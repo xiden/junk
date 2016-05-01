@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_JUNKCONFIG_H
-#define __JUNK_JUNKCONFIG_H
+#ifndef __JUNK_JUNKCONFIG_H__
+#define __JUNK_JUNKCONFIG_H__
 
 #include <assert.h>
 #include <ctype.h>

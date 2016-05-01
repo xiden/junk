@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_CLOCK_H
-#define __JUNK_CLOCK_H
+#ifndef __JUNK_CLOCK_H__
+#define __JUNK_CLOCK_H__
 
 #include "JunkConfig.h"
 

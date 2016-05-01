@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_MATRIX_H
-#define __JUNK_MATRIX_H
+#ifndef __JUNK_MATRIX_H__
+#define __JUNK_MATRIX_H__
 
 #include "Vector.h"
 

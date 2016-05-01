@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_FILEPATH_H
-#define __JUNK_FILEPATH_H
+#ifndef __JUNK_FILEPATH_H__
+#define __JUNK_FILEPATH_H__
 
 #include "JunkConfig.h"
 #include <string>

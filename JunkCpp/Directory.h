@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_DIRECTORY_H
-#define __JUNK_DIRECTORY_H
+#ifndef __JUNK_DIRECTORY_H__
+#define __JUNK_DIRECTORY_H__
 
 #include "JunkConfig.h"
 #include <vector>

@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_FILE_H
-#define __JUNK_FILE_H
+#ifndef __JUNK_FILE_H__
+#define __JUNK_FILE_H__
 
 #include "JunkConfig.h"
 #include <vector>

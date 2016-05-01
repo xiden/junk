@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_SOCKET_H
-#define __JUNK_SOCKET_H
+#ifndef __JUNK_SOCKET_H__
+#define __JUNK_SOCKET_H__
 
 #include "JunkConfig.h"
 
@@ -21,7 +21,6 @@
 #elif defined  _MSC_VER
 #include <WinSock2.h>
 #include <WS2tcpip.h>
-#pragma warning(disable:4267)
 #endif
 
 #include <vector>
@@ -78,7 +77,7 @@ struct SocketRef {
 		void Delete();
 
 		//! ホスト名とサービス名を std::vector に取得する
-		bool GetNames(std::vector<std::string>* pHosts, std::vector<std::string>* pServices);
+		bool GetNames(std::vector<std::string>& hosts, std::vector<std::string>& services);
 
 		//! 指定ホスト名、サービス名、ヒントからアドレス情報を取得し保持する
 		bool Create(
@@ -120,6 +119,72 @@ struct SocketRef {
 		Endpoint(const Endpoint& c);
 		Endpoint& operator=(const Endpoint& c);
 	};
+
+#pragma pack(push, 1)
+	//! IPv4のアドレスとポートを示す構造体
+	struct IPv4AddrPort {
+		in_addr Addr; //!< アドレス
+		uint32_t Port; //!< ポート
+
+		IPv4AddrPort() {
+		}
+		IPv4AddrPort(const in_addr& addr, uint32_t port) {
+			this->Addr = addr;
+			this->Port = port;
+		}
+
+		_FINLINE bool operator==(const IPv4AddrPort& ap) const {
+			return memcmp(this, &ap, sizeof(*this)) == 0;
+		}
+		_FINLINE bool operator!=(const IPv4AddrPort& ap) const {
+			return memcmp(this, &ap, sizeof(*this)) != 0;
+		}
+		_FINLINE bool operator<(const IPv4AddrPort& ap) const {
+			return memcmp(this, &ap, sizeof(*this)) < 0;
+		}
+		_FINLINE bool operator<=(const IPv4AddrPort& ap) const {
+			return memcmp(this, &ap, sizeof(*this)) <= 0;
+		}
+		_FINLINE bool operator>(const IPv4AddrPort& ap) const {
+			return memcmp(this, &ap, sizeof(*this)) > 0;
+		}
+		_FINLINE bool operator>=(const IPv4AddrPort& ap) const {
+			return memcmp(this, &ap, sizeof(*this)) >= 0;
+		}
+	};
+
+	//! IPv6のアドレスとポートを示す構造体
+	struct IPv6AddrPort {
+		in6_addr Addr; //!< 
+		uint32_t Port; //!< ポート
+
+		IPv6AddrPort() {
+		}
+		IPv6AddrPort(const in6_addr& addr, uint32_t port) {
+			this->Addr = addr;
+			this->Port = port;
+		}
+
+		_FINLINE bool operator==(const IPv6AddrPort& ap) const {
+			return memcmp(this, &ap, sizeof(*this)) == 0;
+		}
+		_FINLINE bool operator!=(const IPv6AddrPort& ap) const {
+			return memcmp(this, &ap, sizeof(*this)) != 0;
+		}
+		_FINLINE bool operator<(const IPv6AddrPort& ap) const {
+			return memcmp(this, &ap, sizeof(*this)) < 0;
+		}
+		_FINLINE bool operator<=(const IPv6AddrPort& ap) const {
+			return memcmp(this, &ap, sizeof(*this)) <= 0;
+		}
+		_FINLINE bool operator>(const IPv6AddrPort& ap) const {
+			return memcmp(this, &ap, sizeof(*this)) > 0;
+		}
+		_FINLINE bool operator>=(const IPv6AddrPort& ap) const {
+			return memcmp(this, &ap, sizeof(*this)) >= 0;
+		}
+	};
+#pragma pack(pop)
 
 	Handle m_hSock; //!< ソケットハンドル
 
@@ -208,6 +273,11 @@ struct SocketRef {
 		return connect(m_hSock, (const sockaddr*)pAddr, sizeof(sockaddr_in)) == 0;
 	}
 
+#if defined _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4267)
+#endif
+
 	//! 接続
 	bool Connect(const addrinfo* pAddrInfo) {
 		return connect(m_hSock, pAddrInfo->ai_addr, pAddrInfo->ai_addrlen) == 0;
@@ -272,12 +342,24 @@ struct SocketRef {
 	}
 
 	//! 指定アドレスからのソケットから読み込み(UDP用)
-	_FINLINE int RecvFrom(void* pBuf, size_t size, sockaddr* pFromAddr, socklen_t* pFromLen) {
+	_FINLINE int RecvFrom(void* pBuf, size_t size, sockaddr_storage* pFromAddr, socklen_t* pFromLen) {
 #ifdef __GNUC__
-		return recvfrom(m_hSock, (char*)pBuf, size, 0, pFromAddr, pFromLen);
+		return recvfrom(m_hSock, (char*)pBuf, size, 0, (sockaddr*)pFromAddr, pFromLen);
 #elif defined _MSC_VER
-		return recvfrom(m_hSock, (char*)pBuf, size, 0, pFromAddr, pFromLen);
+		return recvfrom(m_hSock, (char*)pBuf, size, 0, (sockaddr*)pFromAddr, pFromLen);
 #endif
+	}
+
+	//! RecvFrom() などで取得した sockaddr_storage からIPv4アドレス＆ポートを取得する
+	static _FINLINE IPv4AddrPort ToIPv4AddrPort(const sockaddr_storage& addrst) {
+		sockaddr_in& si = (sockaddr_in&)addrst;
+		return IPv4AddrPort(si.sin_addr, htons(si.sin_port));
+	}
+
+	//! RecvFrom() などで取得した sockaddr_storage からIPv6アドレス＆ポートを取得する
+	static _FINLINE IPv6AddrPort ToIPv6AddrPort(const sockaddr_storage& addrst) {
+		sockaddr_in6& si = (sockaddr_in6&)addrst;
+		return IPv6AddrPort(si.sin6_addr, htons(si.sin6_port));
 	}
 
 	//! ソケットへ書き込み
@@ -306,6 +388,10 @@ struct SocketRef {
 		return sendto(m_hSock, (char*)pBuf, size, 0, (sockaddr*)&addr, sizeof(addr));
 #endif
 	}
+
+#if defined _MSC_VER
+#pragma warning(pop)
+#endif
 
 	//! 指定 Endpoint へ送信(UDP用)
 	_FINLINE int SendTo(const void* pBuf, size_t size, const Endpoint& endpoint, int index = 0) {

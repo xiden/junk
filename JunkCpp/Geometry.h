@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __JUNK_GEOMETRY_H
-#define __JUNK_GEOMETRY_H
+#ifndef __JUNK_GEOMETRY_H__
+#define __JUNK_GEOMETRY_H__
 
 #include "JunkConfig.h"
 #include "Matrix.h"

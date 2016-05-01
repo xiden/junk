@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_VECTOR_H
-#define __JUNK_VECTOR_H
+#ifndef __JUNK_VECTOR_H__
+#define __JUNK_VECTOR_H__
 
 #include "JunkDef.h"
 #include "TemplateMeta.h"

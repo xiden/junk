@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_ERROR_H
-#define __JUNK_ERROR_H
+#ifndef __JUNK_ERROR_H__
+#define __JUNK_ERROR_H__
 
 #include "JunkConfig.h"
 #include <errno.h>

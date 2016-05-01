@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_JRPC_H
-#define __JUNK_JPC_H
+#ifndef __JUNK_JRPC_H__
+#define __JUNK_JRPC_H__
 
 #include "Socket.h"
 #include <exception>

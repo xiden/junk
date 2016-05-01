@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __JUNK_TEMPLATEMETA_H
-#define __JUNK_TEMPLATEMETA_H
+#ifndef __JUNK_TEMPLATEMETA_H__
+#define __JUNK_TEMPLATEMETA_H__
 
 #include "JunkConfig.h"
 

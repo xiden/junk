@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_MMFILE_H
-#define __JUNK_MMFILE_H
+#ifndef __JUNK_MMFILE_H__
+#define __JUNK_MMFILE_H__
 
 #include "JunkConfig.h"
 #if defined _WIN32

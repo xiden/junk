@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_STR_H
-#define __JUNK_STR_H
+#ifndef __JUNK_STR_H__
+#define __JUNK_STR_H__
 
 #include "JunkConfig.h"
 #include <stdarg.h>

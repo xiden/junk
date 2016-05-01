@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_JUNKDEF_H
-#define __JUNK_JUNKDEF_H
+#ifndef __JUNK_JUNKDEF_H__
+#define __JUNK_JUNKDEF_H__
 
 #include "JunkConfig.h"
 #include <limits.h>

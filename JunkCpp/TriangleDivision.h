@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __JUNK_TRIANGLEDIVISION_H
-#define __JUNK_TRIANGLEDIVISION_H
+#ifndef __JUNK_TRIANGLEDIVISION_H__
+#define __JUNK_TRIANGLEDIVISION_H__
 
 #include "Vector.h"
 

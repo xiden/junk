@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __JUNK_INTERSECTS_H
-#define __JUNK_INTERSECTS_H
+#ifndef __JUNK_INTERSECTS_H__
+#define __JUNK_INTERSECTS_H__
 
 #include "Vector.h"
 

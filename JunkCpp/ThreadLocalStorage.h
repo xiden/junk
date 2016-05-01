@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_THREADLOCALSTORAGE_H
-#define __JUNK_THREADLOCALSTORAGE_H
+#ifndef __JUNK_THREADLOCALSTORAGE_H__
+#define __JUNK_THREADLOCALSTORAGE_H__
 
 #include "JunkConfig.h"
 

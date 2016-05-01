@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __JUNK_FIXED_H
-#define __JUNK_FIXED_H
+#ifndef __JUNK_FIXED_H__
+#define __JUNK_FIXED_H__
 
 #include "JunkConfig.h"
 

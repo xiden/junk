@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __JUNK_THREAD_H
-#define __JUNK_THREAD_H
+#ifndef __JUNK_THREAD_H__
+#define __JUNK_THREAD_H__
 
 #include "JunkConfig.h"
 

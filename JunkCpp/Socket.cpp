@@ -96,16 +96,21 @@ void SocketRef::Endpoint::Delete() {
 
 //! ホスト名とサービス名を std::vector に取得する
 bool SocketRef::Endpoint::GetNames(
-	std::vector<std::string>* pHosts, //! [in,out] ホスト名配列が返る
-	std::vector<std::string>* pServices //! [in,out] サービス名配列が返る
+	std::vector<std::string>& hosts, //! [in,out] ホスト名配列が返る
+	std::vector<std::string>& services //! [in,out] サービス名配列が返る
 ) {
 	bool result = true;
 	char hbuf[NI_MAXHOST];
 	char sbuf[NI_MAXSERV];
 	size_t count = this->AddrInfos.size();
 
-	pHosts->resize(count);
-	pServices->resize(count);
+	hosts.resize(count);
+	services.resize(count);
+
+#if defined _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4267)
+#endif
 
 	for (size_t i = 0; i < count; i++) {
 		addrinfo* adrinf = this->AddrInfos[i];
@@ -115,12 +120,16 @@ bool SocketRef::Endpoint::GetNames(
 			hbuf, sizeof(hbuf),
 			sbuf, sizeof(sbuf),
 			NI_NUMERICHOST | NI_NUMERICSERV) == 0) {
-			pHosts->at(i) = hbuf;
-			pServices->at(i) = sbuf;
+			hosts[i] = hbuf;
+			services[i] = sbuf;
 		} else {
 			result = false;
 		}
 	}
+
+#if defined _MSC_VER
+#pragma warning(pop)
+#endif
 
 	return result;
 }
