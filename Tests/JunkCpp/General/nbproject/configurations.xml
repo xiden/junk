@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="97">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="JunkCpp" displayName="JunkCpp" projectFiles="true">
+      <itemPath>../../../JunkCpp/Android.mk</itemPath>
+      <itemPath>../../../JunkCpp/Clock.cpp</itemPath>
+      <itemPath>../../../JunkCpp/Clock.h</itemPath>
+      <itemPath>../../../JunkCpp/Directory.cpp</itemPath>
+      <itemPath>../../../JunkCpp/Directory.h</itemPath>
+      <itemPath>../../../JunkCpp/Error.cpp</itemPath>
+      <itemPath>../../../JunkCpp/Error.h</itemPath>
+      <itemPath>../../../JunkCpp/File.cpp</itemPath>
+      <itemPath>../../../JunkCpp/File.h</itemPath>
+      <itemPath>../../../JunkCpp/FilePath.cpp</itemPath>
+      <itemPath>../../../JunkCpp/FilePath.h</itemPath>
+      <itemPath>../../../JunkCpp/Fixed.h</itemPath>
+      <itemPath>../../../JunkCpp/Intersects.h</itemPath>
+      <itemPath>../../../JunkCpp/JRpc.cpp</itemPath>
+      <itemPath>../../../JunkCpp/JRpc.h</itemPath>
+      <itemPath>../../../JunkCpp/JunkConfig.h</itemPath>
+      <itemPath>../../../JunkCpp/JunkDef.h</itemPath>
+      <itemPath>../../../JunkCpp/MMFile.cpp</itemPath>
+      <itemPath>../../../JunkCpp/MMFile.h</itemPath>
+      <itemPath>../../../JunkCpp/Matrix.h</itemPath>
+      <itemPath>../../../JunkCpp/Socket.cpp</itemPath>
+      <itemPath>../../../JunkCpp/Socket.h</itemPath>
+      <itemPath>../../../JunkCpp/Str.cpp</itemPath>
+      <itemPath>../../../JunkCpp/Str.h</itemPath>
+      <itemPath>../../../JunkCpp/TemplateMeta.h</itemPath>
+      <itemPath>../../../JunkCpp/Thread.cpp</itemPath>
+      <itemPath>../../../JunkCpp/Thread.h</itemPath>
+      <itemPath>../../../JunkCpp/ThreadLocalStorage.h</itemPath>
+      <itemPath>../../../JunkCpp/TriangleDivision.h</itemPath>
+      <itemPath>../../../JunkCpp/Vector.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="SourceFiles" displayName="ソース・ファイル" projectFiles="true">
+      <itemPath>main.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="HeaderFiles" displayName="ヘッダー・ファイル" projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles" displayName="リソース・ファイル" projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="テスト・ファイル"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="重要なファイル"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>../../../JunkCpp</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <standard>8</standard>
+        </ccTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../../JunkCpp/Android.mk" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Clock.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Clock.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Directory.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Directory.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Error.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Error.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/File.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/FilePath.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/FilePath.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Fixed.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Intersects.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/JRpc.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/JRpc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/JunkConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/JunkDef.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/MMFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/MMFile.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Matrix.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Socket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Socket.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Str.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Str.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/TemplateMeta.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Thread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Thread.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/ThreadLocalStorage.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/TriangleDivision.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Vector.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <standard>8</standard>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../../JunkCpp/Android.mk" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Clock.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Clock.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Directory.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Directory.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Error.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Error.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/File.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/FilePath.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/FilePath.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Fixed.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Intersects.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/JRpc.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/JRpc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/JunkConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/JunkDef.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/MMFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/MMFile.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Matrix.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Socket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Socket.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Str.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Str.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/TemplateMeta.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Thread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Thread.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/ThreadLocalStorage.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/TriangleDivision.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../JunkCpp/Vector.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

@@ -1,0 +1,5 @@
+﻿MY_DIR := $(call my-dir)
+MY_DIR := $(call my-dir)
+MY_FILES := $(wildcard $(MY_DIR)/*.cpp)
+MY_FILES := $(MY_FILES:$(LOCAL_PATH)/%=%)
+LOCAL_SRC_FILES += $(MY_FILES)

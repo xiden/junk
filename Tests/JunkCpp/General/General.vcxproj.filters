@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ソース ファイル">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="ヘッダー ファイル">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="リソース ファイル">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Junk">
+      <UniqueIdentifier>{1adb3d48-47f2-4b00-9cb7-92de90018521}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\JunkCpp\Error.cpp">
+      <Filter>Junk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\JunkCpp\File.cpp">
+      <Filter>Junk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\JunkCpp\FilePath.cpp">
+      <Filter>Junk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\JunkCpp\JRpc.cpp">
+      <Filter>Junk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\JunkCpp\Socket.cpp">
+      <Filter>Junk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\JunkCpp\Str.cpp">
+      <Filter>Junk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\JunkCpp\Thread.cpp">
+      <Filter>Junk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\JunkCpp\MMFile.cpp">
+      <Filter>Junk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\JunkCpp\Directory.cpp">
+      <Filter>Junk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\JunkCpp\Clock.cpp">
+      <Filter>Junk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\JunkCpp\Geometry.cpp">
+      <Filter>Junk</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\JunkCpp\Error.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\File.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\FilePath.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\Fixed.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\Intersects.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\JRpc.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\JunkConfig.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\JunkDef.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\Matrix.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\Socket.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\Str.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\TemplateMeta.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\Thread.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\ThreadLocalStorage.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\TriangleDivision.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\Vector.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\MMFile.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\Directory.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\Clock.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\Geometry.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\JunkCpp\Android.mk" />
+  </ItemGroup>
+</Project>
