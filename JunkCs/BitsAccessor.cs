@@ -7,10 +7,11 @@ using System.Runtime.InteropServices;
 namespace Junk {
 	/// <summary>
 	/// byte 配列内の任意ビットにアクセスするためのクラス
+	/// リトルエンディアンではLSB0ビットナンバリングを、ビッグエンディアンではMSB0ビットナンバリングを前提としている
 	/// </summary>
 	public class BitsAccessor : IDisposable {
 		[DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
-		static unsafe extern void MoveMemory(void* dest, void* src, IntPtr size); 
+		static unsafe extern void MoveMemory(void* dest, void* src, IntPtr size);
 
 		GCHandle _BufferHandle;
 		unsafe byte* _pBuffer;
@@ -20,7 +21,8 @@ namespace Junk {
 		/// <summary>
 		/// バッファ内のデータがリトルエンディアンであるかどうか
 		/// </summary>
-		public bool LittleEndian {
+		public bool LittleEndian
+		{
 			get { return _LittleEndian; }
 			set { _LittleEndian = value; }
 		}
@@ -32,7 +34,8 @@ namespace Junk {
 		public BitsAccessor(byte[] buffer) {
 			_BufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
 			var ptr = _BufferHandle.AddrOfPinnedObject();
-			unsafe {
+			unsafe
+			{
 				_pBuffer = (byte*)ptr.ToPointer();
 			}
 			_BitLength = buffer.Length * 8;
@@ -89,9 +92,11 @@ namespace Junk {
 			int index1 = position / 8; // バイト配列インデックス
 			int lsb = position % 8; // index1 から最下位ビットへのオフセットビット数
 			byte[] bytes = new byte[count];
-			unsafe {
+			unsafe
+			{
 				byte* pSrc = _pBuffer + index1;
-				fixed (byte* pDst = bytes) {
+				fixed (byte* pDst = bytes)
+				{
 					if (lsb == 0) {
 						MoveMemory(pDst, pSrc, new IntPtr(count));
 					} else if (count != 0) {
@@ -120,49 +125,99 @@ namespace Junk {
 			if (bits == 0 || 32 < (uint)bits || (ulong)l < (uint)position || (ulong)l < (uint)(position + bits))
 				throw new ArgumentException();
 
-			int index1 = position / 8; // バイト配列インデックス
-			int lsb = position % 8; // index1 から最下位ビットへのオフセットビット数
-			int msb = lsb + bits; // index1 から最上位ビットの位置へのオフセット+1
-			int size = (msb + 7) / 8; // バイト境界を考慮した値取得の必要変数サイズ
+			int index = position / 8; // バイト配列インデックス
+			int sb = position % 8; // index から先頭ビットへのオフセットビット数
+			int eb = sb + bits; // index から最終ビットへのオフセット+1
+			int size = (eb + 7) / 8; // バイト境界を考慮した値取得の必要変数サイズ
 
-			unsafe {
-				byte* p = _pBuffer + index1;
+			// byte 配列からビットシフトを用いて32ビット整数を取得する
+			// C#でのビットシフトは int,uint,long,ulong のみ定義されているのでその型でシフトを行う
+			unsafe
+			{
+				byte* p = _pBuffer + index;
 				switch (size) {
 				case 1: {
-						sbyte t = *(sbyte*)p;
-						t <<= 8 - msb;
-						t >>= 8 - bits;
-						return t;
+						if (this.LittleEndian) {
+							int t = (int)p[0] << (32 - eb);
+							t >>= 32 - bits;
+							return t;
+						} else {
+							int t = (int)p[0] << (sb + 24);
+							t >>= 32 - bits;
+							return t;
+						}
 					}
 
 				case 2: {
-						short t = *(short*)p;
-						t <<= 16 - msb;
-						t >>= 16 - bits;
-						return this.LittleEndian ? t : (short)ReverseBytes((ushort)t);
+						if (this.LittleEndian) {
+							int t = *(ushort*)p << (32 - eb);
+							t >>= 32 - bits;
+							return t;
+						} else {
+							int s = (sb + 24);
+							int t = (int)p[0] << s;
+							s -= 8 - sb;
+							t |= (int)p[1] << s;
+							t >>= 32 - bits;
+							return t;
+						}
 					}
 
 				case 3: {
-						uint t1 = *(ushort*)p;
-						uint t2 = *(byte*)(p + 2);
-						int t = (int)((t1 << (32 - bits - lsb)) | (t2 << (32 - (msb & 3))));
-						t >>= 32 - bits;
-						return this.LittleEndian ? t : (int)ReverseBytes((uint)t);
+						if (this.LittleEndian) {
+							int t = *(int*)p << (32 - eb);
+							t >>= 32 - bits;
+							return t;
+						} else {
+							int s = (sb + 24);
+							int t = (int)p[0] << s;
+							s -= 8 - sb;
+							t |= (int)p[1] << s;
+							s -= 8;
+							t |= (int)p[2] << s;
+							t >>= 32 - bits;
+							return t;
+						}
 					}
 
 				case 4: {
-						int t = *(int*)p;
-						t <<= 32 - msb;
-						t >>= 32 - bits;
-						return this.LittleEndian ? t : (int)ReverseBytes((uint)t);
+						if (this.LittleEndian) {
+							int t = *(int*)p << (32 - eb);
+							t >>= 32 - bits;
+							return t;
+						} else {
+							int s = (sb + 24);
+							int t = (int)p[0] << s;
+							s -= 8 - sb;
+							t |= (int)p[1] << s;
+							s -= 8;
+							t |= (int)p[2] << s;
+							s -= 8;
+							t |= (int)p[3] << s;
+							t >>= 32 - bits;
+							return t;
+						}
 					}
 
 				case 5: {
-						ulong t1 = *(uint*)p;
-						ulong t2 = *(byte*)(p + 4);
-						long t = (long)((t1 << (64 - bits - lsb)) | (t2 << (64 - (msb & 3))));
-						t >>= 64 - bits;
-						return this.LittleEndian ? (int)t : (int)ReverseBytes((uint)(int)t);
+						if (this.LittleEndian) {
+							long t = *(long*)p << (64 - eb);
+							t >>= 64 - bits;
+							return (int)t;
+						} else {
+							int s = (sb + 56);
+							long t = (long)p[0] << s;
+							s -= 8 - sb;
+							t |= (long)p[1] << s;
+							s -= 8;
+							t |= (long)p[2] << s;
+							s -= 8;
+							t |= (long)p[3] << s;
+							s -= 8;
+							t |= (long)p[4] << s;
+							t >>= 32 - bits;
+							return (int)t;
+						}
 					}
 
 				default:
@@ -182,49 +237,99 @@ namespace Junk {
 			if (bits == 0 || 32 < (uint)bits || (ulong)l < (uint)position || (ulong)l < (uint)(position + bits))
 				throw new ArgumentException();
 
-			int index1 = position / 8; // バイト配列インデックス
-			int lsb = position % 8; // index1 から最下位ビットへのオフセットビット数
-			int msb = lsb + bits; // index1 から最上位ビットの位置へのオフセット+1
-			int size = (msb + 7) / 8; // バイト境界を考慮した値取得の必要変数サイズ
+			int index = position / 8; // バイト配列インデックス
+			int sb = position % 8; // index から先頭ビットへのオフセットビット数
+			int eb = sb + bits; // index から最終ビットへのオフセット+1
+			int size = (eb + 7) / 8; // バイト境界を考慮した値取得の必要変数サイズ
 
-			unsafe {
-				byte* p = _pBuffer + index1;
+			// byte 配列からビットシフトを用いて32ビット整数を取得する
+			// C#でのビットシフトは int,uint,long,ulong のみ定義されているのでその型でシフトを行う
+			unsafe
+			{
+				byte* p = _pBuffer + index;
 				switch (size) {
 				case 1: {
-						byte t = *(byte*)p;
-						t <<= 8 - msb;
-						t >>= 8 - bits;
-						return t;
+						if (this.LittleEndian) {
+							uint t = (uint)p[0] << (32 - eb);
+							t >>= 32 - bits;
+							return t;
+						} else {
+							uint t = (uint)p[0] << (sb + 24);
+							t >>= 32 - bits;
+							return t;
+						}
 					}
 
 				case 2: {
-						ushort t = *(ushort*)p;
-						t <<= 16 - msb;
-						t >>= 16 - bits;
-						return this.LittleEndian ? t : ReverseBytes(t);
+						if (this.LittleEndian) {
+							uint t = (uint)(*(ushort*)p << (32 - eb));
+							t >>= 32 - bits;
+							return t;
+						} else {
+							int s = (sb + 24);
+							uint t = (uint)p[0] << s;
+							s -= 8 - sb;
+							t |= (uint)p[1] << s;
+							t >>= 32 - bits;
+							return t;
+						}
 					}
 
 				case 3: {
-						uint t1 = *(ushort*)p;
-						uint t2 = *(byte*)(p + 2);
-						uint t = (uint)((t1 << (32 - bits - lsb)) | (t2 << (32 - (msb & 3))));
-						t >>= 32 - bits;
-						return this.LittleEndian ? t : ReverseBytes(t);
+						if (this.LittleEndian) {
+							uint t = *(uint*)p << (32 - eb);
+							t >>= 32 - bits;
+							return t;
+						} else {
+							int s = (sb + 24);
+							uint t = (uint)p[0] << s;
+							s -= 8 - sb;
+							t |= (uint)p[1] << s;
+							s -= 8;
+							t |= (uint)p[2] << s;
+							t >>= 32 - bits;
+							return t;
+						}
 					}
 
 				case 4: {
-						uint t = *(uint*)p;
-						t <<= 32 - msb;
-						t >>= 32 - bits;
-						return this.LittleEndian ? t : ReverseBytes(t);
+						if (this.LittleEndian) {
+							uint t = *(uint*)p << (32 - eb);
+							t >>= 32 - bits;
+							return t;
+						} else {
+							int s = (sb + 24);
+							uint t = (uint)p[0] << s;
+							s -= 8 - sb;
+							t |= (uint)p[1] << s;
+							s -= 8;
+							t |= (uint)p[2] << s;
+							s -= 8;
+							t |= (uint)p[3] << s;
+							t >>= 32 - bits;
+							return t;
+						}
 					}
 
 				case 5: {
-						ulong t1 = *(uint*)p;
-						ulong t2 = *(byte*)(p + 4);
-						ulong t = (ulong)((t1 << (64 - bits - lsb)) | (t2 << (64 - (msb & 3))));
-						t >>= 64 - bits;
-						return this.LittleEndian ? (uint)t : ReverseBytes((uint)t);
+						if (this.LittleEndian) {
+							ulong t = *(ulong*)p << (64 - eb);
+							t >>= 64 - bits;
+							return (uint)t;
+						} else {
+							int s = (sb + 56);
+							ulong t = (ulong)p[0] << s;
+							s -= 8 - sb;
+							t |= (ulong)p[1] << s;
+							s -= 8;
+							t |= (ulong)p[2] << s;
+							s -= 8;
+							t |= (ulong)p[3] << s;
+							s -= 8;
+							t |= (ulong)p[4] << s;
+							t >>= 32 - bits;
+							return (uint)t;
+						}
 					}
 
 				default:
@@ -240,7 +345,8 @@ namespace Junk {
 		protected virtual void Dispose(bool disposing) {
 			if (_BufferHandle.IsAllocated) {
 				_BufferHandle.Free();
-				unsafe {
+				unsafe
+				{
 					_pBuffer = null;
 				}
 			}
@@ -259,22 +365,6 @@ namespace Junk {
 		/// </summary>
 		~BitsAccessor() {
 			Dispose(false);
-		}
-
-		static ushort ReverseBytes(ushort val) {
-			return (ushort)((
-				(val << 8) & 0xff00)
-				| (val >> 8)
-			);
-		}
-
-		static uint ReverseBytes(uint val) {
-			return (uint)((
-				(val << 24) & 0xff000000)
-				| ((val << 8) & 0x00ff0000)
-				| ((val >> 8) & 0x0000ff00)
-				| (val >> 24)
-			);
 		}
 	}
 }
