@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.IO;
 
-namespace Junk
+namespace Jk
 {
 	/// <summary>
 	///	ファイルリストビューコントロール。

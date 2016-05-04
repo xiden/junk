@@ -152,6 +152,7 @@
     <ClCompile Include="..\..\..\JunkCpp\Geometry.cpp" />
     <ClCompile Include="..\..\..\JunkCpp\JRpc.cpp" />
     <ClCompile Include="..\..\..\JunkCpp\MMFile.cpp" />
+    <ClCompile Include="..\..\..\JunkCpp\RingBuffer.cpp" />
     <ClCompile Include="..\..\..\JunkCpp\Socket.cpp" />
     <ClCompile Include="..\..\..\JunkCpp\Str.cpp" />
     <ClCompile Include="..\..\..\JunkCpp\Thread.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="..\..\..\JunkCpp\JunkDef.h" />
     <ClInclude Include="..\..\..\JunkCpp\Matrix.h" />
     <ClInclude Include="..\..\..\JunkCpp\MMFile.h" />
+    <ClInclude Include="..\..\..\JunkCpp\RingBuffer.h" />
     <ClInclude Include="..\..\..\JunkCpp\Socket.h" />
     <ClInclude Include="..\..\..\JunkCpp\Str.h" />
     <ClInclude Include="..\..\..\JunkCpp\TemplateMeta.h" />

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// CSVŠÖŒW‚Ìˆ—‚ğ‚Ü‚Æ‚ß‚½ƒNƒ‰ƒXB
 	/// </summary>

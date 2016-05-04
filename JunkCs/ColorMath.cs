@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// 色計算クラス
 	/// </summary>

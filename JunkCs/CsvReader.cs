@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// CSV形式ストリーム読み込みクラス
 	/// </summary>

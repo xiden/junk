@@ -5,7 +5,7 @@ using System.Text;
 
 using element = System.Double;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// 行列関係メソッド
 	/// </summary>

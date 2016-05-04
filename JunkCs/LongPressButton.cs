@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// 長押し用ボタン
 	/// </summary>

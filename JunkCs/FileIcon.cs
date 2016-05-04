@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Drawing;
 
-namespace Junk
+namespace Jk
 {
 	/// <summary>
 	/// Enables extraction of icons for any file type from

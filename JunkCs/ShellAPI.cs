@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace Junk
+namespace Jk
 {
 	/// <summary>
 	/// SHELL ŠÖŒW‚Ì API ‚Ìˆ—‚ğW‚ß‚½ƒNƒ‰ƒX

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Junk
+namespace Jk
 {
 	/// <summary>
 	/// オブジェクトをファイルへ保存したり、ファイルから読み込んだりする処理を行う。

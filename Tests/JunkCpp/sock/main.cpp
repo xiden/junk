@@ -1,11 +1,10 @@
 ﻿#include <iostream>
+#include <fstream>
+#include <time.h>
 #include "../../../JunkCpp/Socket.h"
 #include "../../../JunkCpp/Error.h"
 #include "../../../JunkCpp/Thread.h"
 #include "../../../JunkCpp/RingBuffer.h"
-
-#define BUFFER_SIZE 256
-#include <time.h>
 
 using namespace jk;
 
@@ -151,11 +150,23 @@ bool UdpMpeg2tsClient() {
 	//sk.SetBlockingMode(false);
 	sk.SetNoDelay(1);
 
+	//TransportPacket tp;
+	//tp.sync_byte = packet[0];
+	//tp.transport_error_indicator = (packet[1] & 0x80) >> 7;
+	//tp.payload_unit_start_indicator = (packet[1] & 0x40) >> 6;
+	//tp.transport_priority = (packet[1] & 0x20) >> 5;
+	//tp.PID = ((packet[1] & 0x1F) >> 8) | packet[2];
+	//tp.transport_scrambling_control = (packet[3] & 0x60) >> 6;
+	//tp.adaption_field_control = (packet[3] & 0x30) >> 4;
+	//tp.continuity_counter = packet[3] & 0x0F;
+
+
 	std::vector<uint8_t> buf(0x100000);
-	RingBufferSizeFixed<uint8_t, 4096> ring;
+	RingBufferSizeFixed<uint8_t, 256> ring;
 	TsPkt pkt;
 	intptr_t state = 0; // 読み込みモード、0:なし、1:Adaptation、2:Payload
 	intptr_t adaptEndSize;
+	intptr_t transportErrorIndicator = 0;
 	intptr_t payloadUnitStartIndicator = 0;
 	intptr_t transportPriority = 0;
 	intptr_t pid = 0;
@@ -163,55 +174,73 @@ bool UdpMpeg2tsClient() {
 	intptr_t adaptationFieldControl = 0;
 	intptr_t continuityCounter = 0;
 	intptr_t payloadSize = 0;
+	std::ofstream fout;
+	fout.open("mpegts.dat", std::ios::out | std::ios::binary | std::ios::trunc);
 	for (;;) {
 		sockaddr_storage fromAddr;
 		socklen_t fromLen = sizeof(fromAddr);
 		memset(&fromAddr, 0, sizeof(fromAddr));
 		auto n = sk.RecvFrom(&buf[0], buf.size(), &fromAddr, &fromLen);
 		if (1 <= n) {
-			for (int i = 0; i < n; i++) {
-				auto b = buf[i];
-				ring.Write(b);
+			fout.write((char*)&buf[0], n);
+			fout.flush();
 
-				switch (state) {
-				case 0:
-					if (b == 0x47)
-						state++;
-					break;
-				case 1:
-					if (b & 1) {
-						state = 0;
-						ring.Clear();
-					} else {
-						payloadUnitStartIndicator = b & 2;
-						transportPriority = b & 4;
-						state++;
-					}
-					break;
-				case 2:
-					pid = ring.PeekHead<uint16_t>(1) >> 3;
-					state++;
-					break;
-				case 3:
-					transportScramblingControl = b & 3;
-					adaptationFieldControl = (b >> 2) & 3;
-					continuityCounter = (b >> 4) & 15;
-					if (adaptationFieldControl)
-						state++;
-					else
-						state = 0;
-						ring.Clear();
-					break;
-				case 4:
-					payloadSize = b;
-					if(payloadSize)
-						std::cout << "PID=" << pid << " Payload=" << payloadSize << " continuityCounter=" << continuityCounter << std::endl;
-					else
-						std::cout << "PID=" << pid << std::endl;
-					state = 0;
-					ring.Clear();
-					break;
-				}
+			//for (int i = 0; i < n; i++) {
+			//	ring.Write(buf[i]);
+			//	auto b = ring[0];
+
+			//	std::cout << ring.Head << ":" << ring.Tail << std::endl;
+
+			//	switch (state) {
+			//	case 0:
+			//		if (b == 0x47) {
+			//			state++;
+			//		} else {
+			//			ring.Read();
+			//		}
+			//		break;
+			//	case 1:
+			//		transportErrorIndicator = (b & 0x80) >> 7;
+			//		if (!transportErrorIndicator) {
+			//			payloadUnitStartIndicator = (b & 0x40) >> 6;
+			//			transportPriority = (b & 0x20) >> 5;
+			//			state++;
+			//		} else {
+			//			state = 0;
+			//			ring.Read();
+			//		}
+			//		break;
+			//	case 2:
+			//		pid = ((ring[1] & 0x1F) >> 8) | ring[2];
+			//		state++;
+			//		break;
+			//	case 3:
+			//		transportScramblingControl = (b & 0x60) >> 6;
+			//		adaptationFieldControl = (b & 0x30) >> 4;
+			//		continuityCounter = b & 0x0F;
+			//		std::cout << "continuityCounter=" << continuityCounter << std::endl;
+			//		if (adaptationFieldControl) {
+			//			state++;
+			//		} else {
+			//			state = 0;
+			//			ring.Clear();
+			//		}
+			//		break;
+			//	case 4:
+			//		payloadSize = b;
+			//		if(payloadSize)
+			//			std::cout << "PID=" << pid << " Payload=" << payloadSize << " continuityCounter=" << continuityCounter << std::endl;
+			//		else
+			//			std::cout << "PID=" << pid << std::endl;
+			//		state++;
+			//		break;
+			//	case 5:
+			//		if (188 <= ring.Size()) {
+			//			state = 0;
+			//			ring.Clear();
+			//		}
+			//		break;
+				//}
 
 				//switch (state) {
 				//case 0:
@@ -246,7 +275,7 @@ bool UdpMpeg2tsClient() {
 				//	}
 				//	break;
 				//}
-			}
+			//}
 		}
 	}
 

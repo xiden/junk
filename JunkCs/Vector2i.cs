@@ -7,8 +7,8 @@ using System.Runtime.InteropServices;
 
 using element = System.Int32;
 
-namespace Junk {
-	[XmlType("Junk.Vector2i")]
+namespace Jk {
+	[XmlType("Jk.Vector2i")]
 	[StructLayout(LayoutKind.Explicit, Pack = 4, Size = 8)]
 	public struct Vector2i {
 		[FieldOffset(0)]

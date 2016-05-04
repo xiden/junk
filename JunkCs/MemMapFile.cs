@@ -5,18 +5,15 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.IO;
 
-namespace Junk
-{
+namespace Jk {
 	/// <summary>
 	/// メモリマップトファイルクラス
 	/// </summary>
-	public class MemMapFile : IDisposable
-	{
+	public class MemMapFile : IDisposable {
 		IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
 		[Flags]
-		public enum EFileAccess : uint
-		{
+		public enum EFileAccess : uint {
 			/// <summary>
 			///
 			/// </summary>
@@ -36,8 +33,7 @@ namespace Junk
 		}
 
 		[Flags]
-		public enum EFileShare : uint
-		{
+		public enum EFileShare : uint {
 			/// <summary>
 			///
 			/// </summary>
@@ -62,8 +58,7 @@ namespace Junk
 			Delete = 0x00000004
 		}
 
-		public enum ECreationDisposition : uint
-		{
+		public enum ECreationDisposition : uint {
 			/// <summary>
 			/// Creates a new file. The function fails if a specified file exists.
 			/// </summary>
@@ -91,8 +86,7 @@ namespace Junk
 		}
 
 		[Flags]
-		public enum EFileAttributes : uint
-		{
+		public enum EFileAttributes : uint {
 			Readonly = 0x00000001,
 			Hidden = 0x00000002,
 			System = 0x00000004,
@@ -121,8 +115,7 @@ namespace Junk
 		}
 
 		[Flags]
-		enum FileMapProtection : uint
-		{
+		enum FileMapProtection : uint {
 			PageReadonly = 0x02,
 			PageReadWrite = 0x04,
 			PageWriteCopy = 0x08,
@@ -135,8 +128,7 @@ namespace Junk
 		}
 
 		[Flags]
-		public enum FileMapAccess : uint
-		{
+		public enum FileMapAccess : uint {
 			FileMapCopy = 0x0001,
 			FileMapWrite = 0x0002,
 			FileMapRead = 0x0004,
@@ -145,8 +137,7 @@ namespace Junk
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		public struct SYSTEM_INFO
-		{
+		public struct SYSTEM_INFO {
 			public ushort processorArchitecture;
 			ushort reserved;
 			public uint pageSize;
@@ -218,32 +209,28 @@ namespace Junk
 		/// <summary>
 		/// ファイル名
 		/// </summary>
-		public string FileName
-		{
+		public string FileName {
 			get { return m_FileName; }
 		}
 
 		/// <summary>
 		/// ファイルハンドル
 		/// </summary>
-		public IntPtr FileHandle
-		{
+		public IntPtr FileHandle {
 			get { return m_FileHandle; }
 		}
 
 		/// <summary>
 		/// マッピングハンドル
 		/// </summary>
-		public IntPtr MappingHandle
-		{
+		public IntPtr MappingHandle {
 			get { return m_MappingHandle; }
 		}
 
 		/// <summary>
 		/// ファイルサイズ(bytes)
 		/// </summary>
-		public ulong FileSize
-		{
+		public ulong FileSize {
 			get { return m_FileSize; }
 		}
 
@@ -254,8 +241,7 @@ namespace Junk
 		/// <param name="fileName">ファイル名</param>
 		/// <param name="fileAccess">ファイルアクセスモード</param>
 		/// <param name="fileShare">ファイル共有モード</param>
-		public MemMapFile(string fileName, FileAccess fileAccess, FileShare fileShare)
-		{
+		public MemMapFile(string fileName, FileAccess fileAccess, FileShare fileShare) {
 			EFileAccess efa;
 			EFileShare efs;
 
@@ -274,34 +260,29 @@ namespace Junk
 			m_FileName = fileName;
 
 			m_FileHandle = CreateFileW(fileName, efa, efs, IntPtr.Zero, ECreationDisposition.OpenExisting, EFileAttributes.Normal, IntPtr.Zero);
-			if (m_FileHandle == INVALID_HANDLE_VALUE)
-			{
+			if (m_FileHandle == INVALID_HANDLE_VALUE) {
 				Dispose();
 				throw new MemMapFileException(Marshal.GetLastWin32Error(), fileName);
 			}
 
-			if (!GetFileSizeEx(m_FileHandle, out m_FileSize))
-			{
+			if (!GetFileSizeEx(m_FileHandle, out m_FileSize)) {
 				Dispose();
 				throw new MemMapFileException(Marshal.GetLastWin32Error(), fileName);
 			}
 
 			m_FileMapProtection = 0;
 			m_FileMapAccess = 0;
-			if ((efa & EFileAccess.GenericRead) == EFileAccess.GenericRead)
-			{
+			if ((efa & EFileAccess.GenericRead) == EFileAccess.GenericRead) {
 				m_FileMapProtection |= FileMapProtection.PageReadonly;
 				m_FileMapAccess |= FileMapAccess.FileMapRead;
 			}
-			if ((efa & EFileAccess.GenericWrite) == EFileAccess.GenericWrite)
-			{
+			if ((efa & EFileAccess.GenericWrite) == EFileAccess.GenericWrite) {
 				m_FileMapProtection = FileMapProtection.PageReadWrite; // 書き込み時は FileMapProtection.PageReadonly を消したいので代入してる
 				m_FileMapAccess |= FileMapAccess.FileMapWrite;
 			}
 
 			m_MappingHandle = CreateFileMappingW(m_FileHandle, IntPtr.Zero, m_FileMapProtection, 0, 0, IntPtr.Zero);
-			if (m_MappingHandle == IntPtr.Zero)
-			{
+			if (m_MappingHandle == IntPtr.Zero) {
 				Dispose();
 				throw new MemMapFileException(Marshal.GetLastWin32Error(), fileName);
 			}
@@ -310,8 +291,7 @@ namespace Junk
 		/// <summary>
 		/// 静的コンストラクタ
 		/// </summary>
-		static MemMapFile()
-		{
+		static MemMapFile() {
 			SYSTEM_INFO si;
 			GetSystemInfo(out si);
 			AllocationGranularity = si.allocationGranularity;
@@ -320,24 +300,20 @@ namespace Junk
 		/// <summary>
 		/// ファイナライザ
 		/// </summary>
-		~MemMapFile()
-		{
+		~MemMapFile() {
 			Dispose();
 		}
 
 		/// <summary>
 		///	オブジェクト破棄
 		/// </summary>
-		public void Dispose()
-		{
-			if (m_MappingHandle != IntPtr.Zero)
-			{
+		public void Dispose() {
+			if (m_MappingHandle != IntPtr.Zero) {
 				ReleaseViews();
 				CloseHandle(m_MappingHandle);
 				m_MappingHandle = IntPtr.Zero;
 			}
-			if (m_FileHandle != IntPtr.Zero)
-			{
+			if (m_FileHandle != IntPtr.Zero) {
 				CloseHandle(m_FileHandle);
 				m_FileHandle = IntPtr.Zero;
 			}
@@ -351,8 +327,7 @@ namespace Junk
 		/// <param name="byteCount">割り当てバイト数</param>
 		/// <returns>メモリアドレス</returns>
 		/// <remarks>割り当てられたメモリは使い終わったら ReleasePtr または ReleaseAllPtrs で開放する必要がある</remarks>
-		public MemMapView AllocateView(ulong position, ulong byteCount)
-		{
+		public MemMapView AllocateView(ulong position, ulong byteCount) {
 			if (this.FileSize < position + byteCount)
 				byteCount = this.FileSize - position;
 
@@ -381,10 +356,8 @@ namespace Junk
 		///	割り当てられたメモリを開放する
 		/// </summary>
 		/// <param name="view">開放するビュー</param>
-		public void ReleaseView(MemMapView view)
-		{
-			if (m_Views.ContainsKey(view.Address))
-			{
+		public void ReleaseView(MemMapView view) {
+			if (m_Views.ContainsKey(view.Address)) {
 				if (!UnmapViewOfFile(m_Views[view.Address].ViewAddress))
 					throw new MemMapFileException(Marshal.GetLastWin32Error(), m_FileName);
 				m_Views.Remove(view.Address);
@@ -394,12 +367,10 @@ namespace Junk
 		/// <summary>
 		/// 全ての割り当てられたメモリを開放する
 		/// </summary>
-		private void ReleaseViews()
-		{
+		private void ReleaseViews() {
 			unsafe
 			{
-				foreach (MemMapView v in m_Views.Values)
-				{
+				foreach (MemMapView v in m_Views.Values) {
 					if (!UnmapViewOfFile(v.ViewAddress))
 						throw new MemMapFileException(Marshal.GetLastWin32Error(), m_FileName);
 				}
@@ -411,8 +382,7 @@ namespace Junk
 	/// <summary>
 	///	メモリに割り当てられたビュー
 	/// </summary>
-	public class MemMapView : IDisposable
-	{
+	public class MemMapView : IDisposable {
 		/// <summary>
 		///	このビューの割り当て元の MemMapFile オブジェクト
 		/// </summary>
@@ -446,8 +416,7 @@ namespace Junk
 		/// <param name="address">position に対応するメモリアドレス</param>
 		/// <param name="viewAddress">実際に MapViewOfFile で割り当てられたメモリアドレス</param>
 		/// <param name="size">割り当てサイズ(bytes)</param>
-		public MemMapView(MemMapFile source, ulong position, IntPtr address, IntPtr viewAddress, ulong size)
-		{
+		public MemMapView(MemMapFile source, ulong position, IntPtr address, IntPtr viewAddress, ulong size) {
 			this.Source = source;
 			this.Position = position;
 			this.Address = address;
@@ -458,18 +427,15 @@ namespace Junk
 		/// <summary>
 		/// ファイナライザ
 		/// </summary>
-		~MemMapView()
-		{
+		~MemMapView() {
 			Dispose();
 		}
 
 		/// <summary>
 		///	オブジェクト破棄
 		/// </summary>
-		public void Dispose()
-		{
-			if (this.Source != null)
-			{
+		public void Dispose() {
+			if (this.Source != null) {
 				this.Source.ReleaseView(this);
 				this.Source = null;
 			}
@@ -480,10 +446,8 @@ namespace Junk
 		/// インデクサ
 		/// </summary>
 		/// <param name="index">アクセスする byte のインデックス番号(ビューの先頭からのカウント)</param>
-		public byte this[ulong index]
-		{
-			get
-			{
+		public byte this[ulong index] {
+			get {
 				unsafe
 				{
 					if (this.Size <= index)
@@ -493,8 +457,7 @@ namespace Junk
 					return p[index];
 				}
 			}
-			set
-			{
+			set {
 				unsafe
 				{
 					if (this.Size <= index)
@@ -512,8 +475,7 @@ namespace Junk
 		/// <param name="offset">ビューの先頭からのオフセット(bytes)</param>
 		/// <param name="length">読み込むサイズ(bytes)</param>
 		/// <returns>バイト配列</returns>
-		public byte[] ReadBytes(ulong offset, uint length)
-		{
+		public byte[] ReadBytes(ulong offset, uint length) {
 			if (this.Size < offset)
 				throw new MemMapFileException("MemMapView.ReadBytes に渡された offset がビューの範囲を超えています", this.Source.FileName);
 
@@ -536,8 +498,7 @@ namespace Junk
 		/// <param name="startIndex">buffer の先頭位置</param>
 		/// <param name="length">読み込むサイズ(bytes)</param>
 		/// <returns>読み込まれたよう素数</returns>
-		public uint Read(ulong offset, byte[] buffer, int startIndex, uint length)
-		{
+		public uint Read(ulong offset, byte[] buffer, int startIndex, uint length) {
 			if (this.Size < offset)
 				throw new MemMapFileException("MemMapView.Read に渡された offset がビューの範囲を超えています", this.Source.FileName);
 
@@ -555,8 +516,7 @@ namespace Junk
 	/// <summary>
 	///	動的にメモリ割り当て範囲を変更するビュー
 	/// </summary>
-	public class DynamicMemMapView : IDisposable 
-	{
+	public class DynamicMemMapView : IDisposable {
 		const int BlockSize = 0x6400000;
 
 		/// <summary>
@@ -594,8 +554,7 @@ namespace Junk
 		/// コンストラクタ
 		/// </summary>
 		/// <param name="source">このビューの割り当て元の MemMapFile オブジェクト</param>
-		public DynamicMemMapView(MemMapFile source)
-		{
+		public DynamicMemMapView(MemMapFile source) {
 			this.Source = source;
 			this.FileSize = source.FileSize;
 		}
@@ -603,20 +562,17 @@ namespace Junk
 		/// <summary>
 		/// ファイナライザ
 		/// </summary>
-		~DynamicMemMapView()
-		{
+		~DynamicMemMapView() {
 			Dispose();
 		}
 
 		/// <summary>
 		///	オブジェクト破棄
 		/// </summary>
-		public void Dispose()
-		{
+		public void Dispose() {
 			if (this.Source != null)
 				this.Source = null;
-			if (this.View != null)
-			{
+			if (this.View != null) {
 				this.View.Dispose();
 				this.View = null;
 			}
@@ -627,10 +583,8 @@ namespace Junk
 		/// インデクサ
 		/// </summary>
 		/// <param name="index">アクセスする byte のインデックス番号(ファイルの先頭からのカウント)</param>
-		public byte this[ulong index]
-		{
-			get
-			{
+		public byte this[ulong index] {
+			get {
 				unsafe
 				{
 					if (index < this.CurrentViewPosition || this.CurrentViewPosition + this.CurrentViewSize <= index)
@@ -640,8 +594,7 @@ namespace Junk
 					return p[index - this.CurrentViewPosition];
 				}
 			}
-			set
-			{
+			set {
 				unsafe
 				{
 					if (index < this.CurrentViewPosition || this.CurrentViewPosition + this.CurrentViewSize <= index)
@@ -659,16 +612,8 @@ namespace Junk
 		/// <typeparam name="T">構造体</typeparam>
 		/// <param name="position">ファイル内での位置(bytes)</param>
 		/// <returns>構造体</returns>
-		public T Read<T>(ulong position)
-		{
-			unsafe
-			{
-				Type type = typeof(T);
-				int structSize = Marshal.SizeOf(type);
-				if (position < this.CurrentViewPosition || this.CurrentViewPosition + this.CurrentViewSize < position + (ulong)structSize)
-					ReAllocateView(position);
-				return (T)Marshal.PtrToStructure(new IntPtr((byte*)this.CurrentViewAddress.ToPointer() + position - this.CurrentViewPosition), type);
-			}
+		public T Read<T>(ulong position) {
+			return (T)Read(position, typeof(T));
 		}
 
 		/// <summary>
@@ -677,14 +622,23 @@ namespace Junk
 		/// <param name="position">ファイル内での位置(bytes)</param>
 		/// <param name="type">構造体型</param>
 		/// <returns>構造体</returns>
-		public object Read(ulong position, Type type)
-		{
+		public object Read(ulong position, Type type) {
 			unsafe
 			{
-				int structSize = Marshal.SizeOf(type);
-				if (position < this.CurrentViewPosition || this.CurrentViewPosition + this.CurrentViewSize < position + (ulong)structSize)
-					ReAllocateView(position);
-				return Marshal.PtrToStructure(new IntPtr((byte*)this.CurrentViewAddress.ToPointer() + position - this.CurrentViewPosition), type);
+				var bits = BitMarshal.BitsOf(type);
+				if (bits != 0) {
+					int structSize = (bits + 7) / 8;
+					var obj = Activator.CreateInstance(type);
+					using (var ba = new BitAccessor(this.ReadBytes(position, structSize))) {
+						BitMarshal.CopyToObject(ba, 0, obj);
+					}
+					return obj;
+				} else {
+					int structSize = Marshal.SizeOf(type);
+					if (position < this.CurrentViewPosition || this.CurrentViewPosition + this.CurrentViewSize < position + (ulong)structSize)
+						ReAllocateView(position);
+					return Marshal.PtrToStructure(new IntPtr((byte*)this.CurrentViewAddress.ToPointer() + position - this.CurrentViewPosition), type);
+				}
 			}
 		}
 
@@ -694,8 +648,7 @@ namespace Junk
 		/// <param name="position">ファイル内での位置(bytes)</param>
 		/// <param name="len">バイト数</param>
 		/// <returns>文字列</returns>
-		public string ReadStringAnsi(ulong position, int len)
-		{
+		public string ReadStringAnsi(ulong position, int len) {
 			unsafe
 			{
 				if (position < this.CurrentViewPosition || this.CurrentViewPosition + this.CurrentViewSize < position + (ulong)len)
@@ -709,8 +662,7 @@ namespace Junk
 		/// </summary>
 		/// <param name="position">ファイル内での位置(bytes)</param>
 		/// <returns>値</returns>
-		public sbyte ReadInt8(ulong position)
-		{
+		public sbyte ReadInt8(ulong position) {
 			unsafe
 			{
 				if (position < this.CurrentViewPosition || this.CurrentViewPosition + this.CurrentViewSize < position + (ulong)1)
@@ -724,8 +676,7 @@ namespace Junk
 		/// </summary>
 		/// <param name="position">ファイル内での位置(bytes)</param>
 		/// <returns>値</returns>
-		public Int16 ReadInt16(ulong position)
-		{
+		public Int16 ReadInt16(ulong position) {
 			unsafe
 			{
 				if (position < this.CurrentViewPosition || this.CurrentViewPosition + this.CurrentViewSize < position + (ulong)2)
@@ -739,8 +690,7 @@ namespace Junk
 		/// </summary>
 		/// <param name="position">ファイル内での位置(bytes)</param>
 		/// <returns>値</returns>
-		public Int32 ReadInt32(ulong position)
-		{
+		public Int32 ReadInt32(ulong position) {
 			unsafe
 			{
 				if (position < this.CurrentViewPosition || this.CurrentViewPosition + this.CurrentViewSize < position + (ulong)4)
@@ -754,8 +704,7 @@ namespace Junk
 		/// </summary>
 		/// <param name="position">ファイル内での位置(bytes)</param>
 		/// <returns>値</returns>
-		public Int64 ReadInt64(ulong position)
-		{
+		public Int64 ReadInt64(ulong position) {
 			unsafe
 			{
 				if (position < this.CurrentViewPosition || this.CurrentViewPosition + this.CurrentViewSize < position + (ulong)8)
@@ -770,8 +719,7 @@ namespace Junk
 		/// <param name="position">ファイル内での位置(bytes)</param>
 		/// <param name="length">読み込むサイズ(bytes)</param>
 		/// <returns>バイト配列</returns>
-		public byte[] ReadBytes(ulong position, int length)
-		{
+		public byte[] ReadBytes(ulong position, int length) {
 			unsafe
 			{
 				if (position < this.CurrentViewPosition || this.CurrentViewPosition + this.CurrentViewSize < position + (ulong)length)
@@ -787,8 +735,7 @@ namespace Junk
 		/// 指定された位置からビューを再割り当てする
 		/// </summary>
 		/// <param name="position">ファイル位置</param>
-		protected void ReAllocateView(ulong position)
-		{
+		protected void ReAllocateView(ulong position) {
 			ReAllocateView(position, BlockSize);
 		}
 
@@ -797,10 +744,8 @@ namespace Junk
 		/// </summary>
 		/// <param name="position">ファイル位置</param>
 		/// <param name="size">割り当てサイズ(bytes)</param>
-		protected void ReAllocateView(ulong position, ulong size)
-		{
-			if (this.View != null)
-			{
+		protected void ReAllocateView(ulong position, ulong size) {
+			if (this.View != null) {
 				this.View.Dispose();
 				this.View = null;
 				this.CurrentViewPosition = 0;
@@ -820,16 +765,14 @@ namespace Junk
 	/// <summary>
 	/// MemMapFile 用の例外クラス。
 	/// </summary>
-	public class MemMapFileException : ApplicationException
-	{
+	public class MemMapFileException : ApplicationException {
 		private string m_FileName;
 
 		/// <summary>
 		/// コンストラクタ。
 		/// </summary>
 		public MemMapFileException(string msg, string fileName)
-			: base(string.Format("{0} (ファイル名 \"{1}\")", msg, fileName))
-		{
+			: base(string.Format("{0} (ファイル名 \"{1}\")", msg, fileName)) {
 			m_FileName = fileName;
 		}
 
@@ -837,16 +780,14 @@ namespace Junk
 		/// コンストラクタ。
 		/// </summary>
 		public MemMapFileException(int ecode, string fileName)
-			: base(string.Format("{0} (ファイル名 \"{1}\")", (new System.ComponentModel.Win32Exception(ecode)).Message, fileName))
-		{
+			: base(string.Format("{0} (ファイル名 \"{1}\")", (new System.ComponentModel.Win32Exception(ecode)).Message, fileName)) {
 			m_FileName = fileName;
 		}
 
 		/// <summary>
 		///	例外発生元のファイルの名前を取得。
 		/// </summary>
-		public string FileName
-		{
+		public string FileName {
 			get { return m_FileName; }
 		}
 	}

@@ -5,7 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// 例外処理手法をまとめたクラス
 	/// </summary>

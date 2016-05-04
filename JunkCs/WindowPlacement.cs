@@ -5,7 +5,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace Junk
+namespace Jk
 {
 	/// <summary>
 	/// ウィンドウ配置クラス

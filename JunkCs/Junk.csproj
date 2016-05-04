@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BitMarshal.cs" />
     <Compile Include="BitsAccessor.cs" />
     <Compile Include="Cloner.cs" />
     <Compile Include="ColorMath.cs" />

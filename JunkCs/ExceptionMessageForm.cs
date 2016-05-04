@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// 例外メッセージ表示フォーム
 	/// 例外の詳細内容表示も可能。

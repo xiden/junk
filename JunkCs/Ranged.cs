@@ -7,11 +7,11 @@ using System.Runtime.InteropServices;
 
 using element = System.Double;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// １次元空間での開始値と終了値を持つ範囲 element 版
 	/// </summary>
-	[XmlType("Junk.Ranged")]
+	[XmlType("Jk.Ranged")]
 	public struct Ranged {
 		/// <summary>
 		/// レンジの開始値

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.IO;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// ファイルを使用したクリティカルセクション
 	/// </summary>

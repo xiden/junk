@@ -7,11 +7,11 @@ using System.Runtime.InteropServices;
 
 using element = System.Double;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// １次元リニア座標変換構造体
 	/// </summary>
-	[XmlType("Junk.TransformLineard")]
+	[XmlType("Jk.TransformLineard")]
 	public struct TransformLineard {
 		/// <summary>
 		/// スケーリング値

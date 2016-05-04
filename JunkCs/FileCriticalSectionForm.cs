@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.IO;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// 排他ファイルロック可能になるまで待つ際に表示されるフォーム
 	/// </summary>

@@ -1,4 +1,4 @@
-﻿namespace Junk
+﻿namespace Jk
 {
 	partial class ListViewEx
 	{

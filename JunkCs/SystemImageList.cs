@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Junk
+namespace Jk
 {
 	/// <summary>
 	/// システムイメージリストへのアクセスを行うクラス。

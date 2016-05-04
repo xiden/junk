@@ -93,7 +93,7 @@ struct RingBufferSizeFixed {
 		return count;
 	}
 	template<class R> _FINLINE R PeekHead(intptr_t indexFromHead) const {
-		R r = R();
+		R r();
 		PeekHead(indexFromHead, sizeof(R), (T*)&r);
 		return r;
 	}

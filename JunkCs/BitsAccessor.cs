@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// byte 配列内の任意ビットにアクセスするためのクラス
 	/// リトルエンディアンではLSB0ビットナンバリングを、ビッグエンディアンではMSB0ビットナンバリングを前提としている
 	/// </summary>
-	public class BitsAccessor : IDisposable {
+	public class BitAccessor : IDisposable {
 		[DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
 		static unsafe extern void MoveMemory(void* dest, void* src, IntPtr size);
 
@@ -31,7 +31,7 @@ namespace Junk {
 		/// コンストラクタ、アクセス対象バッファを指定して初期化する
 		/// </summary>
 		/// <param name="buffer">アクセス対象バッファ</param>
-		public BitsAccessor(byte[] buffer) {
+		public BitAccessor(byte[] buffer) {
 			_BufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
 			var ptr = _BufferHandle.AddrOfPinnedObject();
 			unsafe
@@ -87,7 +87,7 @@ namespace Junk {
 			int bits = count * 8;
 			long l = _BitLength;
 			if (count < 0 || (ulong)l < (uint)position || (ulong)l < (uint)(position + bits))
-				throw new ArgumentException();
+				throw new IndexOutOfRangeException("It has exceeded the size of the array. Argument \"position\"(" + position + ") + \"count\"(" + count + ") * 8.");
 
 			int index1 = position / 8; // バイト配列インデックス
 			int lsb = position % 8; // index1 から最下位ビットへのオフセットビット数
@@ -339,6 +339,20 @@ namespace Junk {
 		}
 
 		/// <summary>
+		/// 指定ビット位置から最大32bitまでの符号なし整数を取得する
+		/// </summary>
+		/// <param name="position">ビット位置</param>
+		/// <param name="bits">ビット数</param>
+		/// <returns>整数</returns>
+		public float GetFloat(int position, int bits) {
+			var u = GetUInt(position, bits);
+			unsafe
+			{
+				return *(float*)&u;
+			}
+		}
+
+		/// <summary>
 		/// 内部 Dispose 処理
 		/// </summary>
 		/// <param name="disposing">Dispose() 内から呼ばれているかどうか</param>
@@ -363,7 +377,7 @@ namespace Junk {
 		/// <summary>
 		/// ファイナライザ
 		/// </summary>
-		~BitsAccessor() {
+		~BitAccessor() {
 			Dispose(false);
 		}
 	}

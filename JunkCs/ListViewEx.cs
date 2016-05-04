@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 using System.Reflection;
 
-namespace Junk
+namespace Jk
 {
 	/// <summary>
 	///	列の表示非表示、状態の保存、実データによるソート機能を実装したリストビュークラス。

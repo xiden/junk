@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using System.Xml.Serialization;
 using System.IO;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// 暗号関係
 	/// </summary>
