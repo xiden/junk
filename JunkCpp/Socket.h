@@ -31,20 +31,20 @@ _JUNK_BEGIN
 //! ソケットクラス、デストラクタではソケットクローズしない
 struct SocketRef {
 #ifdef __GNUC__
-	typedef int Handle; // ハンドル型
+	typedef intptr_t Handle; // ハンドル型
 #elif _MSC_VER
 	typedef SOCKET Handle; // ハンドル型
 #endif
 
 	//! Shutdown() メソッドに渡す列挙値
-	enum class Sd : int {
+	enum class Sd : intptr_t {
 		Read = 0, //!< 読み込みをシャットダウン
 		RWrite = 1, //!< 書き込みをシャットダウン
 		Both = 2, //!< 読み書き両方をシャットダウン
 	};
 
 	//! ソケットタイプ
-	enum class St : int {
+	enum class St : intptr_t {
 		Stream = SOCK_STREAM, //!< ストリームソケット
 		Dgram = SOCK_DGRAM, //!< データグラムソケット
 		Raw = SOCK_RAW, //!< 生プロトコルインターフェース
@@ -53,7 +53,7 @@ struct SocketRef {
 	};
 
 	//! アドレスファミリ
-	enum class Af : int {
+	enum class Af : intptr_t {
 		IPv4 = AF_INET, //!< IPv4
 		IPv6 = AF_INET6, //!< IPv6
 	};
@@ -333,7 +333,7 @@ struct SocketRef {
 	static bool GetName(const sockaddr* pAddr, socklen_t addrLen, std::string* pHost, std::string* pService);
 
 	//! ソケットから読み込み
-	_FINLINE int Recv(void* pBuf, size_t size) {
+	_FINLINE intptr_t Recv(void* pBuf, size_t size) {
 #ifdef __GNUC__
 		return recv(m_hSock, pBuf, size, 0);
 #elif defined _MSC_VER
@@ -342,7 +342,7 @@ struct SocketRef {
 	}
 
 	//! 指定アドレスからのソケットから読み込み(UDP用)
-	_FINLINE int RecvFrom(void* pBuf, size_t size, sockaddr_storage* pFromAddr, socklen_t* pFromLen) {
+	_FINLINE intptr_t RecvFrom(void* pBuf, size_t size, sockaddr_storage* pFromAddr, socklen_t* pFromLen) {
 #ifdef __GNUC__
 		return recvfrom(m_hSock, (char*)pBuf, size, 0, (sockaddr*)pFromAddr, pFromLen);
 #elif defined _MSC_VER
@@ -363,7 +363,7 @@ struct SocketRef {
 	}
 
 	//! ソケットへ書き込み
-	_FINLINE int Send(const void* pBuf, size_t size) {
+	_FINLINE intptr_t Send(const void* pBuf, size_t size) {
 #ifdef __GNUC__
 		return send(m_hSock, (void*)pBuf, size, 0);
 #elif defined _MSC_VER
@@ -372,7 +372,7 @@ struct SocketRef {
 	}
 
 	//! 指定アドレスへ送信(UDP用)
-	_FINLINE int SendTo(const void* pBuf, size_t size, const addrinfo* pAddrInfo) {
+	_FINLINE intptr_t SendTo(const void* pBuf, size_t size, const addrinfo* pAddrInfo) {
 #ifdef __GNUC__
 		return sendto(m_hSock, (char*)pBuf, size, 0, (sockaddr*)pAddrInfo->ai_addr, pAddrInfo->ai_addrlen);
 #elif defined _MSC_VER
@@ -381,7 +381,7 @@ struct SocketRef {
 	}
 
 	//! 指定アドレス情報へ送信(UDP用)
-	_FINLINE int SendTo(const void* pBuf, size_t size, const sockaddr_in& addr) {
+	_FINLINE intptr_t SendTo(const void* pBuf, size_t size, const sockaddr_in& addr) {
 #ifdef __GNUC__
 		return sendto(m_hSock, (char*)pBuf, size, 0, (sockaddr*)&addr, sizeof(addr));
 #elif defined _MSC_VER
@@ -394,7 +394,7 @@ struct SocketRef {
 #endif
 
 	//! 指定 Endpoint へ送信(UDP用)
-	_FINLINE int SendTo(const void* pBuf, size_t size, const Endpoint& endpoint, int index = 0) {
+	_FINLINE intptr_t SendTo(const void* pBuf, size_t size, const Endpoint& endpoint, int index = 0) {
 		return this->SendTo(pBuf, size, endpoint.AddrInfos[index]);
 	}
 

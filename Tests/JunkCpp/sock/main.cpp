@@ -84,26 +84,6 @@ bool UdpServer() {
 }
 
 bool UdpMpeg2tsClient() {
-#pragma pack(push, 1)
-	union TsPkt {
-		uint8_t Array[188];
-		struct {
-			uint8_t SyncByte; //!< 同期判定用マジックナンバー 0x47
-			uint8_t TransportErrorIndicator : 1; //!< エラーチェックのために使用され、0 でなければならない？
-			uint8_t PayloadUnitStartIndicator : 1; //!< 一塊の情報が複数パケットに分割されるときにどれが先頭パケットなのかを示すためのフラグ
-			uint8_t TransportPriority : 1; //!< なぞ
-			uint32_t PID : 13; //!< 後続バイトが何を表現しているのかを表しているもの
-			uint8_t TransportScramblingControl : 2; 
-			uint8_t AdaptationFieldControl : 2; //!< 後続パケットにAdaptationFieldControlやPayloadがあるかを示すフラグ、上1ビットが立っている場合はAdaptationFieldControlがあり、下1ビットが立っている場合はPayloadがあることを表す
-			uint8_t ContinuityCounter : 4; //!< パケットが欠落していないかの確認のために用いられる、同じPIDのパケットが来るたびに1ずつインクリメントされ、0x0Fまで達したら次は0x00に戻る
-			union {
-				uint8_t AdaptationSize; //!< ペイロードデータ長
-				uint8_t Payloads[188 - 4]; //!< PIDで指定されたデータ
-			};
-		};
-	};
-#pragma pack(pop)
-
 	struct CrcCalculator {
 		uint32_t table[256];
 
@@ -148,134 +128,140 @@ bool UdpMpeg2tsClient() {
 		return false;
 	}
 	//sk.SetBlockingMode(false);
-	sk.SetNoDelay(1);
+	//sk.SetNoDelay(1);
 
-	//TransportPacket tp;
-	//tp.sync_byte = packet[0];
-	//tp.transport_error_indicator = (packet[1] & 0x80) >> 7;
-	//tp.payload_unit_start_indicator = (packet[1] & 0x40) >> 6;
-	//tp.transport_priority = (packet[1] & 0x20) >> 5;
-	//tp.PID = ((packet[1] & 0x1F) >> 8) | packet[2];
-	//tp.transport_scrambling_control = (packet[3] & 0x60) >> 6;
-	//tp.adaption_field_control = (packet[3] & 0x30) >> 4;
-	//tp.continuity_counter = packet[3] & 0x0F;
+	std::vector<uint8_t> buf(0x100000); // パケット解析用バッファ
+	auto s = &buf[0]; // バッファ内の処理先頭ポインタ
+	auto p = s; // バッファ内パケット先頭サーチポインタ
+	auto e = s; // バッファ内有効データ終端の次のポインタ
+	auto cap = p + buf.size(); // バッファ終端
+	intptr_t state = 0; // 解析状態
+	intptr_t payload_unit_start_indicator; // 複数パケットに分割されたペイロードの先頭なら1
+	intptr_t transport_priority; // 同じPID内での優先度が高いなら1
+	intptr_t PID; // ペイロードの内容を示すID
+	intptr_t transport_scrambling_control; // スクランブルフラグ
+	intptr_t adaption_field_control; // ペイロードかアダプテーションあるかどうかのフラグ
+	intptr_t continuity_counter; // ペイロードのシーケンス番号
+	intptr_t payload_len; // ペイロードサイズ
+	uint32_t crc; // ペイロードあり時のCRC
 
-
-	std::vector<uint8_t> buf(0x100000);
-	RingBufferSizeFixed<uint8_t, 256> ring;
-	TsPkt pkt;
-	intptr_t state = 0; // 読み込みモード、0:なし、1:Adaptation、2:Payload
-	intptr_t adaptEndSize;
-	intptr_t transportErrorIndicator = 0;
-	intptr_t payloadUnitStartIndicator = 0;
-	intptr_t transportPriority = 0;
-	intptr_t pid = 0;
-	intptr_t transportScramblingControl = 0;
-	intptr_t adaptationFieldControl = 0;
-	intptr_t continuityCounter = 0;
-	intptr_t payloadSize = 0;
 	std::ofstream fout;
-	fout.open("mpegts.dat", std::ios::out | std::ios::binary | std::ios::trunc);
+	fout.open("mpeg2ts_parse.dat", std::ios::out | std::ios::binary | std::ios::trunc);
+
 	for (;;) {
+		// UDPから受信
 		sockaddr_storage fromAddr;
 		socklen_t fromLen = sizeof(fromAddr);
 		memset(&fromAddr, 0, sizeof(fromAddr));
-		auto n = sk.RecvFrom(&buf[0], buf.size(), &fromAddr, &fromLen);
-		if (1 <= n) {
-			fout.write((char*)&buf[0], n);
-			fout.flush();
 
-			//for (int i = 0; i < n; i++) {
-			//	ring.Write(buf[i]);
-			//	auto b = ring[0];
+		// 未解析データが1パケット(188バイト)未満なら読み込む
+		if (e - p < 188) {
+			intptr_t n = sk.RecvFrom(e, cap - e, &fromAddr, &fromLen);
+			if (0 < n)
+				e += n;
+		}
 
-			//	std::cout << ring.Head << ":" << ring.Tail << std::endl;
+		// 188バイト未満ならパケットに成り得ない
+		if (e - p < 188)
+			continue;
 
-			//	switch (state) {
-			//	case 0:
-			//		if (b == 0x47) {
-			//			state++;
-			//		} else {
-			//			ring.Read();
-			//		}
-			//		break;
-			//	case 1:
-			//		transportErrorIndicator = (b & 0x80) >> 7;
-			//		if (!transportErrorIndicator) {
-			//			payloadUnitStartIndicator = (b & 0x40) >> 6;
-			//			transportPriority = (b & 0x20) >> 5;
-			//			state++;
-			//		} else {
-			//			state = 0;
-			//			ring.Read();
-			//		}
-			//		break;
-			//	case 2:
-			//		pid = ((ring[1] & 0x1F) >> 8) | ring[2];
-			//		state++;
-			//		break;
-			//	case 3:
-			//		transportScramblingControl = (b & 0x60) >> 6;
-			//		adaptationFieldControl = (b & 0x30) >> 4;
-			//		continuityCounter = b & 0x0F;
-			//		std::cout << "continuityCounter=" << continuityCounter << std::endl;
-			//		if (adaptationFieldControl) {
-			//			state++;
-			//		} else {
-			//			state = 0;
-			//			ring.Clear();
-			//		}
-			//		break;
-			//	case 4:
-			//		payloadSize = b;
-			//		if(payloadSize)
-			//			std::cout << "PID=" << pid << " Payload=" << payloadSize << " continuityCounter=" << continuityCounter << std::endl;
-			//		else
-			//			std::cout << "PID=" << pid << std::endl;
-			//		state++;
-			//		break;
-			//	case 5:
-			//		if (188 <= ring.Size()) {
-			//			state = 0;
-			//			ring.Clear();
-			//		}
-			//		break;
-				//}
+		switch (state) {
+		case 0:
+			// 同期バイトを探す
+			for (; p < e && *p == 0x47; p++);
+			if (p == e) {
+				p = e = s;
+				continue; // バッファ内に見つからなかったのでバッファ内容全部捨てる
+			}
+			state = 1; // ヘッダ解析状態へ移る
+			break;
 
-				//switch (state) {
-				//case 0:
-				//	if (ring.Size() == 4) {
-				//		ring.PeekHead(0, 4, (uint8_t*)&pkt);
-				//		if (pkt.SyncByte == 0x47) {
-				//			if (pkt.TransportErrorIndicator == 0) {
-				//				std::cout << "PID=" << pkt.PID << std::endl;
-				//				if (pkt.AdaptationFieldControl & 2) {
-				//					auto e = 4 + 1 + pkt.AdaptationSize;
-				//					state = 1;
-				//					adaptEndSize = e;
-				//					std::cout << "AdaptationSize=" << (int)pkt.AdaptationSize << std::endl;
-				//				}
-				//			}
-				//		} else {
-				//			ring.DropHead(1);
-				//		}
-				//	}
-				//	break;
-				//case 1:
-				//	if (ring.Size() == adaptEndSize) {
-				//		state = 2;
-				//		std::cout << "Adaptation end" << std::endl;
-				//	}
-				//	break;
-				//case 2:
-				//	if (ring.Size() == 188) {
-				//		ring.Clear();
-				//		std::cout << "Packet end" << std::endl;
-				//		state = 0;
-				//	}
-				//	break;
-				//}
-			//}
+		case 1:
+			// ヘッダ解析
+			if (e - p < 4)
+				continue; // ヘッダは4バイトないとだめ
+
+						  // 転送エラーフラグチェック
+			if ((p[1] & 0x80) >> 7) {
+				p++;
+				continue; // エラーなのでパケットの先頭を探しなおす
+			}
+
+						  // 分割複数ペイロードの先頭を示すフラグ
+			payload_unit_start_indicator = (p[1] & 0x40) >> 6;
+			// 同じPIDの他のパケットよりも優先度が高い事を示すフラグ
+			transport_priority = (p[1] & 0x20) >> 5;
+			// ペイロード内容をを示すID
+			PID = (uintptr_t)((p[1] & 0x1F) >> 8) | (uintptr_t)p[2];
+			// スクランブルフラグ
+			transport_scrambling_control = (p[3] & 0x60) >> 6;
+			// ペイロードまたはアダプテーション存在フラグ
+			adaption_field_control = (p[3] & 0x30) >> 4;
+			// ペイロードパケットのシーケンス番号
+			continuity_counter = p[3] & 0x0F;
+
+			if (adaption_field_control) {
+				// ペイロードありならペイロードサイズチェック状態へ
+				state = 2;
+			} else {
+				// ペイロード無いならパケット完了待ち状態へ
+				state = 3;
+			}
+			break;
+
+		case 2:
+			// ペイロードサイズチェック状態
+			if (e - p < 5)
+				continue; // 5バイトないとペイロードサイズが取得できない
+			payload_len = p[5];
+			if (188 < payload_len + 5) {
+				// ペイロードサイズ異常なので同期バイト検出間違いかもしれない
+				// 1バイト進めてやり直し
+				p++;
+				continue;
+			}
+
+			// パケット完了待ち状態へ移る
+			state = 3;
+			break;
+
+		case 3:
+			// パケット完了待ち
+			if (e - p < 188)
+				continue; // 188バイト以上無いとパケット
+
+			// ペイロードありならCRCチェックする
+			if (adaption_field_control) {
+				crc = cc(p + 5, payload_len - 4);
+				uint32_t crc2 = (uint32_t)p[payload_len + 1] << 24;
+				crc2 |= (uint32_t)p[payload_len + 2] << 16;
+				crc2 |= (uint32_t)p[payload_len + 3] << 8;
+				crc2 |= (uint32_t)p[payload_len + 4];
+				if (crc != crc2) {
+					// CRC違うなら同期バイト検出間違いかもしれない
+					// 1バイト進めてやり直し
+					p++;
+					std::cout << "CRCエラー: " << std::hex << crc << " : " << crc2 << std::endl << std::dec;
+					continue;
+				}
+			}
+
+			fout.write((char*)p, 188);
+			std::cout << "PID=" << PID << std::endl;
+
+			// このパケットはもう用済み
+			p += 188;
+
+			// もしもうバッファ内にパケットがあり得ないなら残りをバッファ先頭にずらす
+			if (e - p < 188) {
+				memmove(s, p, e - p);
+				e -= e - p;
+				p = s;
+			}
+
+			// 同期バイトを探す状態に戻る
+			state = 0;
+			break;
 		}
 	}
 
