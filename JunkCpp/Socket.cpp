@@ -1,4 +1,8 @@
 ﻿#include "Socket.h"
+#if defined __GNUC__
+#elif defined  _MSC_VER
+#include <ws2ipdef.h>
+#endif
 
 #ifdef _MSC_VER
 #pragma comment(lib, "WS2_32.lib")
@@ -68,6 +72,33 @@ sockaddr_in SocketRef::IPv4StrToAddress(const char* pszIPv4, int port) {
 	adr.sin_addr.S_un.S_addr = IPv4StrToBin(pszIPv4);
 #endif
 	return adr;
+}
+
+//! リモート名の取得
+std::string SocketRef::GetRemoteName(
+	const sockaddr_storage& addrst //!< [in] アドレス情報ストレージ
+) {
+	char buf[INET6_ADDRSTRLEN];
+	switch (addrst.ss_family) {
+	case AF_INET:
+	{
+		const auto& v4 = (const sockaddr_in&)addrst;
+		auto p = inet_ntop(AF_INET, (void*)&v4.sin_addr, buf, sizeof(buf));
+		return p ? p : "";
+	}
+	case AF_INET6:
+	{
+		const auto& v6 = (const sockaddr_in6&)addrst;
+		auto p = inet_ntop(AF_INET6, (void*)&v6.sin6_addr, buf, sizeof(buf));
+		return p ? p : "";
+		//if (IN6_IS_ADDR_V4MAPPED(&v6.sin6_addr)) {
+		// IPv6にマップされたIPv4だけど面倒なので対応しない
+		//} else {
+		//}
+	}
+	default:
+		return "";
+	}
 }
 
 //! 指定ホスト名、サービス名、ヒントからアドレス情報を取得し保持する

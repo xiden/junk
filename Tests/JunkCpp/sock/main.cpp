@@ -10,6 +10,105 @@ using namespace jk;
 
 std::vector<std::string> args; //!< コマンドライン引数
 
+bool TcpClient() {
+	if (args.size() < 2) {
+		std::cout << "TcpClient <hostaddress> <port>" << std::endl;
+		return false;
+	}
+
+	auto host = args[0];
+	auto port = args[1];
+
+	Socket::Endpoint serverEp;
+	if (!serverEp.Create(host.c_str(), port.c_str(), Socket::St::Stream, Socket::Af::IPv4))
+		return false;
+
+	Socket sk;
+	if (!sk.Create(serverEp)) {
+		Error::SetOsLastError();
+		std::cout << Error::GetLastError() << std::endl;
+		return false;
+	}
+	if (!sk.Connect(serverEp)) {
+		Error::SetOsLastError();
+		std::cout << Error::GetLastError() << std::endl;
+		return false;
+	}
+
+	std::cout << "入力された文字が送信されます" << std::endl;
+	for (std::string line; std::getline(std::cin, line);) {
+		if (line == "quit")
+			break;
+		line += "\n";
+		sk.Send(line.c_str(), line.size());
+	}
+
+	return true;
+}
+
+bool TcpServer() {
+	if (args.size() < 1) {
+		std::cout << "TcpServer <port>" << std::endl;
+		return false;
+	}
+
+	auto port = args[0];
+
+	Socket::Endpoint serverEp;
+	if (!serverEp.Create(NULL, port.c_str(), Socket::St::Stream, Socket::Af::IPv4)) {
+		Error::SetOsLastError();
+		std::cout << Error::GetLastError() << std::endl;
+		return false;
+	}
+
+	Socket skListen;
+	if (!skListen.Create(serverEp)) {
+		Error::SetOsLastError();
+		std::cout << Error::GetLastError() << std::endl;
+		return false;
+	}
+	if (!skListen.Bind(serverEp)) {
+		Error::SetOsLastError();
+		std::cout << Error::GetLastError() << std::endl;
+		return false;
+	}
+
+	if (!skListen.Listen(10)) {
+		Error::SetOsLastError();
+		std::cout << Error::GetLastError() << std::endl;
+		return false;
+	}
+
+	std::cout << "送信された文字がひたすら表示されます" << std::endl;
+	std::vector<uint8_t> buf(0x100000);
+	for (;;) {
+		sockaddr_storage fromAddr;
+		socklen_t fromLen = sizeof(fromAddr);
+		memset(&fromAddr, 0, sizeof(fromAddr));
+		std::cout << "接続待機中・・・" << std::endl;
+		Socket sk = skListen.Accept(&fromAddr, &fromLen);
+		if (sk.IsInvalidHandle()) {
+			Error::SetOsLastError();
+			std::cout << Error::GetLastError() << std::endl;
+			continue;
+		}
+		std::cout << Socket::GetRemoteName(fromAddr) << "から接続されました" << std::endl;
+
+		for (;;) {
+			auto n = sk.Recv(&buf[0], buf.size() - 1);
+			if (n <= 0)
+				break;
+			buf[n] = 0;
+			std::cout << (char*)&buf[0];
+		}
+
+		sk.Shutdown(Socket::Sd::Both);
+		std::cout << "切断されました" << std::endl;
+	}
+
+	return true;
+}
+
 bool UdpClient() {
 	if (args.size() < 2) {
 		std::cout << "UdpClient <hostaddress> <port>" << std::endl;
@@ -315,6 +414,10 @@ int main(int argc, char* argv[]) {
 
 	if (mode == "StreamTest")
 		StreamTest();
+	else if (mode == "TcpServer")
+		TcpServer();
+	else if (mode == "TcpClient")
+		TcpClient();
 	else if (mode == "UdpServer")
 		UdpServer();
 	else if (mode == "UdpClient")

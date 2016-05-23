@@ -30,9 +30,9 @@ _JUNK_BEGIN
 
 //! ソケットクラス、デストラクタではソケットクローズしない
 struct SocketRef {
-#ifdef __GNUC__
+#if defined __GNUC__
 	typedef intptr_t Handle; // ハンドル型
-#elif _MSC_VER
+#elif defined  _MSC_VER
 	typedef SOCKET Handle; // ハンドル型
 #endif
 
@@ -126,11 +126,16 @@ struct SocketRef {
 		in_addr Addr; //!< アドレス
 		uint32_t Port; //!< ポート
 
-		IPv4AddrPort() {
+		_FINLINE IPv4AddrPort() {
 		}
-		IPv4AddrPort(const in_addr& addr, uint32_t port) {
+		_FINLINE IPv4AddrPort(const in_addr& addr, uint32_t port) {
 			this->Addr = addr;
 			this->Port = port;
+		}
+		_FINLINE IPv4AddrPort(const sockaddr_storage& addrst) {
+			sockaddr_in& si = (sockaddr_in&)addrst;
+			this->Addr = si.sin_addr;
+			this->Port = htons(si.sin_port);
 		}
 
 		_FINLINE bool operator==(const IPv4AddrPort& ap) const {
@@ -158,11 +163,16 @@ struct SocketRef {
 		in6_addr Addr; //!< 
 		uint32_t Port; //!< ポート
 
-		IPv6AddrPort() {
+		_FINLINE IPv6AddrPort() {
 		}
-		IPv6AddrPort(const in6_addr& addr, uint32_t port) {
+		_FINLINE IPv6AddrPort(const in6_addr& addr, uint32_t port) {
 			this->Addr = addr;
 			this->Port = port;
+		}
+		_FINLINE IPv6AddrPort(const sockaddr_storage& addrst) {
+			sockaddr_in6& si = (sockaddr_in6&)addrst;
+			this->Addr = si.sin6_addr;
+			this->Port = htons(si.sin6_port);
 		}
 
 		_FINLINE bool operator==(const IPv6AddrPort& ap) const {
@@ -215,6 +225,9 @@ struct SocketRef {
 
 	//! 127.0.0.1 の様なIPv4アドレス文字列とポート番号からアドレス構造体を取得する
 	static sockaddr_in IPv4StrToAddress(const char* pszIPv4, int port);
+
+	//! リモート名の取得
+	static std::string GetRemoteName(const sockaddr_storage& addrst);
 
 	//! コンストラクタ
 	SocketRef() {
@@ -329,6 +342,11 @@ struct SocketRef {
 		return accept(m_hSock, pFromAddr, pFromLen);
 	}
 
+	//! 接続受付
+	Handle Accept(sockaddr_storage* pFromAddr, socklen_t* pFromLen) {
+		return accept(m_hSock, (sockaddr*)pFromAddr, pFromLen);
+	}
+
 	//! ソケットアドレスから名前情報を取得する
 	static bool GetName(const sockaddr* pAddr, socklen_t addrLen, std::string* pHost, std::string* pService);
 
@@ -352,14 +370,12 @@ struct SocketRef {
 
 	//! RecvFrom() などで取得した sockaddr_storage からIPv4アドレス＆ポートを取得する
 	static _FINLINE IPv4AddrPort ToIPv4AddrPort(const sockaddr_storage& addrst) {
-		sockaddr_in& si = (sockaddr_in&)addrst;
-		return IPv4AddrPort(si.sin_addr, htons(si.sin_port));
+		return IPv4AddrPort(addrst);
 	}
 
 	//! RecvFrom() などで取得した sockaddr_storage からIPv6アドレス＆ポートを取得する
 	static _FINLINE IPv6AddrPort ToIPv6AddrPort(const sockaddr_storage& addrst) {
-		sockaddr_in6& si = (sockaddr_in6&)addrst;
-		return IPv6AddrPort(si.sin6_addr, htons(si.sin6_port));
+		return IPv6AddrPort(addrst);
 	}
 
 	//! ソケットへ書き込み
