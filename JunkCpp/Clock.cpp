@@ -1,10 +1,7 @@
 ﻿#include "Clock.h"
 #if defined __GNUC__
-
 #include <time.h>
-
-#else
-
+#elif defined  _WIN32
 #include <Windows.h>
 
 static _FINLINE int64_t GetQpf() {
@@ -27,7 +24,7 @@ int64_t Clock::SysNS() {
 	timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	return (int64_t)ts.tv_sec * 1000000000LL + ts.tv_nsec;
-#else
+#elif defined  _WIN32
 	LARGE_INTEGER li;
 	::QueryPerformanceCounter(&li);
 	return INT64_C(1000000000) * li.QuadPart / Qpf;
@@ -40,7 +37,7 @@ double Clock::SysS() {
 	timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	return (double)((int64_t)ts.tv_sec * 1000000000LL + ts.tv_nsec) / 1000000000.0;
-#else
+#elif defined  _WIN32
 	LARGE_INTEGER li;
 	::QueryPerformanceCounter(&li);
 	return (double)li.QuadPart / Qpf;
