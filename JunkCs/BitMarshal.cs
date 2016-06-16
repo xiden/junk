@@ -158,7 +158,7 @@ namespace Jk {
 		/// </summary>
 		/// <param name="littleEndian">リトルエンディアンかどうか</param>
 		public BitStructAttribute(bool littleEndian) {
-			this.LittleEndian = false;
+			this.LittleEndian = littleEndian;
 		}
 	}
 
