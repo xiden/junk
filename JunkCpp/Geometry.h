@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #ifndef __JUNK_GEOMETRY_H__
 #define __JUNK_GEOMETRY_H__
 
@@ -14,53 +14,53 @@ _JUNK_BEGIN
 #endif
 
 
-//! Transform ŠÖ”‚É“n‚·•ÏŠ·î•ñ
+//! Transform é–¢æ•°ã«æ¸¡ã™å¤‰æ›æƒ…å ±
 struct TransformInfo;
 
 //==============================================================================
-//		ƒeƒ“ƒvƒŒ[ƒgAƒCƒ“ƒ‰ƒCƒ“ŠÖ”éŒ¾
+//		ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã€ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³é–¢æ•°å®£è¨€
 //==============================================================================
 
-//! •¡”’¸“_‚Å\¬‚³‚ê‚éƒ‰ƒCƒ“‚Æw’èƒ|ƒCƒ“ƒg‚Æ‚ÌÚG”»’è‚ğs‚¤
-//! @return  ÚG‚µ‚Ä‚¢‚é‚È‚çÚG’¸“_”Ô†‚ª•Ô‚éA‚»‚êˆÈŠO‚Í•‰”‚ª•Ô‚é
+//! è¤‡æ•°é ‚ç‚¹ã§æ§‹æˆã•ã‚Œã‚‹ãƒ©ã‚¤ãƒ³ã¨æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã¨ã®æ¥è§¦åˆ¤å®šã‚’è¡Œã†
+//! @return  æ¥è§¦ã—ã¦ã„ã‚‹ãªã‚‰æ¥è§¦é ‚ç‚¹ç•ªå·ãŒè¿”ã‚‹ã€ãã‚Œä»¥å¤–ã¯è² æ•°ãŒè¿”ã‚‹
 template<
-	class T, //!< ’lŒ^
-	class V1, //!< ’¸“_”z—ñƒxƒNƒgƒ‹Œ^
-	class V2 //!< w’èƒ|ƒCƒ“ƒgƒxƒNƒgƒ‹Œ^
+	class T, //!< å€¤å‹
+	class V1, //!< é ‚ç‚¹é…åˆ—ãƒ™ã‚¯ãƒˆãƒ«å‹
+	class V2 //!< æŒ‡å®šãƒã‚¤ãƒ³ãƒˆãƒ™ã‚¯ãƒˆãƒ«å‹
 >
 _JUNK_GEOMETRY_INLINE intptr_t HitTestPointAndPolylineTmpl(
-	const V1* vts, //!< [in] ’¸“_”z—ñæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t count, //!< [in] ’¸“_”
-	V2 pt, //!< [in] ÚG”»’èƒ|ƒCƒ“ƒgÀ•W
-	T vertexRadius, //!< [in] ’¸“_‚Ì”¼Œa
-	T edgeThickness, //!< [in] •Ó‚Ì‘¾‚³
-	T& t //!< [out] •Ó‚ÆÚG‚µ‚½Û‚Ìƒpƒ‰ƒ[ƒ^ t ‚ª•Ô‚é(0 ‚È‚ç–ß‚è’l‚Ì’¸“_A1‚È‚çŸ‚Ì’¸“_)
+	const V1* vts, //!< [in] é ‚ç‚¹é…åˆ—å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t count, //!< [in] é ‚ç‚¹æ•°
+	V2 pt, //!< [in] æ¥è§¦åˆ¤å®šãƒã‚¤ãƒ³ãƒˆåº§æ¨™
+	T vertexRadius, //!< [in] é ‚ç‚¹ã®åŠå¾„
+	T edgeThickness, //!< [in] è¾ºã®å¤ªã•
+	T& t //!< [out] è¾ºã¨æ¥è§¦ã—ãŸéš›ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ t ãŒè¿”ã‚‹(0 ãªã‚‰æˆ»ã‚Šå€¤ã®é ‚ç‚¹ã€1ãªã‚‰æ¬¡ã®é ‚ç‚¹)
 ) {
 	vertexRadius *= vertexRadius;
 
 	if (1 <= count) {
-		//	æ“ªƒ|ƒCƒ“ƒg‚Æ’¸“_‚ÌÚG”»’è
+		//	å…ˆé ­ãƒã‚¤ãƒ³ãƒˆã¨é ‚ç‚¹ã®æ¥è§¦åˆ¤å®š
 		if ((pt - vts[0]).LengthSquare() <= vertexRadius) {
-			//	w’èƒ|ƒCƒ“ƒg‚©‚ç’¸“_‚Ü‚Å‚Ì‹——£‚ª vertexRadius ˆÈ‰º‚É‚È‚Á‚½‚ç’¸“_‚ÉÚG‚Æ”»’è
+			//	æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã‹ã‚‰é ‚ç‚¹ã¾ã§ã®è·é›¢ãŒ vertexRadius ä»¥ä¸‹ã«ãªã£ãŸã‚‰é ‚ç‚¹ã«æ¥è§¦ã¨åˆ¤å®š
 			t = 0.0;
 			return 0;
 		}
 	}
 
 	for (intptr_t i = 1; i < count; i++) {
-		//	w’èƒ|ƒCƒ“ƒg‚Æ’¸“_‚ÌÚG”»’è
+		//	æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã¨é ‚ç‚¹ã®æ¥è§¦åˆ¤å®š
 		if ((pt - vts[i]).LengthSquare() <= vertexRadius) {
-			//	w’èƒ|ƒCƒ“ƒg‚©‚ç’¸“_‚Ü‚Å‚Ì‹——£‚ª vertexRadius ˆÈ‰º‚É‚È‚Á‚½‚ç’¸“_‚ÉÚG‚Æ”»’è
+			//	æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã‹ã‚‰é ‚ç‚¹ã¾ã§ã®è·é›¢ãŒ vertexRadius ä»¥ä¸‹ã«ãªã£ãŸã‚‰é ‚ç‚¹ã«æ¥è§¦ã¨åˆ¤å®š
 			t = 0.0;
 			return i;
 		}
 
-		//	w’èƒ|ƒCƒ“ƒg‚Æ•Ó‚ÌÚG”»’è
+		//	æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã¨è¾ºã®æ¥è§¦åˆ¤å®š
 		Vector2d s = vts[i - 1];
 		Vector2d v1 = vts[i] - s;
 		double l = v1.LengthSquare();
 		if (l == 0.0)
-			continue; // ’¸“_‚ªd‚È‚Á‚Ä‚é‚Ì‚Å•Ó‚Í‘¶İ‚µ‚È‚¢
+			continue; // é ‚ç‚¹ãŒé‡ãªã£ã¦ã‚‹ã®ã§è¾ºã¯å­˜åœ¨ã—ãªã„
 
 		l = sqrt(l);
 		v1 /= l;
@@ -70,7 +70,7 @@ _JUNK_GEOMETRY_INLINE intptr_t HitTestPointAndPolylineTmpl(
 		double y = v1.MakeVertical().Dot(v2);
 
 		if (0.0 <= x && x <= l && -edgeThickness <= y && y <= edgeThickness) {
-			//	À•W•ÏŠ·Œã‚É‹éŒ`‚Ì”ÍˆÍ“à‚Éw’èƒ|ƒCƒ“ƒg‚ª‚ ‚é‚È‚ç•Ó‚ÉÚG‚Æ”»’è
+			//	åº§æ¨™å¤‰æ›å¾Œã«çŸ©å½¢ã®ç¯„å›²å†…ã«æŒ‡å®šãƒã‚¤ãƒ³ãƒˆãŒã‚ã‚‹ãªã‚‰è¾ºã«æ¥è§¦ã¨åˆ¤å®š
 			t = x / l;
 			return i - 1;
 		}
@@ -79,29 +79,29 @@ _JUNK_GEOMETRY_INLINE intptr_t HitTestPointAndPolylineTmpl(
 	return -1;
 }
 
-//! •¡”’¸“_‚Å\¬‚³‚ê‚éƒ‰ƒCƒ“‚Æw’èƒ|ƒCƒ“ƒg‚Æ‚ÌÚG”»’è‚ğs‚¤
-//! @return ÚG‚µ‚Ä‚¢‚é‚È‚çÚG’¸“_”Ô†‚ª•Ô‚éA‚»‚êˆÈŠO‚Í•‰”‚ª•Ô‚é
+//! è¤‡æ•°é ‚ç‚¹ã§æ§‹æˆã•ã‚Œã‚‹ãƒ©ã‚¤ãƒ³ã¨æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã¨ã®æ¥è§¦åˆ¤å®šã‚’è¡Œã†
+//! @return æ¥è§¦ã—ã¦ã„ã‚‹ãªã‚‰æ¥è§¦é ‚ç‚¹ç•ªå·ãŒè¿”ã‚‹ã€ãã‚Œä»¥å¤–ã¯è² æ•°ãŒè¿”ã‚‹
 template<
-	class T, // ’lŒ^
-	class V1, // ’¸“_”z—ñƒxƒNƒgƒ‹Œ^
-	class V2, // w’èƒ|ƒCƒ“ƒgƒxƒNƒgƒ‹Œ^
-	class V3 // pointOnEdge ‚ÌƒxƒNƒgƒ‹Œ^
+	class T, // å€¤å‹
+	class V1, // é ‚ç‚¹é…åˆ—ãƒ™ã‚¯ãƒˆãƒ«å‹
+	class V2, // æŒ‡å®šãƒã‚¤ãƒ³ãƒˆãƒ™ã‚¯ãƒˆãƒ«å‹
+	class V3 // pointOnEdge ã®ãƒ™ã‚¯ãƒˆãƒ«å‹
 >
 _JUNK_GEOMETRY_INLINE intptr_t HitTestPointAndPolylineTmpl(
-	const V1* vts, //!< [in] ’¸“_”z—ñæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t count, //!< [in] ’¸“_”
-	V2 pt, //!< [in] ÚG”»’èƒ|ƒCƒ“ƒgÀ•W
-	T vertexRadius, //!< [in] ’¸“_‚Ì”¼Œa
-	T edgeThickness, //!< [in] •Ó‚Ì‘¾‚³
-	T& t, //!< [out] •Ó‚ÆÚG‚µ‚½Û‚Ìƒpƒ‰ƒ[ƒ^ t ‚ª•Ô‚é(0 ‚È‚ç–ß‚è’l‚Ì’¸“_A1‚È‚çŸ‚Ì’¸“_)
-	V3& pointOnEdge //!< [out] ÚG‚µ‚½•Ó‚ÌÅ‹ß“_À•W‚ª•Ô‚é
+	const V1* vts, //!< [in] é ‚ç‚¹é…åˆ—å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t count, //!< [in] é ‚ç‚¹æ•°
+	V2 pt, //!< [in] æ¥è§¦åˆ¤å®šãƒã‚¤ãƒ³ãƒˆåº§æ¨™
+	T vertexRadius, //!< [in] é ‚ç‚¹ã®åŠå¾„
+	T edgeThickness, //!< [in] è¾ºã®å¤ªã•
+	T& t, //!< [out] è¾ºã¨æ¥è§¦ã—ãŸéš›ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ t ãŒè¿”ã‚‹(0 ãªã‚‰æˆ»ã‚Šå€¤ã®é ‚ç‚¹ã€1ãªã‚‰æ¬¡ã®é ‚ç‚¹)
+	V3& pointOnEdge //!< [out] æ¥è§¦ã—ãŸè¾ºã®æœ€è¿‘ç‚¹åº§æ¨™ãŒè¿”ã‚‹
 ) {
 	vertexRadius *= vertexRadius;
 
 	if (1 <= count) {
-		//	æ“ªƒ|ƒCƒ“ƒg‚Æ’¸“_‚ÌÚG”»’è
+		//	å…ˆé ­ãƒã‚¤ãƒ³ãƒˆã¨é ‚ç‚¹ã®æ¥è§¦åˆ¤å®š
 		if ((pt - vts[0]).LengthSquare() <= vertexRadius) {
-			//	w’èƒ|ƒCƒ“ƒg‚©‚ç’¸“_‚Ü‚Å‚Ì‹——£‚ª vertexRadius ˆÈ‰º‚É‚È‚Á‚½‚ç’¸“_‚ÉÚG‚Æ”»’è
+			//	æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã‹ã‚‰é ‚ç‚¹ã¾ã§ã®è·é›¢ãŒ vertexRadius ä»¥ä¸‹ã«ãªã£ãŸã‚‰é ‚ç‚¹ã«æ¥è§¦ã¨åˆ¤å®š
 			t = 0.0;
 			pointOnEdge = vts[0];
 			return 0;
@@ -109,20 +109,20 @@ _JUNK_GEOMETRY_INLINE intptr_t HitTestPointAndPolylineTmpl(
 	}
 
 	for (intptr_t i = 1; i < count; i++) {
-		//	w’èƒ|ƒCƒ“ƒg‚Æ’¸“_‚ÌÚG”»’è
+		//	æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã¨é ‚ç‚¹ã®æ¥è§¦åˆ¤å®š
 		if ((pt - vts[i]).LengthSquare() <= vertexRadius) {
-			//	w’èƒ|ƒCƒ“ƒg‚©‚ç’¸“_‚Ü‚Å‚Ì‹——£‚ª vertexRadius ˆÈ‰º‚É‚È‚Á‚½‚ç’¸“_‚ÉÚG‚Æ”»’è
+			//	æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã‹ã‚‰é ‚ç‚¹ã¾ã§ã®è·é›¢ãŒ vertexRadius ä»¥ä¸‹ã«ãªã£ãŸã‚‰é ‚ç‚¹ã«æ¥è§¦ã¨åˆ¤å®š
 			t = 0.0;
 			pointOnEdge = vts[i];
 			return i;
 		}
 
-		//	w’èƒ|ƒCƒ“ƒg‚Æ•Ó‚ÌÚG”»’è
+		//	æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã¨è¾ºã®æ¥è§¦åˆ¤å®š
 		Vector2d s = vts[i - 1];
 		Vector2d v1 = vts[i] - s;
 		double l = v1.LengthSquare();
 		if (l == 0.0)
-			continue; // ’¸“_‚ªd‚È‚Á‚Ä‚é‚Ì‚Å•Ó‚Í‘¶İ‚µ‚È‚¢
+			continue; // é ‚ç‚¹ãŒé‡ãªã£ã¦ã‚‹ã®ã§è¾ºã¯å­˜åœ¨ã—ãªã„
 
 		l = sqrt(l);
 		v1 /= l;
@@ -132,7 +132,7 @@ _JUNK_GEOMETRY_INLINE intptr_t HitTestPointAndPolylineTmpl(
 		double y = v1.Vertical().Dot(v2);
 
 		if (0.0 <= x && x <= l && -edgeThickness <= y && y <= edgeThickness) {
-			//	À•W•ÏŠ·Œã‚É‹éŒ`‚Ì”ÍˆÍ“à‚Éw’èƒ|ƒCƒ“ƒg‚ª‚ ‚é‚È‚ç•Ó‚ÉÚG‚Æ”»’è
+			//	åº§æ¨™å¤‰æ›å¾Œã«çŸ©å½¢ã®ç¯„å›²å†…ã«æŒ‡å®šãƒã‚¤ãƒ³ãƒˆãŒã‚ã‚‹ãªã‚‰è¾ºã«æ¥è§¦ã¨åˆ¤å®š
 			pointOnEdge = s + v1 * x;
 			t = x / l;
 			return i - 1;
@@ -142,34 +142,34 @@ _JUNK_GEOMETRY_INLINE intptr_t HitTestPointAndPolylineTmpl(
 	return -1;
 }
 
-//! •¡”’¸“_‚Å\¬‚³‚ê‚é‘¾‚³‚ğ‚Âƒ‰ƒCƒ“‚Æ‰~‚Æ‚ÌÚG”»’è‚ğs‚¤A‘S‚Ä‚Ì“ü—ÍÀ•W‚ÍÀ•W•ÏŠ·ŠÖ”TF‚ğ’Ê‚µ‚ÄQÆ‚³‚ê‚é
-//! @return ÚG‚µ‚Ä‚¢‚é‚È‚çÚG’¸“_”Ô†‚ª•Ô‚éA‚»‚êˆÈŠO‚Í•‰”‚ª•Ô‚é
+//! è¤‡æ•°é ‚ç‚¹ã§æ§‹æˆã•ã‚Œã‚‹å¤ªã•ã‚’æŒã¤ãƒ©ã‚¤ãƒ³ã¨å††ã¨ã®æ¥è§¦åˆ¤å®šã‚’è¡Œã†ã€å…¨ã¦ã®å…¥åŠ›åº§æ¨™ã¯åº§æ¨™å¤‰æ›é–¢æ•°TFã‚’é€šã—ã¦å‚ç…§ã•ã‚Œã‚‹
+//! @return æ¥è§¦ã—ã¦ã„ã‚‹ãªã‚‰æ¥è§¦é ‚ç‚¹ç•ªå·ãŒè¿”ã‚‹ã€ãã‚Œä»¥å¤–ã¯è² æ•°ãŒè¿”ã‚‹
 template<
-	class T, //!< ’lŒ^
-	class V1, //!< ’¸“_”z—ñƒxƒNƒgƒ‹Œ^
-	class V2, //!< w’èƒ|ƒCƒ“ƒgƒxƒNƒgƒ‹Œ^
-	class V3, //!< pointOnEdge ‚ÌƒxƒNƒgƒ‹Œ^
-	class TF //!< ’¸“_À•W•ÏŠ·ŠÖ”
+	class T, //!< å€¤å‹
+	class V1, //!< é ‚ç‚¹é…åˆ—ãƒ™ã‚¯ãƒˆãƒ«å‹
+	class V2, //!< æŒ‡å®šãƒã‚¤ãƒ³ãƒˆãƒ™ã‚¯ãƒˆãƒ«å‹
+	class V3, //!< pointOnEdge ã®ãƒ™ã‚¯ãƒˆãƒ«å‹
+	class TF //!< é ‚ç‚¹åº§æ¨™å¤‰æ›é–¢æ•°
 >
 _JUNK_GEOMETRY_INLINE intptr_t HitTestPointAndPolylineTf(
-	int checkEdge, //!< [in] •Ó‚à’²‚×‚é‚©‚Ç‚¤‚©
-	const V1* vts, //!< [in] ’¸“_”z—ñæ“ªƒ|ƒCƒ“ƒ^(À•W•ÏŠ·‘O)
-	intptr_t count, //!< [in] ’¸“_”
-	V2 pt, //!< [in] ÚG”»’èƒ|ƒCƒ“ƒgÀ•W(À•W•ÏŠ·Œã)
-	T vertexRadius, //!< [in] ’¸“_‚Ì”¼Œa(À•W•ÏŠ·Œã)
-	T edgeThickness, //!< [in] •Ó‚Ì‘¾‚³(À•W•ÏŠ·Œã)A•‰”‚ªw’è‚³‚ê‚½‚ç•Ó‚Ìƒ`ƒFƒbƒN‚Ís‚í‚ê‚È‚¢
-	TF tf, //!< [in] À•W•ÏŠ·ŠÖ”
-	T& t, //!< [out] •Ó‚ÆÚG‚µ‚½Û‚Ìƒpƒ‰ƒ[ƒ^ t ‚ª•Ô‚é(0 ‚È‚ç–ß‚è’l‚Ì’¸“_A1‚È‚çŸ‚Ì’¸“_)
-	V3& nearestPt, //!< [out] Å‹ß“_À•W(À•W•ÏŠ·Œã)‚ª•Ô‚é
-	T& distance2 //!< [out] Å‹ß“_‚Æ‚Ì‹——£‚Ì“ñæ
+	int checkEdge, //!< [in] è¾ºã‚‚èª¿ã¹ã‚‹ã‹ã©ã†ã‹
+	const V1* vts, //!< [in] é ‚ç‚¹é…åˆ—å…ˆé ­ãƒã‚¤ãƒ³ã‚¿(åº§æ¨™å¤‰æ›å‰)
+	intptr_t count, //!< [in] é ‚ç‚¹æ•°
+	V2 pt, //!< [in] æ¥è§¦åˆ¤å®šãƒã‚¤ãƒ³ãƒˆåº§æ¨™(åº§æ¨™å¤‰æ›å¾Œ)
+	T vertexRadius, //!< [in] é ‚ç‚¹ã®åŠå¾„(åº§æ¨™å¤‰æ›å¾Œ)
+	T edgeThickness, //!< [in] è¾ºã®å¤ªã•(åº§æ¨™å¤‰æ›å¾Œ)ã€è² æ•°ãŒæŒ‡å®šã•ã‚ŒãŸã‚‰è¾ºã®ãƒã‚§ãƒƒã‚¯ã¯è¡Œã‚ã‚Œãªã„
+	TF tf, //!< [in] åº§æ¨™å¤‰æ›é–¢æ•°
+	T& t, //!< [out] è¾ºã¨æ¥è§¦ã—ãŸéš›ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ t ãŒè¿”ã‚‹(0 ãªã‚‰æˆ»ã‚Šå€¤ã®é ‚ç‚¹ã€1ãªã‚‰æ¬¡ã®é ‚ç‚¹)
+	V3& nearestPt, //!< [out] æœ€è¿‘ç‚¹åº§æ¨™(åº§æ¨™å¤‰æ›å¾Œ)ãŒè¿”ã‚‹
+	T& distance2 //!< [out] æœ€è¿‘ç‚¹ã¨ã®è·é›¢ã®äºŒä¹—
 ) {
 	vertexRadius *= vertexRadius;
 
-	intptr_t vtindex = -1; // Å‚à‹ß‚¢’¸“_‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†
-	intptr_t egindex = -1; // Å‚à‹ß‚¢•Ó‚Ì‚ÌÅ‰‚Ì’¸“_ƒCƒ“ƒfƒbƒNƒX”Ô†
-	T vtdist2; // Å‚à‹ß‚¢’¸“_‚Ì‹——£‚Ì“ñæ
-	T egdist; // Å‚à‹ß‚¢•Ó‚Ì‹——£
-	V1 vlt; // ÅŒã‚ÉÀ•W•ÏŠ·‚µ‚½’¸“_À•W
+	intptr_t vtindex = -1; // æœ€ã‚‚è¿‘ã„é ‚ç‚¹ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·
+	intptr_t egindex = -1; // æœ€ã‚‚è¿‘ã„è¾ºã®ã®æœ€åˆã®é ‚ç‚¹ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·
+	T vtdist2; // æœ€ã‚‚è¿‘ã„é ‚ç‚¹ã®è·é›¢ã®äºŒä¹—
+	T egdist; // æœ€ã‚‚è¿‘ã„è¾ºã®è·é›¢
+	V1 vlt; // æœ€å¾Œã«åº§æ¨™å¤‰æ›ã—ãŸé ‚ç‚¹åº§æ¨™
 
 	SetMaxVal(vtdist2);
 	SetMaxVal(egdist);
@@ -180,8 +180,8 @@ _JUNK_GEOMETRY_INLINE intptr_t HitTestPointAndPolylineTf(
 	if (1 <= count) {
 		vlt = tf(vts[0]);
 
-		// æ“ªƒ|ƒCƒ“ƒg‚Æ’¸“_‚ÌÚG”»’è
-		// w’èƒ|ƒCƒ“ƒg‚©‚ç’¸“_‚Ü‚Å‚Ì‹——£‚ª vertexRadius ˆÈ‰º‚É‚È‚Á‚½‚çŒó•â‚É’Ç‰Á
+		// å…ˆé ­ãƒã‚¤ãƒ³ãƒˆã¨é ‚ç‚¹ã®æ¥è§¦åˆ¤å®š
+		// æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã‹ã‚‰é ‚ç‚¹ã¾ã§ã®è·é›¢ãŒ vertexRadius ä»¥ä¸‹ã«ãªã£ãŸã‚‰å€™è£œã«è¿½åŠ 
 		T d2 = (pt - vlt).LengthSquare();
 		if (d2 <= vertexRadius) {
 			vtindex = 0;
@@ -190,26 +190,26 @@ _JUNK_GEOMETRY_INLINE intptr_t HitTestPointAndPolylineTf(
 	}
 
 	for (intptr_t i = 1; i < count; i++) {
-		// ¡‰ñ‚Ì‘ÎÛ’¸“_‚ğÀ•W•ÏŠ·
+		// ä»Šå›ã®å¯¾è±¡é ‚ç‚¹ã‚’åº§æ¨™å¤‰æ›
 		V1 vt = tf(vts[i]);
 
-		// w’èƒ|ƒCƒ“ƒg‚Æ’¸“_‚ÌÚG”»’è
-		// w’èƒ|ƒCƒ“ƒg‚©‚ç’¸“_‚Ü‚Å‚Ì‹——£‚ª vertexRadius ˆÈ‰º‚É‚È‚Á‚½‚çŒó•â‚É’Ç‰Á
+		// æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã¨é ‚ç‚¹ã®æ¥è§¦åˆ¤å®š
+		// æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã‹ã‚‰é ‚ç‚¹ã¾ã§ã®è·é›¢ãŒ vertexRadius ä»¥ä¸‹ã«ãªã£ãŸã‚‰å€™è£œã«è¿½åŠ 
 		T d2 = (pt - vt).LengthSquare();
 		if (d2 <= vertexRadius && d2 < vtdist2) {
 			vtindex = i;
 			vtdist2 = d2;
 		}
 
-		// Šù‚Éw’èÀ•W‚ª’¸“_‚ÆÚG‚µ‚Ä‚¢‚éê‡‚É‚Í•Ó‚Ì”»’è‚Í•K—v–³‚¢
+		// æ—¢ã«æŒ‡å®šåº§æ¨™ãŒé ‚ç‚¹ã¨æ¥è§¦ã—ã¦ã„ã‚‹å ´åˆã«ã¯è¾ºã®åˆ¤å®šã¯å¿…è¦ç„¡ã„
 		if (!checkEdge || vtindex != -1)
 			continue;
 
-		// w’èƒ|ƒCƒ“ƒg‚Æ•Ó‚ÌÚG”»’è
+		// æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã¨è¾ºã®æ¥è§¦åˆ¤å®š
 		Vector2d v1 = vt - vlt;
 		double l = v1.LengthSquare();
 		if (l == 0.0)
-			continue; // ’¸“_‚ªd‚È‚Á‚Ä‚é‚Ì‚Å•Ó‚Í‘¶İ‚µ‚È‚¢
+			continue; // é ‚ç‚¹ãŒé‡ãªã£ã¦ã‚‹ã®ã§è¾ºã¯å­˜åœ¨ã—ãªã„
 
 		l = sqrt(l);
 		v1 /= l;
@@ -218,7 +218,7 @@ _JUNK_GEOMETRY_INLINE intptr_t HitTestPointAndPolylineTf(
 		double x = v1.Dot(v2);
 		double y = v1.Vertical().Dot(v2);
 
-		// À•W•ÏŠ·Œã‚É‹éŒ`‚Ì”ÍˆÍ“à‚Éw’èƒ|ƒCƒ“ƒg‚ª‚ ‚é‚È‚çŒó•â‚É’Ç‰Á
+		// åº§æ¨™å¤‰æ›å¾Œã«çŸ©å½¢ã®ç¯„å›²å†…ã«æŒ‡å®šãƒã‚¤ãƒ³ãƒˆãŒã‚ã‚‹ãªã‚‰å€™è£œã«è¿½åŠ 
 		if (0.0 <= x && x <= l && -edgeThickness <= y && y <= edgeThickness && y < egdist) {
 			egindex = i - 1;
 			egdist = y;
@@ -242,16 +242,16 @@ _JUNK_GEOMETRY_INLINE intptr_t HitTestPointAndPolylineTf(
 	return -1;
 }
 
-// ‹@”\: •¡”’¸“_‚Å\¬‚³‚ê‚éƒ‰ƒCƒ“‚Ì‘S‚Ä‚Ì•Ó‚Ì’·‚³‚Ì‡Œv‚ğŒvZ‚·‚é
+// æ©Ÿèƒ½: è¤‡æ•°é ‚ç‚¹ã§æ§‹æˆã•ã‚Œã‚‹ãƒ©ã‚¤ãƒ³ã®å…¨ã¦ã®è¾ºã®é•·ã•ã®åˆè¨ˆã‚’è¨ˆç®—ã™ã‚‹
 //
-// –ß‚è’l: ’·‚³
+// æˆ»ã‚Šå€¤: é•·ã•
 //
 template<
-	class V1 // ’¸“_”z—ñƒxƒNƒgƒ‹Œ^
+	class V1 // é ‚ç‚¹é…åˆ—ãƒ™ã‚¯ãƒˆãƒ«å‹
 >
 _JUNK_GEOMETRY_INLINE double PolylineLengthTmpl(
-	const V1* vts, //!< [in] ’¸“_”z—ñæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t count //!< [in] ’¸“_”
+	const V1* vts, //!< [in] é ‚ç‚¹é…åˆ—å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t count //!< [in] é ‚ç‚¹æ•°
 ) {
 	double l = 0.0;
 	for (intptr_t i = 1; i < count; i++)
@@ -259,13 +259,13 @@ _JUNK_GEOMETRY_INLINE double PolylineLengthTmpl(
 	return l;
 }
 
-// ‹@”\: SSE3‚ğg—p‚µ‚Ä•¡”’¸“_‚Å\¬‚³‚ê‚éƒ‰ƒCƒ“‚Ì‘S‚Ä‚Ì•Ó‚Ì’·‚³‚Ì‡Œv‚ğŒvZ‚·‚é
+// æ©Ÿèƒ½: SSE3ã‚’ä½¿ç”¨ã—ã¦è¤‡æ•°é ‚ç‚¹ã§æ§‹æˆã•ã‚Œã‚‹ãƒ©ã‚¤ãƒ³ã®å…¨ã¦ã®è¾ºã®é•·ã•ã®åˆè¨ˆã‚’è¨ˆç®—ã™ã‚‹
 //
-// –ß‚è’l: ’·‚³
+// æˆ»ã‚Šå€¤: é•·ã•
 //
 _JUNK_GEOMETRY_INLINE double PolylineLengthSSE3(
-	const VectorN<double, 2>* vts, //!< [in] ’¸“_”z—ñæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t count //!< [in] ’¸“_”
+	const VectorN<double, 2>* vts, //!< [in] é ‚ç‚¹é…åˆ—å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t count //!< [in] é ‚ç‚¹æ•°
 ) {
 	if (count <= 1)
 		return 0.0;
@@ -298,187 +298,187 @@ _JUNK_GEOMETRY_INLINE double PolylineLengthSSE3(
 
 
 //==============================================================================
-//		ƒCƒ“ƒ|[ƒgŠÖ”éŒ¾
+//		ã‚¤ãƒ³ãƒãƒ¼ãƒˆé–¢æ•°å®£è¨€
 //==============================================================================
 
-// ‹@”\ : Å‘åÅ¬‚ğŒŸõ‚·‚é
+// æ©Ÿèƒ½ : æœ€å¤§æœ€å°ã‚’æ¤œç´¢ã™ã‚‹
 //
 JUNKAPI void JUNKCALL SearchMaxMin(
-	const double* p, //!< [in] Å‘åÅ¬ŒŸõ‚·‚éƒf[ƒ^
-	intptr_t n, //!< [in] ŒŸõƒf[ƒ^”A0 ˆÈ‰º‚Ìê‡‚ÍŠÖ”‚ğŒÄ‚Ño‚³‚È‚¢‚æ‚¤‚É‚µ‚Ä‚­‚¾‚³‚¢
-	double& min, //!< [out] Å¬’l‚ª•Ô‚é
-	double& max //!< [out] Å‘å’l‚ª•Ô‚é
+	const double* p, //!< [in] æœ€å¤§æœ€å°æ¤œç´¢ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, //!< [in] æ¤œç´¢ãƒ‡ãƒ¼ã‚¿æ•°ã€0 ä»¥ä¸‹ã®å ´åˆã¯é–¢æ•°ã‚’å‘¼ã³å‡ºã•ãªã„ã‚ˆã†ã«ã—ã¦ãã ã•ã„
+	double& min, //!< [out] æœ€å°å€¤ãŒè¿”ã‚‹
+	double& max //!< [out] æœ€å¤§å€¤ãŒè¿”ã‚‹
 );
 
-// ‹@”\ : ƒŠƒ“ƒOƒoƒbƒtƒ@“à‚©‚çÅ‘åÅ¬‚ğŒŸõ‚·‚é
+// æ©Ÿèƒ½ : ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡å†…ã‹ã‚‰æœ€å¤§æœ€å°ã‚’æ¤œç´¢ã™ã‚‹
 //
 JUNKAPI void JUNKCALL SearchMaxMinRing(
-	const double* pBuffer, //!< [in] ƒŠƒ“ƒOƒoƒbƒtƒ@‚Ìæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t nBufLen, //!< [in] ƒŠƒ“ƒOƒoƒbƒtƒ@‚ÌƒTƒCƒYA0 ˆÈ‰º‚Ìê‡‚ÍŠÖ”‚ğŒÄ‚Ño‚³‚È‚¢‚æ‚¤‚É‚µ‚Ä‚­‚¾‚³‚¢
-	intptr_t iIndex, //!< [in] ŒŸõŠJnˆÊ’u‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†
-	intptr_t n, //!< [in] ŒŸõƒf[ƒ^”A0 ˆÈ‰º‚Ìê‡‚ÍŠÖ”‚ğŒÄ‚Ño‚³‚È‚¢‚æ‚¤‚É‚µ‚Ä‚­‚¾‚³‚¢
-	double& min, //!< [out] Å¬’l‚ª•Ô‚é
-	double& max //!< [out] Å‘å’l‚ª•Ô‚é
+	const double* pBuffer, //!< [in] ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡ã®å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t nBufLen, //!< [in] ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡ã®ã‚µã‚¤ã‚ºã€0 ä»¥ä¸‹ã®å ´åˆã¯é–¢æ•°ã‚’å‘¼ã³å‡ºã•ãªã„ã‚ˆã†ã«ã—ã¦ãã ã•ã„
+	intptr_t iIndex, //!< [in] æ¤œç´¢é–‹å§‹ä½ç½®ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·
+	intptr_t n, //!< [in] æ¤œç´¢ãƒ‡ãƒ¼ã‚¿æ•°ã€0 ä»¥ä¸‹ã®å ´åˆã¯é–¢æ•°ã‚’å‘¼ã³å‡ºã•ãªã„ã‚ˆã†ã«ã—ã¦ãã ã•ã„
+	double& min, //!< [out] æœ€å°å€¤ãŒè¿”ã‚‹
+	double& max //!< [out] æœ€å¤§å€¤ãŒè¿”ã‚‹
 );
 
-// ‹@”\: double Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚ğó‚¯æ‚èAX‚ÆY‚»‚ê‚¼‚ê‚ÌÅ‘åÅ¬‚ğŒŸõ‚·‚é
+// æ©Ÿèƒ½: double å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã‚’å—ã‘å–ã‚Šã€Xã¨Yãã‚Œãã‚Œã®æœ€å¤§æœ€å°ã‚’æ¤œç´¢ã™ã‚‹
 //
 JUNKAPI void JUNKCALL SearchPointMaxMin(
-	const Vector2d* p, //!< [in] Å‘åÅ¬ŒŸõ‚·‚éƒf[ƒ^
-	intptr_t n, //!< [in] ƒf[ƒ^”
-	double& minX, //!< [out] Å¬X’l‚ª•Ô‚é
-	double& minY, //!< [out] Å¬Y’l‚ª•Ô‚é
-	double& maxX, //!< [out] Å‘åX’l‚ª•Ô‚é
-	double& maxY //!< [out] Å‘åY’l‚ª•Ô‚é
+	const Vector2d* p, //!< [in] æœ€å¤§æœ€å°æ¤œç´¢ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, //!< [in] ãƒ‡ãƒ¼ã‚¿æ•°
+	double& minX, //!< [out] æœ€å°Xå€¤ãŒè¿”ã‚‹
+	double& minY, //!< [out] æœ€å°Yå€¤ãŒè¿”ã‚‹
+	double& maxX, //!< [out] æœ€å¤§Xå€¤ãŒè¿”ã‚‹
+	double& maxY //!< [out] æœ€å¤§Yå€¤ãŒè¿”ã‚‹
 );
 
-// ‹@”\ : üŒ`•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : ç·šå½¢å¤‰æ›ã‚’è¡Œã†
 //
 JUNKAPI void JUNKCALL TransformLin(
-	const double* pSrc, //!< [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	double scale, //!< [in] ƒXƒP[ƒŠƒ“ƒO’l
-	double translate, //!< [in] •½sˆÚ“®’l
-	double* pDst //!< [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const double* pSrc, //!< [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scale, //!< [in] ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translate, //!< [in] å¹³è¡Œç§»å‹•å€¤
+	double* pDst //!< [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 );
 
-// ‹@”\ : üŒ`•ÏŠ·Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : ç·šå½¢å¤‰æ›å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
 JUNKAPI void JUNKCALL TransformLinInt(
-	const double* pSrc, //!< [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	double scale, //!< [in] ƒXƒP[ƒŠƒ“ƒO’l
-	double translate, //!< [in] •½sˆÚ“®’l
-	int* pDst //!< [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const double* pSrc, //!< [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scale, //!< [in] ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translate, //!< [in] å¹³è¡Œç§»å‹•å€¤
+	int* pDst //!< [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 );
 
-// ‹@”\ : ”ñüŒ`•ÏŠ·(Log,Pow)‚ğŠÜ‚Ş•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : éç·šå½¢å¤‰æ›(Log,Pow)ã‚’å«ã‚€å¤‰æ›ã‚’è¡Œã†
 //
 JUNKAPI void JUNKCALL TransformNonLin(
-	const double* pSrc, //!< [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	const TransformInfo* pTis, //!< [in] •ÏŠ·î•ñ”z—ñ
-	intptr_t nTransform, //!< [in] pTis ‚Ì—v‘f”
-	double* pDst //!< [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const double* pSrc, //!< [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	const TransformInfo* pTis, //!< [in] å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTransform, //!< [in] pTis ã®è¦ç´ æ•°
+	double* pDst //!< [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 );
 
-// ‹@”\ : ”ñüŒ`•ÏŠ·(Log,Pow)Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : éç·šå½¢å¤‰æ›(Log,Pow)å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
 JUNKAPI void JUNKCALL TransformNonLinInt(
-	const double* pSrc, //!< [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	const TransformInfo* pTis, //!< [in] •ÏŠ·î•ñ”z—ñ
-	intptr_t nTransform, //!< [in] pTis ‚Ì—v‘f”
-	int* pDst //!< [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const double* pSrc, //!< [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	const TransformInfo* pTis, //!< [in] å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTransform, //!< [in] pTis ã®è¦ç´ æ•°
+	int* pDst //!< [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 );
 
-// ‹@”\ : üŒ`•ÏŠ·Œãint‚É•ÏŠ·‚ğs‚¤
-//        o—Í‚Ì pDst ‚Í POINT \‘¢‘Ì(8ƒoƒCƒg)‚Ì”z—ñ‚ÆŒ©‚È‚µAæ“ª4ƒoƒCƒg‚É’l‚ğ‘‚«‚İc‚è‚Ì4ƒoƒCƒg‚Í‚»‚Ì‚Ü‚Üc‚·
+// æ©Ÿèƒ½ : ç·šå½¢å¤‰æ›å¾Œintã«å¤‰æ›ã‚’è¡Œã†
+//        å‡ºåŠ›ã® pDst ã¯ POINT æ§‹é€ ä½“(8ãƒã‚¤ãƒˆ)ã®é…åˆ—ã¨è¦‹ãªã—ã€å…ˆé ­4ãƒã‚¤ãƒˆã«å€¤ã‚’æ›¸ãè¾¼ã¿æ®‹ã‚Šã®4ãƒã‚¤ãƒˆã¯ãã®ã¾ã¾æ®‹ã™
 //
 JUNKAPI void JUNKCALL TransformLinToInt2(
-	const double* pSrc, //!< [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	double scale, //!< [in] ƒXƒP[ƒŠƒ“ƒO’l
-	double translate, //!< [in] •½sˆÚ“®’l
-	int* pDst //!< [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const double* pSrc, //!< [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scale, //!< [in] ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translate, //!< [in] å¹³è¡Œç§»å‹•å€¤
+	int* pDst //!< [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 );
 
-// ‹@”\ : ”ñüŒ`•ÏŠ·(Log,Pow)Œãint‚É•ÏŠ·‚ğs‚¤
-//        o—Í‚Ì pDst ‚Í POINT \‘¢‘Ì(8ƒoƒCƒg)‚Ì”z—ñ‚ÆŒ©‚È‚µAæ“ª4ƒoƒCƒg‚É’l‚ğ‘‚«‚İc‚è‚Ì4ƒoƒCƒg‚Í‚»‚Ì‚Ü‚Üc‚·
+// æ©Ÿèƒ½ : éç·šå½¢å¤‰æ›(Log,Pow)å¾Œintã«å¤‰æ›ã‚’è¡Œã†
+//        å‡ºåŠ›ã® pDst ã¯ POINT æ§‹é€ ä½“(8ãƒã‚¤ãƒˆ)ã®é…åˆ—ã¨è¦‹ãªã—ã€å…ˆé ­4ãƒã‚¤ãƒˆã«å€¤ã‚’æ›¸ãè¾¼ã¿æ®‹ã‚Šã®4ãƒã‚¤ãƒˆã¯ãã®ã¾ã¾æ®‹ã™
 //
 JUNKAPI void JUNKCALL TransformNonLinToInt2(
-	const double* pSrc, //!< [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	const TransformInfo* pTis, //!< [in] •ÏŠ·î•ñ”z—ñ
-	intptr_t nTransform, //!< [in] pTis ‚Ì—v‘f”
-	int* pDst //!< [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const double* pSrc, //!< [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	const TransformInfo* pTis, //!< [in] å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTransform, //!< [in] pTis ã®è¦ç´ æ•°
+	int* pDst //!< [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 );
 
-// ‹@”\ : double Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚ğó‚¯æ‚èA•ÏŠ·‚µ‚Ä int Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚Éo—Í‚·‚é
+// æ©Ÿèƒ½ : double å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã‚’å—ã‘å–ã‚Šã€å¤‰æ›ã—ã¦ int å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã«å‡ºåŠ›ã™ã‚‹
 //
 JUNKAPI void JUNKCALL TransformLinPointDToPointI(
-	const Vector2d* pSrc, //!< [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	double scaleX, //!< [in] XÀ•WƒXƒP[ƒŠƒ“ƒO’l
-	double translateX, //!< [in] XÀ•W•½sˆÚ“®’l
-	double scaleY, //!< [in] YÀ•WƒXƒP[ƒŠƒ“ƒO’l
-	double translateY, //!< [in] YÀ•W•½sˆÚ“®’l
-	Vector2i* pDst //!< [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const Vector2d* pSrc, //!< [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scaleX, //!< [in] Xåº§æ¨™ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translateX, //!< [in] Xåº§æ¨™å¹³è¡Œç§»å‹•å€¤
+	double scaleY, //!< [in] Yåº§æ¨™ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translateY, //!< [in] Yåº§æ¨™å¹³è¡Œç§»å‹•å€¤
+	Vector2i* pDst //!< [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 );
 
-// ‹@”\ : ”ñüŒ`•ÏŠ·(Log,Pow)Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : éç·šå½¢å¤‰æ›(Log,Pow)å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
 JUNKAPI void JUNKCALL TransformNonLinPointDToPointI(
-	const Vector2d* pSrc, //!< [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	const TransformInfo* pTisX, //!< [in] XÀ•W•ÏŠ·î•ñ”z—ñ
-	intptr_t nTransformX, //!< [in] pTisX ‚Ì—v‘f”
-	const TransformInfo* pTisY, //!< [in] YÀ•W•ÏŠ·î•ñ”z—ñ
-	intptr_t nTransformY, //!< [in] pTisY ‚Ì—v‘f”
-	Vector2i* pDst //!< [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const Vector2d* pSrc, //!< [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	const TransformInfo* pTisX, //!< [in] Xåº§æ¨™å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTransformX, //!< [in] pTisX ã®è¦ç´ æ•°
+	const TransformInfo* pTisY, //!< [in] Yåº§æ¨™å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTransformY, //!< [in] pTisY ã®è¦ç´ æ•°
+	Vector2i* pDst //!< [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 );
 
-// ‹@”\ : •`‰æ—p‚É®”À•W‚É•ÏŠ·‚·‚éA“¯‚¶À•W‚É–³‘Ê‚È•`‰æ‚ğs‚í‚È‚¢‚æ‚¤‚É•ÏŠ·‚·‚é
+// æ©Ÿèƒ½ : æç”»ç”¨ã«æ•´æ•°åº§æ¨™ã«å¤‰æ›ã™ã‚‹ã€åŒã˜åº§æ¨™ã«ç„¡é§„ãªæç”»ã‚’è¡Œã‚ãªã„ã‚ˆã†ã«å¤‰æ›ã™ã‚‹
 //
-// •Ô‚è’l : •ÏŠ·Œã‚Ìƒf[ƒ^”A•‰”‚ª•Ô‚ê‚ÎƒGƒ‰[
-//		-1=ƒƒ‚ƒŠ•s‘«
+// è¿”ã‚Šå€¤ : å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿æ•°ã€è² æ•°ãŒè¿”ã‚Œã°ã‚¨ãƒ©ãƒ¼
+//		-1=ãƒ¡ãƒ¢ãƒªä¸è¶³
 //
 JUNKAPI intptr_t JUNKCALL TransformForDraw(
-	const TransformInfo* pTisX, //!< [in] X²•ÏŠ·î•ñ”z—ñ
-	intptr_t nTisX, //!< [in] pTisX ‚Ì—v‘f”
-	const TransformInfo* pTisY, //!< [in] Y²•ÏŠ·î•ñ”z—ñ
-	intptr_t nTisY, //!< [in] pTisY ‚Ì—v‘f”
-	const double* pSrcY, //!< [in] •ÏŠ·Œ³‚ÌY²’lƒf[ƒ^
-	intptr_t iStartIndexX, //!< [in] X²’lŒvZ—p‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	Vector2i* pDst //!< [out] •ÏŠ·Œã‚ÌXY’lƒf[ƒ^A•K—v‚È—v‘f”‚ÍÀ•W•ÏŠ·Œã‚Ì’l‚É‚æ‚èˆÙ‚È‚éAÀ•W•ÏŠ·Œã‚ÌX’l”ÍˆÍ*4+4’ö“x•K—v
+	const TransformInfo* pTisX, //!< [in] Xè»¸å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTisX, //!< [in] pTisX ã®è¦ç´ æ•°
+	const TransformInfo* pTisY, //!< [in] Yè»¸å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTisY, //!< [in] pTisY ã®è¦ç´ æ•°
+	const double* pSrcY, //!< [in] å¤‰æ›å…ƒã®Yè»¸å€¤ãƒ‡ãƒ¼ã‚¿
+	intptr_t iStartIndexX, //!< [in] Xè»¸å€¤è¨ˆç®—ç”¨ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	Vector2i* pDst //!< [out] å¤‰æ›å¾Œã®XYå€¤ãƒ‡ãƒ¼ã‚¿ã€å¿…è¦ãªè¦ç´ æ•°ã¯åº§æ¨™å¤‰æ›å¾Œã®å€¤ã«ã‚ˆã‚Šç•°ãªã‚‹ã€åº§æ¨™å¤‰æ›å¾Œã®Xå€¤ç¯„å›²*4+4ç¨‹åº¦å¿…è¦
 );
 
-// ‹@”\ : •`‰æ—p‚É®”À•W‚É•ÏŠ·‚·‚éA“¯‚¶À•W‚É–³‘Ê‚È•`‰æ‚ğs‚í‚È‚¢‚æ‚¤‚É•ÏŠ·‚·‚é(ƒŠƒ“ƒOƒoƒbƒtƒ@”Å)
-//	Y²’lƒf[ƒ^‚Í pSrcY + iStartIndexY ‚©‚çæ“¾ŠJn‚³‚êApSrcY + nSrcYBufLen ‚ğ’´‚¦‚½‚ç pSrcY ‚É–ß‚Á‚Äæ“¾‚ª‘±‚¯‚ç‚ê‚é
+// æ©Ÿèƒ½ : æç”»ç”¨ã«æ•´æ•°åº§æ¨™ã«å¤‰æ›ã™ã‚‹ã€åŒã˜åº§æ¨™ã«ç„¡é§„ãªæç”»ã‚’è¡Œã‚ãªã„ã‚ˆã†ã«å¤‰æ›ã™ã‚‹(ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡ç‰ˆ)
+//	Yè»¸å€¤ãƒ‡ãƒ¼ã‚¿ã¯ pSrcY + iStartIndexY ã‹ã‚‰å–å¾—é–‹å§‹ã•ã‚Œã€pSrcY + nSrcYBufLen ã‚’è¶…ãˆãŸã‚‰ pSrcY ã«æˆ»ã£ã¦å–å¾—ãŒç¶šã‘ã‚‰ã‚Œã‚‹
 //
-// •Ô‚è’l : •ÏŠ·Œã‚Ìƒf[ƒ^”A•‰”‚ª•Ô‚ê‚ÎƒGƒ‰[
-//		-1=ƒƒ‚ƒŠ•s‘«
+// è¿”ã‚Šå€¤ : å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿æ•°ã€è² æ•°ãŒè¿”ã‚Œã°ã‚¨ãƒ©ãƒ¼
+//		-1=ãƒ¡ãƒ¢ãƒªä¸è¶³
 //
 JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
-	const TransformInfo* pTisX, //!< [in] X²•ÏŠ·î•ñ”z—ñ
-	intptr_t nTisX, //!< [in] pTisX ‚Ì—v‘f”
-	const TransformInfo* pTisY, //!< [in] Y²•ÏŠ·î•ñ”z—ñ
-	intptr_t nTisY, //!< [in] pTisY ‚Ì—v‘f”
-	const double* pSrcY, //!< [in] •ÏŠ·Œ³‚ÌY²’lƒf[ƒ^(Y²ƒf[ƒ^ƒoƒbƒtƒ@‚Ìæ“ªƒAƒhƒŒƒX)
-	intptr_t nSrcYBufLen, //!< [in] pSrcY ‚Ìƒoƒbƒtƒ@‚ÌƒTƒCƒY(ƒf[ƒ^”)
-	intptr_t iStartIndexX, //!< [in] X²’lŒvZ—p‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-	intptr_t iStartIndexY, //!< [in] Y²’lŒvZ—p‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	Vector2i* pDst //!< [out] •ÏŠ·Œã‚ÌXY’lƒf[ƒ^A•K—v‚È—v‘f”‚ÍÀ•W•ÏŠ·Œã‚Ì’l‚É‚æ‚èˆÙ‚È‚éAÀ•W•ÏŠ·Œã‚ÌX’l”ÍˆÍ*4+4’ö“x•K—v
+	const TransformInfo* pTisX, //!< [in] Xè»¸å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTisX, //!< [in] pTisX ã®è¦ç´ æ•°
+	const TransformInfo* pTisY, //!< [in] Yè»¸å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTisY, //!< [in] pTisY ã®è¦ç´ æ•°
+	const double* pSrcY, //!< [in] å¤‰æ›å…ƒã®Yè»¸å€¤ãƒ‡ãƒ¼ã‚¿(Yè»¸ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã®å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹)
+	intptr_t nSrcYBufLen, //!< [in] pSrcY ã®ãƒãƒƒãƒ•ã‚¡ã®ã‚µã‚¤ã‚º(ãƒ‡ãƒ¼ã‚¿æ•°)
+	intptr_t iStartIndexX, //!< [in] Xè»¸å€¤è¨ˆç®—ç”¨ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+	intptr_t iStartIndexY, //!< [in] Yè»¸å€¤è¨ˆç®—ç”¨ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	Vector2i* pDst //!< [out] å¤‰æ›å¾Œã®XYå€¤ãƒ‡ãƒ¼ã‚¿ã€å¿…è¦ãªè¦ç´ æ•°ã¯åº§æ¨™å¤‰æ›å¾Œã®å€¤ã«ã‚ˆã‚Šç•°ãªã‚‹ã€åº§æ¨™å¤‰æ›å¾Œã®Xå€¤ç¯„å›²*4+4ç¨‹åº¦å¿…è¦
 );
 
-// ‹@”\ : •¡”’¸“_‚Å\¬‚³‚ê‚éƒ‰ƒCƒ“‚Æw’èƒ|ƒCƒ“ƒg‚Æ‚ÌÚG”»’è‚ğs‚¤
+// æ©Ÿèƒ½ : è¤‡æ•°é ‚ç‚¹ã§æ§‹æˆã•ã‚Œã‚‹ãƒ©ã‚¤ãƒ³ã¨æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã¨ã®æ¥è§¦åˆ¤å®šã‚’è¡Œã†
 //
-// –ß‚è’l: ÚG‚µ‚Ä‚¢‚é‚È‚çÚG’¸“_”Ô†‚ª•Ô‚éA‚»‚êˆÈŠO‚Í•‰”‚ª•Ô‚é
+// æˆ»ã‚Šå€¤: æ¥è§¦ã—ã¦ã„ã‚‹ãªã‚‰æ¥è§¦é ‚ç‚¹ç•ªå·ãŒè¿”ã‚‹ã€ãã‚Œä»¥å¤–ã¯è² æ•°ãŒè¿”ã‚‹
 //
 JUNKAPI intptr_t JUNKCALL HitTestPointAndPolyline(
-	const Vector2d* vts, //!< [in] ’¸“_”z—ñæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t count, //!< [in] ’¸“_”
-	Vector2d pt, //!< [in] ÚG”»’èƒ|ƒCƒ“ƒgÀ•W
-	double vertexRadius, //!< [in] ’¸“_‚Ì”¼Œa
-	double edgeThickness, //!< [in] •Ó‚Ì‘¾‚³
-	double& t, //!< [out] •Ó‚ÆÚG‚µ‚½Û‚Ìƒpƒ‰ƒ[ƒ^ t ‚ª•Ô‚é(0 ‚È‚ç–ß‚è’l‚Ì’¸“_A1‚È‚çŸ‚Ì’¸“_)
-	Vector2d& pointOnEdge //!< [out] ÚG‚µ‚½•Ó‚ÌÅ‹ß“_À•W‚ª•Ô‚é
+	const Vector2d* vts, //!< [in] é ‚ç‚¹é…åˆ—å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t count, //!< [in] é ‚ç‚¹æ•°
+	Vector2d pt, //!< [in] æ¥è§¦åˆ¤å®šãƒã‚¤ãƒ³ãƒˆåº§æ¨™
+	double vertexRadius, //!< [in] é ‚ç‚¹ã®åŠå¾„
+	double edgeThickness, //!< [in] è¾ºã®å¤ªã•
+	double& t, //!< [out] è¾ºã¨æ¥è§¦ã—ãŸéš›ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ t ãŒè¿”ã‚‹(0 ãªã‚‰æˆ»ã‚Šå€¤ã®é ‚ç‚¹ã€1ãªã‚‰æ¬¡ã®é ‚ç‚¹)
+	Vector2d& pointOnEdge //!< [out] æ¥è§¦ã—ãŸè¾ºã®æœ€è¿‘ç‚¹åº§æ¨™ãŒè¿”ã‚‹
 );
 
-// ‹@”\ : •¡”’¸“_‚Å\¬‚³‚ê‚éƒ‰ƒCƒ“‚Ì‘S‚Ä‚Ì•Ó‚Ì’·‚³‚Ì‡Œv‚ğŒvZ‚·‚é
+// æ©Ÿèƒ½ : è¤‡æ•°é ‚ç‚¹ã§æ§‹æˆã•ã‚Œã‚‹ãƒ©ã‚¤ãƒ³ã®å…¨ã¦ã®è¾ºã®é•·ã•ã®åˆè¨ˆã‚’è¨ˆç®—ã™ã‚‹
 //
-// –ß‚è’l: ’·‚³
+// æˆ»ã‚Šå€¤: é•·ã•
 //
 JUNKAPI double JUNKCALL PolylineLength(
-	const Vector2d* vts, //!< [in] ’¸“_”z—ñæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t count //!< [in] ’¸“_”
+	const Vector2d* vts, //!< [in] é ‚ç‚¹é…åˆ—å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t count //!< [in] é ‚ç‚¹æ•°
 );
 
 
 //==============================================================================
-//		À•W•ÏŠ·—p\‘¢‘ÌéŒ¾
+//		åº§æ¨™å¤‰æ›ç”¨æ§‹é€ ä½“å®£è¨€
 //==============================================================================
 
 #undef max
@@ -486,27 +486,27 @@ JUNKAPI double JUNKCALL PolylineLength(
 
 #pragma pack(push,1)
 
-struct TransformLinear // üŒ`À•W•ÏŠ·\‘¢‘Ì
+struct TransformLinear // ç·šå½¢åº§æ¨™å¤‰æ›æ§‹é€ ä½“
 {
-	double Scale; // ƒXƒP[ƒŠƒ“ƒO’l
-	double Translate; // ƒXƒP[ƒŠƒ“ƒOŒã‚ÌˆÚ“®—Ê
+	double Scale; // ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double Translate; // ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å¾Œã®ç§»å‹•é‡
 
-	TransformLinear() // ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	TransformLinear() // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	{
 	}
 
-	TransformLinear(const TransformLinear& c) // ƒRƒs[ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	TransformLinear(const TransformLinear& c) // ã‚³ãƒ”ãƒ¼ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	{
 		*this = c;
 	}
 
-	TransformLinear(double s, double t) // ƒRƒ“ƒXƒgƒ‰ƒNƒ^@ƒXƒP[ƒŠƒ“ƒO’l‚ÆˆÚ“®’l‚ğw’è‚µ‚Ä‰Šú‰»
+	TransformLinear(double s, double t) // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€€ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤ã¨ç§»å‹•å€¤ã‚’æŒ‡å®šã—ã¦åˆæœŸåŒ–
 	{
 		Scale = s;
 		Translate = t;
 	}
 
-	TransformLinear(const RangeD& src, const RangeD& dst) // ƒRƒ“ƒXƒgƒ‰ƒNƒ^Aw’è‚³‚ê‚½”ÍˆÍ‚ğw’è‚³‚ê‚½”ÍˆÍ‚Öƒ}ƒbƒsƒ“ƒO‚·‚é‰Šú‰»
+	TransformLinear(const RangeD& src, const RangeD& dst) // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€æŒ‡å®šã•ã‚ŒãŸç¯„å›²ã‚’æŒ‡å®šã•ã‚ŒãŸç¯„å›²ã¸ãƒãƒƒãƒ”ãƒ³ã‚°ã™ã‚‹åˆæœŸåŒ–
 	{
 		double s = src.Size();
 		if (s != 0.0) {
@@ -518,27 +518,27 @@ struct TransformLinear // üŒ`À•W•ÏŠ·\‘¢‘Ì
 		}
 	}
 
-	double Cnv(double val) const // ³•ûŒü‚Å•ÏŠ·
+	double Cnv(double val) const // æ­£æ–¹å‘ã§å¤‰æ›
 	{
 		return val * Scale + Translate;
 	}
 
-	double InvCnv(double val) const // ‹t•ûŒü‚Å•ÏŠ·
+	double InvCnv(double val) const // é€†æ–¹å‘ã§å¤‰æ›
 	{
 		return (val - Translate) / Scale;
 	}
 
-	void Cnv(const double* pSrcArray, double* pDstArray, intptr_t num) // w’è”z—ñ“à‚Ì•¡”ƒf[ƒ^‚ÌÀ•W•ÏŠ·‚ğs‚¤
+	void Cnv(const double* pSrcArray, double* pDstArray, intptr_t num) // æŒ‡å®šé…åˆ—å†…ã®è¤‡æ•°ãƒ‡ãƒ¼ã‚¿ã®åº§æ¨™å¤‰æ›ã‚’è¡Œã†
 	{
 		TransformLin(pSrcArray, num, Scale, Translate, pDstArray);
 	}
 
-	void Cnv(const double* pSrcArray, int* pDstArray, intptr_t num) // w’è”z—ñ“à‚Ì•¡”ƒf[ƒ^‚ÌÀ•W•ÏŠ·‚ğs‚¤
+	void Cnv(const double* pSrcArray, int* pDstArray, intptr_t num) // æŒ‡å®šé…åˆ—å†…ã®è¤‡æ•°ãƒ‡ãƒ¼ã‚¿ã®åº§æ¨™å¤‰æ›ã‚’è¡Œã†
 	{
 		TransformLinInt(pSrcArray, num, Scale, Translate, pDstArray);
 	}
 
-	void Cnv(const double* pSrcArray, Vector2i* pDstArray, BOOL convertY, intptr_t num) // w’è”z—ñ“à‚Ì•¡”ƒf[ƒ^‚ÌÀ•W•ÏŠ·‚ğs‚¤A•ÏŠ·Œãƒf[ƒ^‚Í pDstArray ‚ÉŠi”[‚³‚ê‚é(convertY ‚ª0‚È‚ç x ‚ÉA‚»‚êˆÈŠO‚È‚ç yj
+	void Cnv(const double* pSrcArray, Vector2i* pDstArray, BOOL convertY, intptr_t num) // æŒ‡å®šé…åˆ—å†…ã®è¤‡æ•°ãƒ‡ãƒ¼ã‚¿ã®åº§æ¨™å¤‰æ›ã‚’è¡Œã†ã€å¤‰æ›å¾Œãƒ‡ãƒ¼ã‚¿ã¯ pDstArray ã«æ ¼ç´ã•ã‚Œã‚‹(convertY ãŒ0ãªã‚‰ x ã«ã€ãã‚Œä»¥å¤–ãªã‚‰ yï¼‰
 	{
 		int* pDst = (int*)pDstArray;
 		if (convertY)
@@ -546,74 +546,74 @@ struct TransformLinear // üŒ`À•W•ÏŠ·\‘¢‘Ì
 		TransformLinToInt2(pSrcArray, num, Scale, Translate, pDst);
 	}
 
-	TransformLinear Multiply(const TransformLinear& transform) const // •ÏŠ·‚ğ‡¬
+	TransformLinear Multiply(const TransformLinear& transform) const // å¤‰æ›ã‚’åˆæˆ
 	{
 		return TransformLinear(Scale * transform.Scale, Translate * transform.Scale + transform.Translate);
 	}
 
-	TransformLinear Invert() const // ‹t•ÏŠ·‚ğì¬
+	TransformLinear Invert() const // é€†å¤‰æ›ã‚’ä½œæˆ
 	{
 		return TransformLinear(1.0 / Scale, -Translate / Scale);
 	}
 
-	BOOL operator!=(const TransformLinear& c) const // “à—e‚Ì•sˆê’v‚Ìƒ`ƒFƒbƒN
+	BOOL operator!=(const TransformLinear& c) const // å†…å®¹ã®ä¸ä¸€è‡´ã®ãƒã‚§ãƒƒã‚¯
 	{
 		return Scale != c.Scale || Translate != c.Translate;
 	}
 };
 
-struct TransformInfo // Transform \‘¢‘Ì“à‚Åg—p‚³‚ê‚é‚P‰ñ‚ÌÀ•W•ÏŠ·î•ñ
+struct TransformInfo // Transform æ§‹é€ ä½“å†…ã§ä½¿ç”¨ã•ã‚Œã‚‹ï¼‘å›ã®åº§æ¨™å¤‰æ›æƒ…å ±
 {
-	int LogBeforeLinear; // ƒŠƒjƒA•ÏŠ·‚Ì‘O‚É log10 ‚ğÀs‚·‚é‚©‚Ç‚¤‚©
-	int PowAfterLinear; // ƒŠƒjƒA•ÏŠ·‚ÌÕ‚É pow10 ‚ğÀs‚·‚é‚©‚Ç‚¤‚©
-	TransformLinear Transform; // ƒŠƒjƒAÀ•W•ÏŠ·\‘¢‘Ì
+	int LogBeforeLinear; // ãƒªãƒ‹ã‚¢å¤‰æ›ã®å‰ã« log10 ã‚’å®Ÿè¡Œã™ã‚‹ã‹ã©ã†ã‹
+	int PowAfterLinear; // ãƒªãƒ‹ã‚¢å¤‰æ›ã®è·¡ã« pow10 ã‚’å®Ÿè¡Œã™ã‚‹ã‹ã©ã†ã‹
+	TransformLinear Transform; // ãƒªãƒ‹ã‚¢åº§æ¨™å¤‰æ›æ§‹é€ ä½“
 
-	TransformInfo() // ƒfƒtƒHƒ‹ƒgƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	TransformInfo() // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	{
 	}
 
-	TransformInfo(int lbl, int pal, const TransformLinear& tf) // ƒRƒ“ƒXƒgƒ‰ƒNƒ^A’l‚ğw’è‚µ‚Ä‰Šú‰»‚·‚é
+	TransformInfo(int lbl, int pal, const TransformLinear& tf) // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€å€¤ã‚’æŒ‡å®šã—ã¦åˆæœŸåŒ–ã™ã‚‹
 	{
 		LogBeforeLinear = lbl;
 		PowAfterLinear = pal;
 		Transform = tf;
 	}
 
-	TransformInfo Invert() const // ‹t•ÏŠ·‚ğì¬‚·‚é
+	TransformInfo Invert() const // é€†å¤‰æ›ã‚’ä½œæˆã™ã‚‹
 	{
 		return TransformInfo(PowAfterLinear, LogBeforeLinear, Transform.Invert());
 	}
 };
 
-//! À•W•ÏŠ·ƒNƒ‰ƒXA”ñüŒ`‚Ì•ÏŠ·(ƒƒO)‚àŠÜ‚Ş
+//! åº§æ¨™å¤‰æ›ã‚¯ãƒ©ã‚¹ã€éç·šå½¢ã®å¤‰æ›(ãƒ­ã‚°)ã‚‚å«ã‚€
 struct Transform 
 {
-	std::vector<TransformInfo> TransformInfos; // À•W•ÏŠ·î•ñ”z—ñAƒƒO‚ğŠÜ‚Şê‡‚Í‘S‚Ä‚Ì•ÏŠ·‚ğ‚P‚Â‚Ì TransformLinear ‚É‡¬‚·‚é‚±‚Æ‚Í‚Å‚«‚È‚¢‚½‚ß”z—ñ‚Æ‚È‚Á‚Ä‚¢‚éA0”Ô–Ú‚Ì—v‘f‚©‚ç‡‚É•ÏŠ·‚ğs‚¤
-	double MinVal; // Cnv ƒƒ\ƒbƒh‚Å•ÏŠ·‰Â”\‚ÈÅ¬’lALog •ÏŠ·‚Ég—p‚·‚é
+	std::vector<TransformInfo> TransformInfos; // åº§æ¨™å¤‰æ›æƒ…å ±é…åˆ—ã€ãƒ­ã‚°ã‚’å«ã‚€å ´åˆã¯å…¨ã¦ã®å¤‰æ›ã‚’ï¼‘ã¤ã® TransformLinear ã«åˆæˆã™ã‚‹ã“ã¨ã¯ã§ããªã„ãŸã‚é…åˆ—ã¨ãªã£ã¦ã„ã‚‹ã€0ç•ªç›®ã®è¦ç´ ã‹ã‚‰é †ã«å¤‰æ›ã‚’è¡Œã†
+	double MinVal; // Cnv ãƒ¡ã‚½ãƒƒãƒ‰ã§å¤‰æ›å¯èƒ½ãªæœ€å°å€¤ã€Log å¤‰æ›æ™‚ã«ä½¿ç”¨ã™ã‚‹
 
-	Transform() // ƒfƒtƒHƒ‹ƒgƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	Transform() // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	{
 	}
 
-	Transform(intptr_t tiCount, const TransformInfo* pTis, double minVal) // ƒRƒ“ƒXƒgƒ‰ƒNƒ^A•ÏŠ·î•ñ”z—ñ‚ğw’è‚µ‚Ä‰Šú‰»‚·‚é
+	Transform(intptr_t tiCount, const TransformInfo* pTis, double minVal) // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€å¤‰æ›æƒ…å ±é…åˆ—ã‚’æŒ‡å®šã—ã¦åˆæœŸåŒ–ã™ã‚‹
 	{
 		TransformInfos.insert(TransformInfos.end(), pTis, pTis + tiCount);
 		MinVal = DBL_MIN;
 	}
 
-	Transform(const std::vector<TransformInfo>& tis, double minVal) // ƒRƒ“ƒXƒgƒ‰ƒNƒ^A•ÏŠ·î•ñ”z—ñ‚ğw’è‚µ‚Ä‰Šú‰»‚·‚é
+	Transform(const std::vector<TransformInfo>& tis, double minVal) // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€å¤‰æ›æƒ…å ±é…åˆ—ã‚’æŒ‡å®šã—ã¦åˆæœŸåŒ–ã™ã‚‹
 	{
 		TransformInfos.insert(TransformInfos.end(), tis.begin(), tis.end());
 		MinVal = DBL_MIN;
 	}
 
-	Transform(double scale, double translate) // ƒRƒ“ƒXƒgƒ‰ƒNƒ^AkÚ‚ÆˆÚ“®—Ê‚ğw’è‚µ‚Ä‰Šú‰»‚·‚é
+	Transform(double scale, double translate) // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€ç¸®å°ºã¨ç§»å‹•é‡ã‚’æŒ‡å®šã—ã¦åˆæœŸåŒ–ã™ã‚‹
 	{
 		TransformInfos.push_back(TransformInfo(FALSE, FALSE, TransformLinear(scale, translate)));
 		MinVal = DBL_MIN;
 	}
 
-	Transform(RangeD rangeBefore, RangeD rangeAfter, BOOL log) // ƒRƒ“ƒXƒgƒ‰ƒNƒ^A•ÏŠ·‘O‚Æ•ÏŠ·Œã‚Ì”ÍˆÍ‚ÆƒƒOƒtƒ‰ƒO‚ğw’è‚µ‚Ä‰Šú‰»‚·‚é
+	Transform(RangeD rangeBefore, RangeD rangeAfter, BOOL log) // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€å¤‰æ›å‰ã¨å¤‰æ›å¾Œã®ç¯„å›²ã¨ãƒ­ã‚°ãƒ•ãƒ©ã‚°ã‚’æŒ‡å®šã—ã¦åˆæœŸåŒ–ã™ã‚‹
 	{
 		if (log) {
 			MinVal = rangeBefore.S;
@@ -630,7 +630,7 @@ struct Transform
 		}
 	}
 
-	double Cnv(double val) const // À•W•ÏŠ·‚ğs‚¤
+	double Cnv(double val) const // åº§æ¨™å¤‰æ›ã‚’è¡Œã†
 	{
 		for (intptr_t i = 0, n = TransformInfos.size(); i < n; i++) {
 			const TransformInfo& ti = TransformInfos[i];
@@ -643,7 +643,7 @@ struct Transform
 		return val;
 	}
 
-	double InvCnv(double val) const // ‹tÀ•W•ÏŠ·‚ğs‚¤
+	double InvCnv(double val) const // é€†åº§æ¨™å¤‰æ›ã‚’è¡Œã†
 	{
 		for (intptr_t i = TransformInfos.size() - 1; 0 <= i; i--) {
 			const TransformInfo& ti = TransformInfos[i];
@@ -656,17 +656,17 @@ struct Transform
 		return val;
 	}
 
-	void Cnv(const double* pSrcArray, double* pDstArray, intptr_t num) // w’è”z—ñ“à‚Ì•¡”ƒf[ƒ^‚ÌÀ•W•ÏŠ·‚ğs‚¤
+	void Cnv(const double* pSrcArray, double* pDstArray, intptr_t num) // æŒ‡å®šé…åˆ—å†…ã®è¤‡æ•°ãƒ‡ãƒ¼ã‚¿ã®åº§æ¨™å¤‰æ›ã‚’è¡Œã†
 	{
 		TransformNonLin(pSrcArray, num, &TransformInfos[0], TransformInfos.size(), pDstArray);
 	}
 
-	void Cnv(const double* pSrcArray, int* pDstArray, intptr_t num) // w’è”z—ñ“à‚Ì•¡”ƒf[ƒ^‚ÌÀ•W•ÏŠ·‚ğs‚¤
+	void Cnv(const double* pSrcArray, int* pDstArray, intptr_t num) // æŒ‡å®šé…åˆ—å†…ã®è¤‡æ•°ãƒ‡ãƒ¼ã‚¿ã®åº§æ¨™å¤‰æ›ã‚’è¡Œã†
 	{
 		TransformNonLinInt(pSrcArray, num, &TransformInfos[0], TransformInfos.size(), pDstArray);
 	}
 
-	void Cnv(const double* pSrcArray, Vector2i* pDstArray, BOOL convertY, intptr_t num) // w’è”z—ñ“à‚Ì•¡”ƒf[ƒ^‚ÌÀ•W•ÏŠ·‚ğs‚¤A•ÏŠ·Œãƒf[ƒ^‚Í pDstArray ‚ÉŠi”[‚³‚ê‚é(convertY ‚ª0‚È‚ç x ‚ÉA‚»‚êˆÈŠO‚È‚ç yj
+	void Cnv(const double* pSrcArray, Vector2i* pDstArray, BOOL convertY, intptr_t num) // æŒ‡å®šé…åˆ—å†…ã®è¤‡æ•°ãƒ‡ãƒ¼ã‚¿ã®åº§æ¨™å¤‰æ›ã‚’è¡Œã†ã€å¤‰æ›å¾Œãƒ‡ãƒ¼ã‚¿ã¯ pDstArray ã«æ ¼ç´ã•ã‚Œã‚‹(convertY ãŒ0ãªã‚‰ x ã«ã€ãã‚Œä»¥å¤–ãªã‚‰ yï¼‰
 	{
 		int* pDst = (int*)pDstArray;
 		if (convertY)
@@ -674,9 +674,9 @@ struct Transform
 		TransformNonLinToInt2(pSrcArray, num, &TransformInfos[0], TransformInfos.size(), pDst);
 	}
 
-	Transform Multiply(const Transform& transform) const // À•W•ÏŠ·‚ğ‡¬‚·‚éA•ÏŠ·‚Ì‡”Ô‚Í this ¨ transform
+	Transform Multiply(const Transform& transform) const // åº§æ¨™å¤‰æ›ã‚’åˆæˆã™ã‚‹ã€å¤‰æ›ã®é †ç•ªã¯ this â†’ transform
 	{
-		//	À•W•ÏŠ·î•ñ”z—ñ‚ğŒ‹‡
+		//	åº§æ¨™å¤‰æ›æƒ…å ±é…åˆ—ã‚’çµåˆ
 		std::vector<TransformInfo> tis;
 		const std::vector<TransformInfo>& tis2 = transform.TransformInfos;
 		tis.insert(tis.end(), TransformInfos.begin(), TransformInfos.end());
@@ -684,12 +684,12 @@ struct Transform
 			TransformInfo& ti1 = tis[tis.size() - 1];
 			const TransformInfo& ti2 = tis2[i];
 			if (ti1.PowAfterLinear == ti2.LogBeforeLinear) {
-				//	‹«–Ú‚É Pow10 ‚Æ Log10 —¼•û‚ª‘¶İ‚µ‚Ä‚¢‚é‚©—¼•û‘¶İ‚µ‚È‚¢ê‡
-				//	‚±‚Ìê‡‚ÍƒŠƒjƒA•ÏŠ·‚ğ‡¬‚Å‚«‚é
+				//	å¢ƒç›®ã« Pow10 ã¨ Log10 ä¸¡æ–¹ãŒå­˜åœ¨ã—ã¦ã„ã‚‹ã‹ä¸¡æ–¹å­˜åœ¨ã—ãªã„å ´åˆ
+				//	ã“ã®å ´åˆã¯ãƒªãƒ‹ã‚¢å¤‰æ›ã‚’åˆæˆã§ãã‚‹
 				tis[tis.size() - 1] = TransformInfo(ti1.LogBeforeLinear, ti2.PowAfterLinear, ti1.Transform.Multiply(ti2.Transform));
 			} else {
-				//	‹«–Ú‚É Pow10 ‚© Log10 ‚Ì‚Ç‚¿‚ç‚©‚ª‘¶İ‚·‚éê‡
-				//	‚±‚Ìê‡‚ÍƒŠƒjƒA•ÏŠ·‚ğ‡¬‚Å‚«‚È‚¢
+				//	å¢ƒç›®ã« Pow10 ã‹ Log10 ã®ã©ã¡ã‚‰ã‹ãŒå­˜åœ¨ã™ã‚‹å ´åˆ
+				//	ã“ã®å ´åˆã¯ãƒªãƒ‹ã‚¢å¤‰æ›ã‚’åˆæˆã§ããªã„
 				tis.push_back(ti2);
 			}
 		}
@@ -697,7 +697,7 @@ struct Transform
 		return Transform(tis, std::max(MinVal, transform.MinVal));
 	}
 
-	Transform Invert() const // ‹t•ÏŠ·‚ğì¬‚·‚é
+	Transform Invert() const // é€†å¤‰æ›ã‚’ä½œæˆã™ã‚‹
 	{
 		Transform tf;
 		intptr_t n = TransformInfos.size();
@@ -708,42 +708,42 @@ struct Transform
 		return tf;
 	}
 
-	_FINLINE static double Log10(double val) // ‚±‚ÌÀ•W•ÏŠ·ˆ—ê—p‚Ì Log10
+	_FINLINE static double Log10(double val) // ã“ã®åº§æ¨™å¤‰æ›å‡¦ç†å°‚ç”¨ã® Log10
 	{
 		if (val == 0.0)
 			return 0.0;
 		if (0.0 < val)
 			return log10(val);
 		else
-			return -log10(-val); // •’Ê‚±‚ñ‚ÈŒvZ‚È‚¢‚ªA‚È‚ñ‚Æ‚µ‚Ä‚Å‚àƒOƒ‰ƒt‚Å•\¦‚·‚é
+			return -log10(-val); // æ™®é€šã“ã‚“ãªè¨ˆç®—ãªã„ãŒã€ãªã‚“ã¨ã—ã¦ã§ã‚‚ã‚°ãƒ©ãƒ•ã§è¡¨ç¤ºã™ã‚‹
 	}
 
-	_FINLINE static double Pow10(double val) // ‚±‚ÌÀ•W•ÏŠ·ˆ—ê—p‚Ì Pow10
+	_FINLINE static double Pow10(double val) // ã“ã®åº§æ¨™å¤‰æ›å‡¦ç†å°‚ç”¨ã® Pow10
 	{
 		return pow(10.0, val);
 	}
 };
 
-// ‹@”\ : double Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚ğó‚¯æ‚èA•ÏŠ·‚µ‚Ä int Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚Éo—Í‚·‚é
+// æ©Ÿèƒ½ : double å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã‚’å—ã‘å–ã‚Šã€å¤‰æ›ã—ã¦ int å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã«å‡ºåŠ›ã™ã‚‹
 //
 _FINLINE void TransformPoints(
-	const Vector2d* pSrc, //!< [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	const TransformLinear& tfx, //!< [in] X²À•W•ÏŠ·ƒIƒuƒWƒFƒNƒg
-	const TransformLinear& tfy, //!< [in] Y²À•W•ÏŠ·ƒIƒuƒWƒFƒNƒg
-	Vector2i* pDst //!< [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const Vector2d* pSrc, //!< [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	const TransformLinear& tfx, //!< [in] Xè»¸åº§æ¨™å¤‰æ›ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	const TransformLinear& tfy, //!< [in] Yè»¸åº§æ¨™å¤‰æ›ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	Vector2i* pDst //!< [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 ) {
 	TransformLinPointDToPointI(pSrc, n, tfx.Scale, tfx.Translate, tfy.Scale, tfy.Translate, pDst);
 }
 
-// ‹@”\ : ”ñüŒ`•ÏŠ·(Log,Pow)Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : éç·šå½¢å¤‰æ›(Log,Pow)å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
 _FINLINE void TransformPoints(
-	const Vector2d* pSrc, //!< [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	const Transform& tfx, //!< [in] X²À•W•ÏŠ·ƒIƒuƒWƒFƒNƒg
-	const Transform& tfy, //!< [in] Y²À•W•ÏŠ·ƒIƒuƒWƒFƒNƒg
-	Vector2i* pDst //!< [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const Vector2d* pSrc, //!< [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	const Transform& tfx, //!< [in] Xè»¸åº§æ¨™å¤‰æ›ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	const Transform& tfy, //!< [in] Yè»¸åº§æ¨™å¤‰æ›ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	Vector2i* pDst //!< [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 ) {
 	TransformNonLinPointDToPointI(
 		pSrc,
@@ -755,18 +755,18 @@ _FINLINE void TransformPoints(
 		pDst);
 }
 
-// ‹@”\ : •`‰æ—p‚É®”À•W‚É•ÏŠ·‚·‚éA“¯‚¶À•W‚É–³‘Ê‚È•`‰æ‚ğs‚í‚È‚¢‚æ‚¤‚É•ÏŠ·‚·‚é
+// æ©Ÿèƒ½ : æç”»ç”¨ã«æ•´æ•°åº§æ¨™ã«å¤‰æ›ã™ã‚‹ã€åŒã˜åº§æ¨™ã«ç„¡é§„ãªæç”»ã‚’è¡Œã‚ãªã„ã‚ˆã†ã«å¤‰æ›ã™ã‚‹
 //
-// •Ô‚è’l : •ÏŠ·Œã‚Ìƒf[ƒ^”A•‰”‚ª•Ô‚ê‚ÎƒGƒ‰[
-//		-1=ƒƒ‚ƒŠ•s‘«
+// è¿”ã‚Šå€¤ : å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿æ•°ã€è² æ•°ãŒè¿”ã‚Œã°ã‚¨ãƒ©ãƒ¼
+//		-1=ãƒ¡ãƒ¢ãƒªä¸è¶³
 //
 _FINLINE intptr_t TransformForDraw(
-	const Transform& tfx, //!< [in] X²À•W•ÏŠ·ƒIƒuƒWƒFƒNƒg
-	const Transform& tfy, //!< [in] Y²À•W•ÏŠ·ƒIƒuƒWƒFƒNƒg
-	const double* pSrcY, //!< [in] •ÏŠ·Œ³‚ÌY²’lƒf[ƒ^
-	intptr_t iStartIndexX, //!< [in] X²’lŒvZ—p‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	Vector2i* pDst //!< [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const Transform& tfx, //!< [in] Xè»¸åº§æ¨™å¤‰æ›ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	const Transform& tfy, //!< [in] Yè»¸åº§æ¨™å¤‰æ›ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	const double* pSrcY, //!< [in] å¤‰æ›å…ƒã®Yè»¸å€¤ãƒ‡ãƒ¼ã‚¿
+	intptr_t iStartIndexX, //!< [in] Xè»¸å€¤è¨ˆç®—ç”¨ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	Vector2i* pDst //!< [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 ) {
 	return TransformForDraw(
 		&tfx.TransformInfos[0],
@@ -779,21 +779,21 @@ _FINLINE intptr_t TransformForDraw(
 		pDst);
 }
 
-// ‹@”\ : •`‰æ—p‚É®”À•W‚É•ÏŠ·‚·‚éA“¯‚¶À•W‚É–³‘Ê‚È•`‰æ‚ğs‚í‚È‚¢‚æ‚¤‚É•ÏŠ·‚·‚é(ƒŠƒ“ƒOƒoƒbƒtƒ@”Å)
-//	Y²’lƒf[ƒ^‚Í pSrcY + iStartIndexY ‚©‚çæ“¾ŠJn‚³‚êApSrcY + nSrcYBufLen ‚ğ’´‚¦‚½‚ç pSrcY ‚É–ß‚Á‚Äæ“¾‚ª‘±‚¯‚ç‚ê‚é
+// æ©Ÿèƒ½ : æç”»ç”¨ã«æ•´æ•°åº§æ¨™ã«å¤‰æ›ã™ã‚‹ã€åŒã˜åº§æ¨™ã«ç„¡é§„ãªæç”»ã‚’è¡Œã‚ãªã„ã‚ˆã†ã«å¤‰æ›ã™ã‚‹(ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡ç‰ˆ)
+//	Yè»¸å€¤ãƒ‡ãƒ¼ã‚¿ã¯ pSrcY + iStartIndexY ã‹ã‚‰å–å¾—é–‹å§‹ã•ã‚Œã€pSrcY + nSrcYBufLen ã‚’è¶…ãˆãŸã‚‰ pSrcY ã«æˆ»ã£ã¦å–å¾—ãŒç¶šã‘ã‚‰ã‚Œã‚‹
 //
-// •Ô‚è’l : •ÏŠ·Œã‚Ìƒf[ƒ^”A•‰”‚ª•Ô‚ê‚ÎƒGƒ‰[
-//		-1=ƒƒ‚ƒŠ•s‘«
+// è¿”ã‚Šå€¤ : å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿æ•°ã€è² æ•°ãŒè¿”ã‚Œã°ã‚¨ãƒ©ãƒ¼
+//		-1=ãƒ¡ãƒ¢ãƒªä¸è¶³
 //
 _FINLINE intptr_t TransformForDrawRing(
-	const Transform& tfx, //!< [in] X²À•W•ÏŠ·ƒIƒuƒWƒFƒNƒg
-	const Transform& tfy, //!< [in] Y²À•W•ÏŠ·ƒIƒuƒWƒFƒNƒg
-	const double* pSrcY, //!< [in] •ÏŠ·Œ³‚ÌY²’lƒf[ƒ^(Y²ƒf[ƒ^ƒoƒbƒtƒ@‚Ìæ“ªƒAƒhƒŒƒX)
-	intptr_t nSrcYBufLen, //!< [in] pSrcY ‚Ìƒoƒbƒtƒ@‚ÌƒTƒCƒY(ƒf[ƒ^”)
-	intptr_t iStartIndexX, //!< [in] X²’lŒvZ—p‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-	intptr_t iStartIndexY, //!< [in] Y²’lŒvZ—p‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-	intptr_t n, //!< [in] •ÏŠ·ƒf[ƒ^”
-	Vector2i* pDst //!< [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const Transform& tfx, //!< [in] Xè»¸åº§æ¨™å¤‰æ›ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	const Transform& tfy, //!< [in] Yè»¸åº§æ¨™å¤‰æ›ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	const double* pSrcY, //!< [in] å¤‰æ›å…ƒã®Yè»¸å€¤ãƒ‡ãƒ¼ã‚¿(Yè»¸ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã®å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹)
+	intptr_t nSrcYBufLen, //!< [in] pSrcY ã®ãƒãƒƒãƒ•ã‚¡ã®ã‚µã‚¤ã‚º(ãƒ‡ãƒ¼ã‚¿æ•°)
+	intptr_t iStartIndexX, //!< [in] Xè»¸å€¤è¨ˆç®—ç”¨ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+	intptr_t iStartIndexY, //!< [in] Yè»¸å€¤è¨ˆç®—ç”¨ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+	intptr_t n, //!< [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	Vector2i* pDst //!< [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 ) {
 	return TransformForDrawRing(
 		&tfx.TransformInfos[0],

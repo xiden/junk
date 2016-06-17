@@ -1,4 +1,4 @@
-// GraphNative.cpp : DLL ƒAƒvƒŠƒP[ƒVƒ‡ƒ“—p‚ÉƒGƒNƒXƒ|[ƒg‚³‚ê‚éŠÖ”‚ğ’è‹`‚µ‚Ü‚·B
+ï»¿// GraphNative.cpp : DLL ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ç”¨ã«ã‚¨ã‚¯ã‚¹ãƒãƒ¼ãƒˆã•ã‚Œã‚‹é–¢æ•°ã‚’å®šç¾©ã—ã¾ã™ã€‚
 //
 
 #include <windows.h>
@@ -71,10 +71,10 @@ void __fastcall SearchMaxMinWithoutSimd(const double* p, intptr_t n, double& min
 #ifdef ERR_CHECK_MODE
 	if(100 <= n)
 #else
-	if(20000 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+	if(20000 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 #endif
 	{
-		//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+		//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 		intptr_t nthread = omp_get_max_threads() * omp_get_num_procs();
 		if(n < nthread)
@@ -114,7 +114,7 @@ void __fastcall SearchMaxMinWithoutSimd(const double* p, intptr_t n, double& min
 	}
 	else
 	{
-		//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+		//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 		double tmax;
 		double tmin;
@@ -136,13 +136,13 @@ void __fastcall SearchMaxMinWithSse2(const double* p, intptr_t n, double& min, d
 {
 	if((n < 6) | ((intptr_t)p & 7))
 	{
-		//	ƒf[ƒ^‚ª6ŒÂ–¢–‚Ü‚½‚Íƒf[ƒ^‚Ìæ“ª‚ª8A16ˆÈŠO‚ÌƒAƒ‰ƒCƒƒ“ƒg‚È‚çSSEg‚¦‚È‚¢
+		//	ãƒ‡ãƒ¼ã‚¿ãŒ6å€‹æœªæº€ã¾ãŸã¯ãƒ‡ãƒ¼ã‚¿ã®å…ˆé ­ãŒ8ã€16ä»¥å¤–ã®ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆãªã‚‰SSEä½¿ãˆãªã„
 		SearchMaxMinWithoutSimd(p, n, min, max);
 		return;
 	}
 
-	//	16ƒAƒ‰ƒCƒƒ“ƒg‚ÉØ‚èã‚°‚½ŠJnƒ|ƒCƒ“ƒ^æ“¾
-	//	16ƒAƒ‰ƒCƒƒ“ƒg‚ÉØ‚èÌ‚Ä‚½I—¹ƒ|ƒCƒ“ƒ^æ“¾
+	//	16ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã«åˆ‡ã‚Šä¸Šã’ãŸé–‹å§‹ãƒã‚¤ãƒ³ã‚¿å–å¾—
+	//	16ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã«åˆ‡ã‚Šæ¨ã¦ãŸçµ‚äº†ãƒã‚¤ãƒ³ã‚¿å–å¾—
 	const __m128d* ps16 = (__m128d*)((intptr_t)(p + 1) & ~(intptr_t)0xf);
 	const double* pe = p + n;
 	const __m128d* pe16 = (__m128d*)((intptr_t)pe & ~(intptr_t)0xf);
@@ -150,12 +150,12 @@ void __fastcall SearchMaxMinWithSse2(const double* p, intptr_t n, double& min, d
 #ifdef ERR_CHECK_MODE
 	if(100 <= n)
 #else
-	if(30000 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+	if(30000 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 #endif
 	{
-		//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+		//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
-		//	n ‚ğ __m128d ’PˆÊ‚ÌŒÂ”‚É•ÏŠ·
+		//	n ã‚’ __m128d å˜ä½ã®å€‹æ•°ã«å¤‰æ›
 		n = pe16 - ps16;
 
 		intptr_t nthread = omp_get_max_threads();
@@ -164,22 +164,22 @@ void __fastcall SearchMaxMinWithSse2(const double* p, intptr_t n, double& min, d
 
 		intptr_t divsize = n / nthread;
 		
-		//	ŠJnˆÊ’u‚ÅÅ‘å‚ÆÅ¬‚ğ‰Šú‰»
+		//	é–‹å§‹ä½ç½®ã§æœ€å¤§ã¨æœ€å°ã‚’åˆæœŸåŒ–
 		__m128d smax;
 		__m128d smin;
 		if((intptr_t)p == (intptr_t)ps16)
 		{
-			//	16ƒAƒ‰ƒCƒƒ“ƒg‚Ìê‡
+			//	16ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã®å ´åˆ
 			smax = smin = *ps16;
 		}
 		else
 		{
-			//	8ƒAƒ‰ƒCƒƒ“ƒg‚Ìê‡
+			//	8ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã®å ´åˆ
 			__m128d t = { *p, *p };
 			smax = smin = t;
 		}
 
-		//	ƒXƒŒƒbƒh‚Å•ªŠ„ˆ—
+		//	ã‚¹ãƒ¬ãƒƒãƒ‰ã§åˆ†å‰²å‡¦ç†
 		#pragma omp parallel for shared(smin, smax) 
 		for(intptr_t j = 0; j < nthread; ++j)
 		{
@@ -212,7 +212,7 @@ void __fastcall SearchMaxMinWithSse2(const double* p, intptr_t n, double& min, d
 			}
 		}
 
-		//	I—¹ƒ|ƒCƒ“ƒ^‚ª16ƒAƒ‰ƒCƒƒ“ƒg‚Å‚Í‚È‚¢ê‡‚Ì“Á•Êˆ—
+		//	çµ‚äº†ãƒã‚¤ãƒ³ã‚¿ãŒ16ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã§ã¯ãªã„å ´åˆã®ç‰¹åˆ¥å‡¦ç†
 		if((intptr_t)pe != (intptr_t)pe16)
 		{
 			__m128d t = { pe[-1], pe[-1] };
@@ -220,34 +220,34 @@ void __fastcall SearchMaxMinWithSse2(const double* p, intptr_t n, double& min, d
 			smin = _mm_min_pd(smin, t);
 		}
 
-		//	ãˆÊ8ƒoƒCƒg‚Æ‰ºˆÊ8ƒoƒCƒg‚ğ”äŠr‚µ‚ÄÅ‘åÅ¬æ“¾
+		//	ä¸Šä½8ãƒã‚¤ãƒˆã¨ä¸‹ä½8ãƒã‚¤ãƒˆã‚’æ¯”è¼ƒã—ã¦æœ€å¤§æœ€å°å–å¾—
 		smax = _mm_max_pd(smax, _mm_shuffle_pd(smax, smax, 3));
 		smin = _mm_min_pd(smin, _mm_shuffle_pd(smin, smin, 3));
 
-		//	–ß‚è’lƒZƒbƒg
+		//	æˆ»ã‚Šå€¤ã‚»ãƒƒãƒˆ
 		max = smax.m128d_f64[0];
 		min = smin.m128d_f64[0];
 	}
 	else
 	{
-		//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+		//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
-		//	ŠJnˆÊ’u‚ÅÅ‘å‚ÆÅ¬‚ğ‰Šú‰»
+		//	é–‹å§‹ä½ç½®ã§æœ€å¤§ã¨æœ€å°ã‚’åˆæœŸåŒ–
 		__m128d smax;
 		__m128d smin;
 		if((intptr_t)p == (intptr_t)ps16)
 		{
-			//	16ƒAƒ‰ƒCƒƒ“ƒg‚Ìê‡
+			//	16ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã®å ´åˆ
 			smax = smin = *ps16;
 		}
 		else
 		{
-			//	8ƒAƒ‰ƒCƒƒ“ƒg‚Ìê‡
+			//	8ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã®å ´åˆ
 			__m128d t = { *p, *p };
 			smax = smin = t;
 		}
 
-		//	ƒ‹[ƒv‚Åˆ—
+		//	ãƒ«ãƒ¼ãƒ—ã§å‡¦ç†
 		const __m128d* e4 = ps16 + ((pe16 - ps16) & ~(intptr_t)0x3);
 		for(; ps16 < e4; ps16 += 4)
 		{
@@ -265,7 +265,7 @@ void __fastcall SearchMaxMinWithSse2(const double* p, intptr_t n, double& min, d
 			smin = _mm_min_pd(smin, t);
 		} 
 
-		//	I—¹ƒ|ƒCƒ“ƒ^‚ª16ƒAƒ‰ƒCƒƒ“ƒg‚Å‚Í‚È‚¢ê‡‚Ì“Á•Êˆ—
+		//	çµ‚äº†ãƒã‚¤ãƒ³ã‚¿ãŒ16ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã§ã¯ãªã„å ´åˆã®ç‰¹åˆ¥å‡¦ç†
 		if((intptr_t)pe != (intptr_t)pe16)
 		{
 			__m128d t = { pe[-1], pe[-1] };
@@ -273,55 +273,55 @@ void __fastcall SearchMaxMinWithSse2(const double* p, intptr_t n, double& min, d
 			smin = _mm_min_pd(smin, t);
 		}
 
-		//	ãˆÊ8ƒoƒCƒg‚Æ‰ºˆÊ8ƒoƒCƒg‚ğ”äŠr‚µ‚ÄÅ‘åÅ¬æ“¾
+		//	ä¸Šä½8ãƒã‚¤ãƒˆã¨ä¸‹ä½8ãƒã‚¤ãƒˆã‚’æ¯”è¼ƒã—ã¦æœ€å¤§æœ€å°å–å¾—
 		smax = _mm_max_pd(smax, _mm_shuffle_pd(smax, smax, 3));
 		smin = _mm_min_pd(smin, _mm_shuffle_pd(smin, smin, 3));
 
-		//	–ß‚è’lƒZƒbƒg
+		//	æˆ»ã‚Šå€¤ã‚»ãƒƒãƒˆ
 		max = smax.m128d_f64[0];
 		min = smin.m128d_f64[0];
 	}
 }
 
-// ‹@”\ : Å‘åÅ¬‚ğŒŸõ‚·‚é
+// æ©Ÿèƒ½ : æœ€å¤§æœ€å°ã‚’æ¤œç´¢ã™ã‚‹
 //
 JUNKAPI void JUNKCALL SearchMaxMin(
-	const double* p, // [in] Å‘åÅ¬ŒŸõ‚·‚éƒf[ƒ^
-	intptr_t n, // [in] ŒŸõƒf[ƒ^”A0 ˆÈ‰º‚Ìê‡‚ÍŠÖ”‚ğŒÄ‚Ño‚³‚È‚¢‚æ‚¤‚É‚µ‚Ä‚­‚¾‚³‚¢
-	double& min, // [out] Å¬’l‚ª•Ô‚é
-	double& max // [out] Å‘å’l‚ª•Ô‚é
+	const double* p, // [in] æœ€å¤§æœ€å°æ¤œç´¢ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] æ¤œç´¢ãƒ‡ãƒ¼ã‚¿æ•°ã€0 ä»¥ä¸‹ã®å ´åˆã¯é–¢æ•°ã‚’å‘¼ã³å‡ºã•ãªã„ã‚ˆã†ã«ã—ã¦ãã ã•ã„
+	double& min, // [out] æœ€å°å€¤ãŒè¿”ã‚‹
+	double& max // [out] æœ€å¤§å€¤ãŒè¿”ã‚‹
 )
 {
 	if(SearchMaxMinBest == NULL)
 	{
 		if(IsSSE2Supported())
-			SearchMaxMinBest = SearchMaxMinWithSse2; // SSE2g—p‰Â”\
+			SearchMaxMinBest = SearchMaxMinWithSse2; // SSE2ä½¿ç”¨å¯èƒ½
 		else
-			SearchMaxMinBest = SearchMaxMinWithoutSimd; // SSE2g—p•s‰Â”\
+			SearchMaxMinBest = SearchMaxMinWithoutSimd; // SSE2ä½¿ç”¨ä¸å¯èƒ½
 	}
 	SearchMaxMinBest(p, n, min, max);
 }
 
-// ‹@”\ : ƒŠƒ“ƒOƒoƒbƒtƒ@“à‚©‚çÅ‘åÅ¬‚ğŒŸõ‚·‚é
+// æ©Ÿèƒ½ : ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡å†…ã‹ã‚‰æœ€å¤§æœ€å°ã‚’æ¤œç´¢ã™ã‚‹
 //
 JUNKAPI void JUNKCALL SearchMaxMinRing(
-	const double* pBuffer, // [in] ƒŠƒ“ƒOƒoƒbƒtƒ@‚Ìæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t nBufLen, // [in] ƒŠƒ“ƒOƒoƒbƒtƒ@‚ÌƒTƒCƒYA0 ˆÈ‰º‚Ìê‡‚ÍŠÖ”‚ğŒÄ‚Ño‚³‚È‚¢‚æ‚¤‚É‚µ‚Ä‚­‚¾‚³‚¢
-	intptr_t iIndex, // [in] ŒŸõŠJnˆÊ’u‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†
-	intptr_t n, // [in] ŒŸõƒf[ƒ^”A0 ˆÈ‰º‚Ìê‡‚ÍŠÖ”‚ğŒÄ‚Ño‚³‚È‚¢‚æ‚¤‚É‚µ‚Ä‚­‚¾‚³‚¢
-	double& min, // [out] Å¬’l‚ª•Ô‚é
-	double& max // [out] Å‘å’l‚ª•Ô‚é
+	const double* pBuffer, // [in] ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡ã®å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t nBufLen, // [in] ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡ã®ã‚µã‚¤ã‚ºã€0 ä»¥ä¸‹ã®å ´åˆã¯é–¢æ•°ã‚’å‘¼ã³å‡ºã•ãªã„ã‚ˆã†ã«ã—ã¦ãã ã•ã„
+	intptr_t iIndex, // [in] æ¤œç´¢é–‹å§‹ä½ç½®ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·
+	intptr_t n, // [in] æ¤œç´¢ãƒ‡ãƒ¼ã‚¿æ•°ã€0 ä»¥ä¸‹ã®å ´åˆã¯é–¢æ•°ã‚’å‘¼ã³å‡ºã•ãªã„ã‚ˆã†ã«ã—ã¦ãã ã•ã„
+	double& min, // [out] æœ€å°å€¤ãŒè¿”ã‚‹
+	double& max // [out] æœ€å¤§å€¤ãŒè¿”ã‚‹
 )
 {
 	iIndex %= nBufLen;
 	if(iIndex + n < nBufLen)
 	{
-		// ƒoƒbƒtƒ@‚ğ•ªŠ„‚·‚é•K—v‚ª–³‚¢ê‡
+		// ãƒãƒƒãƒ•ã‚¡ã‚’åˆ†å‰²ã™ã‚‹å¿…è¦ãŒç„¡ã„å ´åˆ
 		SearchMaxMin(pBuffer + iIndex, n, min, max);
 	}
 	else
 	{
-		// ƒoƒbƒtƒ@‚ğ•ªŠ„‚·‚é•K—v‚ª‚ ‚éê‡
+		// ãƒãƒƒãƒ•ã‚¡ã‚’åˆ†å‰²ã™ã‚‹å¿…è¦ãŒã‚ã‚‹å ´åˆ
 		intptr_t n1 = nBufLen - iIndex;
 		intptr_t n2 = n - n1;
 		double min1;
@@ -339,24 +339,24 @@ JUNKAPI void JUNKCALL SearchMaxMinRing(
 //==============================================================================
 void (__fastcall *SearchPointMaxMinBest)(const Vector2d* p, intptr_t n, double& minX, double& maxX, double& minY, double& maxY);
 
-// ‹@”\: double Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚ğó‚¯æ‚èAX‚ÆY‚»‚ê‚¼‚ê‚ÌÅ‘åÅ¬‚ğŒŸõ‚·‚é
+// æ©Ÿèƒ½: double å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã‚’å—ã‘å–ã‚Šã€Xã¨Yãã‚Œãã‚Œã®æœ€å¤§æœ€å°ã‚’æ¤œç´¢ã™ã‚‹
 //
 void __fastcall SearchPointMaxMinWithoutSimd(
-	const Vector2d* p, // [in] double Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚Ìæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t n, // [in] ƒxƒNƒgƒ‹”
-	double& minX, // [out] Å¬X’l‚ª•Ô‚é
-	double& minY, // [out] Å¬Y’l‚ª•Ô‚é
-	double& maxX, // [out] Å‘åX’l‚ª•Ô‚é
-	double& maxY // [out] Å‘åY’l‚ª•Ô‚é
+	const Vector2d* p, // [in] double å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã®å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t n, // [in] ãƒ™ã‚¯ãƒˆãƒ«æ•°
+	double& minX, // [out] æœ€å°Xå€¤ãŒè¿”ã‚‹
+	double& minY, // [out] æœ€å°Yå€¤ãŒè¿”ã‚‹
+	double& maxX, // [out] æœ€å¤§Xå€¤ãŒè¿”ã‚‹
+	double& maxY // [out] æœ€å¤§Yå€¤ãŒè¿”ã‚‹
 )
 {
 #ifdef ERR_CHECK_MODE
 	if(100 <= n)
 #else
-	if(20000 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+	if(20000 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 #endif
 	{
-		//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+		//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 		intptr_t nthread = omp_get_max_threads() * omp_get_num_procs();
 		if(n < nthread)
@@ -405,7 +405,7 @@ void __fastcall SearchPointMaxMinWithoutSimd(
 	}
 	else
 	{
-		//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+		//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 		double tminX;
 		double tminY;
@@ -430,26 +430,26 @@ void __fastcall SearchPointMaxMinWithoutSimd(
 	}
 }
 
-// ‹@”\: double Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚ğó‚¯æ‚èAX‚ÆY‚»‚ê‚¼‚ê‚ÌÅ‘åÅ¬‚ğŒŸõ‚·‚é
+// æ©Ÿèƒ½: double å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã‚’å—ã‘å–ã‚Šã€Xã¨Yãã‚Œãã‚Œã®æœ€å¤§æœ€å°ã‚’æ¤œç´¢ã™ã‚‹
 //
 void __fastcall SearchPointMaxMinWithSse2(
-	const Vector2d* p, // [in] double Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚Ìæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t n, // [in] ƒxƒNƒgƒ‹”
-	double& minX, // [out] Å¬X’l‚ª•Ô‚é
-	double& minY, // [out] Å¬Y’l‚ª•Ô‚é
-	double& maxX, // [out] Å‘åX’l‚ª•Ô‚é
-	double& maxY // [out] Å‘åY’l‚ª•Ô‚é
+	const Vector2d* p, // [in] double å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã®å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t n, // [in] ãƒ™ã‚¯ãƒˆãƒ«æ•°
+	double& minX, // [out] æœ€å°Xå€¤ãŒè¿”ã‚‹
+	double& minY, // [out] æœ€å°Yå€¤ãŒè¿”ã‚‹
+	double& maxX, // [out] æœ€å¤§Xå€¤ãŒè¿”ã‚‹
+	double& maxY // [out] æœ€å¤§Yå€¤ãŒè¿”ã‚‹
 )
 {
 	if((n < 4) | ((intptr_t)p & 7))
 	{
-		//	ƒf[ƒ^‚ª6ŒÂ–¢–‚Ü‚½‚Íƒf[ƒ^‚Ìæ“ª‚ª8A16ˆÈŠO‚ÌƒAƒ‰ƒCƒƒ“ƒg‚È‚çSSEg‚¦‚È‚¢
+		//	ãƒ‡ãƒ¼ã‚¿ãŒ6å€‹æœªæº€ã¾ãŸã¯ãƒ‡ãƒ¼ã‚¿ã®å…ˆé ­ãŒ8ã€16ä»¥å¤–ã®ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆãªã‚‰SSEä½¿ãˆãªã„
 		SearchPointMaxMinWithoutSimd(p, n, minX, minY, maxX, maxY);
 		return;
 	}
 
-	//	16ƒAƒ‰ƒCƒƒ“ƒg‚ÉØ‚èã‚°‚½ŠJnƒ|ƒCƒ“ƒ^æ“¾
-	//	16ƒAƒ‰ƒCƒƒ“ƒg‚ÉØ‚èÌ‚Ä‚½I—¹ƒ|ƒCƒ“ƒ^æ“¾
+	//	16ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã«åˆ‡ã‚Šä¸Šã’ãŸé–‹å§‹ãƒã‚¤ãƒ³ã‚¿å–å¾—
+	//	16ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã«åˆ‡ã‚Šæ¨ã¦ãŸçµ‚äº†ãƒã‚¤ãƒ³ã‚¿å–å¾—
 	const __m128d* ps16 = (__m128d*)((intptr_t)((char*)p + 8) & ~(intptr_t)0xf);
 	const Vector2d* pe = p + n;
 	const __m128d* pe16 = (__m128d*)((intptr_t)pe & ~(intptr_t)0xf);
@@ -457,12 +457,12 @@ void __fastcall SearchPointMaxMinWithSse2(
 #ifdef ERR_CHECK_MODE
 	if(100 <= n)
 #else
-	if(30000 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+	if(30000 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 #endif
 	{
-		//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+		//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
-		//	n ‚ğ __m128d ’PˆÊ‚ÌŒÂ”‚É•ÏŠ·
+		//	n ã‚’ __m128d å˜ä½ã®å€‹æ•°ã«å¤‰æ›
 		n = pe16 - ps16;
 
 		intptr_t nthread = omp_get_max_threads();
@@ -471,22 +471,22 @@ void __fastcall SearchPointMaxMinWithSse2(
 
 		intptr_t divsize = n / nthread;
 		
-		//	ŠJnˆÊ’u‚ÅÅ‘å‚ÆÅ¬‚ğ‰Šú‰»
+		//	é–‹å§‹ä½ç½®ã§æœ€å¤§ã¨æœ€å°ã‚’åˆæœŸåŒ–
 		__m128d smax;
 		__m128d smin;
 		if((intptr_t)p == (intptr_t)ps16)
 		{
-			//	16ƒAƒ‰ƒCƒƒ“ƒg‚Ìê‡
+			//	16ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã®å ´åˆ
 			smax = smin = *ps16;
 		}
 		else
 		{
-			//	8ƒAƒ‰ƒCƒƒ“ƒg‚Ìê‡
-			__m128d t = { p->Y(), p->X() }; // X‚ÆY‚ª‹t‚É‚È‚é
+			//	8ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã®å ´åˆ
+			__m128d t = { p->Y(), p->X() }; // Xã¨YãŒé€†ã«ãªã‚‹
 			smax = smin = t;
 		}
 
-		//	ƒXƒŒƒbƒh‚Å•ªŠ„ˆ—
+		//	ã‚¹ãƒ¬ãƒƒãƒ‰ã§åˆ†å‰²å‡¦ç†
 		#pragma omp parallel for shared(smin, smax) 
 		for(intptr_t j = 0; j < nthread; ++j)
 		{
@@ -519,7 +519,7 @@ void __fastcall SearchPointMaxMinWithSse2(
 			}
 		}
 
-		//	I—¹ƒ|ƒCƒ“ƒ^‚ª16ƒAƒ‰ƒCƒƒ“ƒg‚Å‚Í‚È‚¢ê‡‚Ì“Á•Êˆ—
+		//	çµ‚äº†ãƒã‚¤ãƒ³ã‚¿ãŒ16ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã§ã¯ãªã„å ´åˆã®ç‰¹åˆ¥å‡¦ç†
 		if((intptr_t)pe != (intptr_t)pe16)
 		{
 			__m128d t;
@@ -532,7 +532,7 @@ void __fastcall SearchPointMaxMinWithSse2(
 			smax = _mm_max_pd(smax, t);
 			smin = _mm_min_pd(smin, t);
 
-			//	–ß‚è’lƒZƒbƒg
+			//	æˆ»ã‚Šå€¤ã‚»ãƒƒãƒˆ
 			minX = smin.m128d_f64[1];
 			minY = smin.m128d_f64[0];
 			maxX = smax.m128d_f64[1];
@@ -540,7 +540,7 @@ void __fastcall SearchPointMaxMinWithSse2(
 		}
 		else
 		{
-			//	–ß‚è’lƒZƒbƒg
+			//	æˆ»ã‚Šå€¤ã‚»ãƒƒãƒˆ
 			minX = smin.m128d_f64[0];
 			minY = smin.m128d_f64[1];
 			maxX = smax.m128d_f64[0];
@@ -549,24 +549,24 @@ void __fastcall SearchPointMaxMinWithSse2(
 	}
 	else
 	{
-		//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+		//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
-		//	ŠJnˆÊ’u‚ÅÅ‘å‚ÆÅ¬‚ğ‰Šú‰»
+		//	é–‹å§‹ä½ç½®ã§æœ€å¤§ã¨æœ€å°ã‚’åˆæœŸåŒ–
 		__m128d smax;
 		__m128d smin;
 		if((intptr_t)p == (intptr_t)ps16)
 		{
-			//	16ƒAƒ‰ƒCƒƒ“ƒg‚Ìê‡
+			//	16ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã®å ´åˆ
 			smax = smin = *ps16;
 		}
 		else
 		{
-			//	16ƒAƒ‰ƒCƒƒ“ƒgˆÈŠO‚Ìê‡
+			//	16ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆä»¥å¤–ã®å ´åˆ
 			__m128d t = { p->Y(), p->X() };
 			smax = smin = t;
 		}
 
-		//	ƒ‹[ƒv‚Åˆ—
+		//	ãƒ«ãƒ¼ãƒ—ã§å‡¦ç†
 		const __m128d* e4 = ps16 + ((pe16 - ps16) & ~(intptr_t)0x3);
 		for(; ps16 < e4; ps16 += 4)
 		{
@@ -584,7 +584,7 @@ void __fastcall SearchPointMaxMinWithSse2(
 			smin = _mm_min_pd(smin, t);
 		} 
 
-		//	I—¹ƒ|ƒCƒ“ƒ^‚ª16ƒAƒ‰ƒCƒƒ“ƒg‚Å‚Í‚È‚¢ê‡‚Ì“Á•Êˆ—
+		//	çµ‚äº†ãƒã‚¤ãƒ³ã‚¿ãŒ16ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã§ã¯ãªã„å ´åˆã®ç‰¹åˆ¥å‡¦ç†
 		if((intptr_t)pe != (intptr_t)pe16)
 		{
 			__m128d t;
@@ -597,7 +597,7 @@ void __fastcall SearchPointMaxMinWithSse2(
 			smax = _mm_max_pd(smax, t);
 			smin = _mm_min_pd(smin, t);
 
-			//	–ß‚è’lƒZƒbƒg
+			//	æˆ»ã‚Šå€¤ã‚»ãƒƒãƒˆ
 			maxX = smax.m128d_f64[1];
 			minX = smin.m128d_f64[1];
 			maxY = smax.m128d_f64[0];
@@ -605,7 +605,7 @@ void __fastcall SearchPointMaxMinWithSse2(
 		}
 		else
 		{
-			//	–ß‚è’lƒZƒbƒg
+			//	æˆ»ã‚Šå€¤ã‚»ãƒƒãƒˆ
 			maxX = smax.m128d_f64[0];
 			minX = smin.m128d_f64[0];
 			maxY = smax.m128d_f64[1];
@@ -614,15 +614,15 @@ void __fastcall SearchPointMaxMinWithSse2(
 	}
 }
 
-//// ‹@”\ : Å‘åÅ¬‚ğŒŸõ‚·‚éAˆê”ÔƒVƒ“ƒvƒ‹‚ÈÀ‘•
+//// æ©Ÿèƒ½ : æœ€å¤§æœ€å°ã‚’æ¤œç´¢ã™ã‚‹ã€ä¸€ç•ªã‚·ãƒ³ãƒ—ãƒ«ãªå®Ÿè£…
 ////
 //void __fastcall _SearchPointMaxMinBase(
-//	const Vector2D* p, // [in] Å‘åÅ¬ŒŸõ‚·‚éƒf[ƒ^
-//	intptr_t n, // [in] ƒf[ƒ^”
-//	double& minX, // [out] Å¬X’l‚ª•Ô‚é
-//	double& minY, // [out] Å¬Y’l‚ª•Ô‚é
-//	double& maxX, // [out] Å‘åX’l‚ª•Ô‚é
-//	double& maxY // [out] Å‘åY’l‚ª•Ô‚é
+//	const Vector2D* p, // [in] æœ€å¤§æœ€å°æ¤œç´¢ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
+//	intptr_t n, // [in] ãƒ‡ãƒ¼ã‚¿æ•°
+//	double& minX, // [out] æœ€å°Xå€¤ãŒè¿”ã‚‹
+//	double& minY, // [out] æœ€å°Yå€¤ãŒè¿”ã‚‹
+//	double& maxX, // [out] æœ€å¤§Xå€¤ãŒè¿”ã‚‹
+//	double& maxY // [out] æœ€å¤§Yå€¤ãŒè¿”ã‚‹
 //)
 //{
 //	double tminX;
@@ -650,23 +650,23 @@ void __fastcall SearchPointMaxMinWithSse2(
 //	maxY = tmaxY;
 //}
 
-// ‹@”\: double Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚ğó‚¯æ‚èAX‚ÆY‚»‚ê‚¼‚ê‚ÌÅ‘åÅ¬‚ğŒŸõ‚·‚é
+// æ©Ÿèƒ½: double å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã‚’å—ã‘å–ã‚Šã€Xã¨Yãã‚Œãã‚Œã®æœ€å¤§æœ€å°ã‚’æ¤œç´¢ã™ã‚‹
 //
 JUNKAPI void JUNKCALL SearchPointMaxMin(
-	const Vector2d* p, // [in] Å‘åÅ¬ŒŸõ‚·‚éƒf[ƒ^
-	intptr_t n, // [in] ƒf[ƒ^”
-	double& minX, // [out] Å¬X’l‚ª•Ô‚é
-	double& minY, // [out] Å¬Y’l‚ª•Ô‚é
-	double& maxX, // [out] Å‘åX’l‚ª•Ô‚é
-	double& maxY // [out] Å‘åY’l‚ª•Ô‚é
+	const Vector2d* p, // [in] æœ€å¤§æœ€å°æ¤œç´¢ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] ãƒ‡ãƒ¼ã‚¿æ•°
+	double& minX, // [out] æœ€å°Xå€¤ãŒè¿”ã‚‹
+	double& minY, // [out] æœ€å°Yå€¤ãŒè¿”ã‚‹
+	double& maxX, // [out] æœ€å¤§Xå€¤ãŒè¿”ã‚‹
+	double& maxY // [out] æœ€å¤§Yå€¤ãŒè¿”ã‚‹
 )
 {
 	if(SearchMaxMinBest == NULL)
 	{
 		if(0) //IsSSE2Supported())
-			SearchPointMaxMinBest = SearchPointMaxMinWithSse2; // SSE2g—p‰Â”\
+			SearchPointMaxMinBest = SearchPointMaxMinWithSse2; // SSE2ä½¿ç”¨å¯èƒ½
 		else
-			SearchPointMaxMinBest = SearchPointMaxMinWithoutSimd; // SSE2g—p•s‰Â”\
+			SearchPointMaxMinBest = SearchPointMaxMinWithoutSimd; // SSE2ä½¿ç”¨ä¸å¯èƒ½
 	}
 	SearchPointMaxMinBest(p, n, minX, minY, maxX, maxY);
 
@@ -688,19 +688,19 @@ JUNKAPI void JUNKCALL SearchPointMaxMin(
 
 
 //==============================================================================
-// ‹@”\ : üŒ`•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : ç·šå½¢å¤‰æ›ã‚’è¡Œã†
 //
 JUNKAPI void JUNKCALL TransformLin(
-	const double* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	double scale, // [in] ƒXƒP[ƒŠƒ“ƒO’l
-	double translate, // [in] •½sˆÚ“®’l
-	double* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const double* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scale, // [in] ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translate, // [in] å¹³è¡Œç§»å‹•å€¤
+	double* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 )
 {
-	if(20000 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+	if(20000 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 	{
-		//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+		//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 		#pragma omp parallel for
 		for (intptr_t i = 0; i < n; i++)
@@ -708,26 +708,26 @@ JUNKAPI void JUNKCALL TransformLin(
 	}
 	else
 	{
-		//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+		//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 		for (intptr_t i = 0; i < n; i++)
 			pDst[i] = pSrc[i] * scale + translate;
 	}
 }
 
-// ‹@”\ : üŒ`•ÏŠ·Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : ç·šå½¢å¤‰æ›å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
 JUNKAPI void JUNKCALL TransformLinInt(
-	const double* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	double scale, // [in] ƒXƒP[ƒŠƒ“ƒO’l
-	double translate, // [in] •½sˆÚ“®’l
-	int* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const double* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scale, // [in] ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translate, // [in] å¹³è¡Œç§»å‹•å€¤
+	int* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 )
 {
-	if(10000 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+	if(10000 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 	{
-		//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+		//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 		#pragma omp parallel for
 		for (intptr_t i = 0; i < n; i++)
@@ -735,36 +735,36 @@ JUNKAPI void JUNKCALL TransformLinInt(
 	}
 	else
 	{
-		//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+		//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 		for (intptr_t i = 0; i < n; i++)
 			pDst[i] = (int)(pSrc[i] * scale + translate);
 	}
 }
 
-// ‹@”\ : ”ñüŒ`•ÏŠ·(Log,Pow)‚ğŠÜ‚Ş•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : éç·šå½¢å¤‰æ›(Log,Pow)ã‚’å«ã‚€å¤‰æ›ã‚’è¡Œã†
 //
 JUNKAPI void JUNKCALL TransformNonLin(
-	const double* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	const TransformInfo* pTis, // [in] •ÏŠ·î•ñ”z—ñ
-	intptr_t nTransform, // [in] pTis ‚Ì—v‘f”
-	double* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const double* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	const TransformInfo* pTis, // [in] å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTransform, // [in] pTis ã®è¦ç´ æ•°
+	double* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 )
 {
 	if(nTransform == 1 && !pTis->LogBeforeLinear && !pTis->PowAfterLinear)
 	{
-		//	üŒ`•ÏŠ·‚Ì‚İ‚Ìê‡
+		//	ç·šå½¢å¤‰æ›ã®ã¿ã®å ´åˆ
 
 		TransformLin(pSrc, n, pTis->Transform.Scale, pTis->Transform.Translate, pDst);
 	}
 	else
 	{
-		//	”ñüŒ`•ÏŠ·‚ğŠÜ‚Şê‡
+		//	éç·šå½¢å¤‰æ›ã‚’å«ã‚€å ´åˆ
 
-		if(500 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+		if(500 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 		{
-			//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+			//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 			#pragma omp parallel for
 			for (intptr_t i = 0; i < n; i++)
@@ -784,7 +784,7 @@ JUNKAPI void JUNKCALL TransformNonLin(
 		}
 		else
 		{
-			//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+			//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 			for (intptr_t i = 0; i < n; i++)
 			{
@@ -804,29 +804,29 @@ JUNKAPI void JUNKCALL TransformNonLin(
 	}
 }
 
-// ‹@”\ : ”ñüŒ`•ÏŠ·(Log,Pow)Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : éç·šå½¢å¤‰æ›(Log,Pow)å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
 JUNKAPI void JUNKCALL TransformNonLinInt(
-	const double* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	const TransformInfo* pTis, // [in] •ÏŠ·î•ñ”z—ñ
-	intptr_t nTransform, // [in] pTis ‚Ì—v‘f”
-	int* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const double* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	const TransformInfo* pTis, // [in] å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTransform, // [in] pTis ã®è¦ç´ æ•°
+	int* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 )
 {
 	if(nTransform == 1 && !pTis->LogBeforeLinear && !pTis->PowAfterLinear)
 	{
-		//	üŒ`•ÏŠ·‚Ì‚İ‚Ìê‡
+		//	ç·šå½¢å¤‰æ›ã®ã¿ã®å ´åˆ
 
 		TransformLinInt(pSrc, n, pTis->Transform.Scale, pTis->Transform.Translate, pDst);
 	}
 	else
 	{
-		//	”ñüŒ`•ÏŠ·‚ğŠÜ‚Şê‡
+		//	éç·šå½¢å¤‰æ›ã‚’å«ã‚€å ´åˆ
 
-		if(300 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+		if(300 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 		{
-			//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+			//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 			#pragma omp parallel for
 			for (intptr_t i = 0; i < n; i++)
@@ -846,7 +846,7 @@ JUNKAPI void JUNKCALL TransformNonLinInt(
 		}
 		else
 		{
-			//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+			//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 			for (intptr_t i = 0; i < n; i++)
 			{
@@ -866,20 +866,20 @@ JUNKAPI void JUNKCALL TransformNonLinInt(
 	}
 }
 
-// ‹@”\ : üŒ`•ÏŠ·Œãint‚É•ÏŠ·‚ğs‚¤
-//        o—Í‚Ì pDst ‚Í POINT \‘¢‘Ì(8ƒoƒCƒg)‚Ì”z—ñ‚ÆŒ©‚È‚µAæ“ª4ƒoƒCƒg‚É’l‚ğ‘‚«‚İc‚è‚Ì4ƒoƒCƒg‚Í‚»‚Ì‚Ü‚Üc‚·
+// æ©Ÿèƒ½ : ç·šå½¢å¤‰æ›å¾Œintã«å¤‰æ›ã‚’è¡Œã†
+//        å‡ºåŠ›ã® pDst ã¯ POINT æ§‹é€ ä½“(8ãƒã‚¤ãƒˆ)ã®é…åˆ—ã¨è¦‹ãªã—ã€å…ˆé ­4ãƒã‚¤ãƒˆã«å€¤ã‚’æ›¸ãè¾¼ã¿æ®‹ã‚Šã®4ãƒã‚¤ãƒˆã¯ãã®ã¾ã¾æ®‹ã™
 //
 JUNKAPI void JUNKCALL TransformLinToInt2(
-	const double* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	double scale, // [in] ƒXƒP[ƒŠƒ“ƒO’l
-	double translate, // [in] •½sˆÚ“®’l
-	int* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const double* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scale, // [in] ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translate, // [in] å¹³è¡Œç§»å‹•å€¤
+	int* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 )
 {
-	if(10000 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+	if(10000 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 	{
-		//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+		//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 		#pragma omp parallel for
 		for (intptr_t i = 0; i < n; i++)
@@ -887,37 +887,37 @@ JUNKAPI void JUNKCALL TransformLinToInt2(
 	}
 	else
 	{
-		//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+		//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 		for (intptr_t i = 0; i < n; i++)
 			pDst[i * 2] = (int)(pSrc[i] * scale + translate);
 	}
 }
 
-// ‹@”\ : ”ñüŒ`•ÏŠ·(Log,Pow)Œãint‚É•ÏŠ·‚ğs‚¤
-//        o—Í‚Ì pDst ‚Í POINT \‘¢‘Ì(8ƒoƒCƒg)‚Ì”z—ñ‚ÆŒ©‚È‚µAæ“ª4ƒoƒCƒg‚É’l‚ğ‘‚«‚İc‚è‚Ì4ƒoƒCƒg‚Í‚»‚Ì‚Ü‚Üc‚·
+// æ©Ÿèƒ½ : éç·šå½¢å¤‰æ›(Log,Pow)å¾Œintã«å¤‰æ›ã‚’è¡Œã†
+//        å‡ºåŠ›ã® pDst ã¯ POINT æ§‹é€ ä½“(8ãƒã‚¤ãƒˆ)ã®é…åˆ—ã¨è¦‹ãªã—ã€å…ˆé ­4ãƒã‚¤ãƒˆã«å€¤ã‚’æ›¸ãè¾¼ã¿æ®‹ã‚Šã®4ãƒã‚¤ãƒˆã¯ãã®ã¾ã¾æ®‹ã™
 //
 JUNKAPI void JUNKCALL TransformNonLinToInt2(
-	const double* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	const TransformInfo* pTis, // [in] •ÏŠ·î•ñ”z—ñ
-	intptr_t nTransform, // [in] pTis ‚Ì—v‘f”
-	int* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const double* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	const TransformInfo* pTis, // [in] å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTransform, // [in] pTis ã®è¦ç´ æ•°
+	int* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 )
 {
 	if(nTransform == 1 && !pTis->LogBeforeLinear && !pTis->PowAfterLinear)
 	{
-		//	üŒ`•ÏŠ·‚Ì‚İ‚Ìê‡
+		//	ç·šå½¢å¤‰æ›ã®ã¿ã®å ´åˆ
 
 		TransformLinToInt2(pSrc, n, pTis->Transform.Scale, pTis->Transform.Translate, pDst);
 	}
 	else
 	{
-		//	”ñüŒ`•ÏŠ·‚ğŠÜ‚Şê‡
+		//	éç·šå½¢å¤‰æ›ã‚’å«ã‚€å ´åˆ
 
-		if(300 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+		if(300 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 		{
-			//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+			//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 			#pragma omp parallel for
 			for (intptr_t i = 0; i < n; i++)
@@ -937,7 +937,7 @@ JUNKAPI void JUNKCALL TransformNonLinToInt2(
 		}
 		else
 		{
-			//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+			//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 			for (intptr_t i = 0; i < n; i++)
 			{
@@ -957,25 +957,25 @@ JUNKAPI void JUNKCALL TransformNonLinToInt2(
 	}
 }
 
-// ‹@”\ : SIMD‚ğg—p‚¹‚¸‚ÉüŒ`•ÏŠ·Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : SIMDã‚’ä½¿ç”¨ã›ãšã«ç·šå½¢å¤‰æ›å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
-// •Ô‚è’l : ÀÛ‚É•ÏŠ·Œãƒf[ƒ^‚ª‘‚«‚Ü‚ê‚éæ“ªƒ|ƒCƒ“ƒ^
+// è¿”ã‚Šå€¤ : å®Ÿéš›ã«å¤‰æ›å¾Œãƒ‡ãƒ¼ã‚¿ãŒæ›¸ãè¾¼ã¾ã‚Œã‚‹å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
 //
 int* __fastcall _TransformLinIntWithoutSimd(
-	const double* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	double scale, // [in] ƒXƒP[ƒŠƒ“ƒO’l
-	double translate, // [in] •½sˆÚ“®’l
-	int* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const double* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scale, // [in] ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translate, // [in] å¹³è¡Œç§»å‹•å€¤
+	int* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 )
 {
 #ifdef ERR_CHECK_MODE
 	if(100 <= n)
 #else
-	if(10000 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+	if(10000 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 #endif
 	{
-		//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+		//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 		#pragma omp parallel for
 		for (intptr_t i = 0; i < n; i++)
@@ -983,7 +983,7 @@ int* __fastcall _TransformLinIntWithoutSimd(
 	}
 	else
 	{
-		//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+		//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 		for (intptr_t i = 0; i < n; i++)
 			pDst[i] = (int)(pSrc[i] * scale + translate);
@@ -992,38 +992,38 @@ int* __fastcall _TransformLinIntWithoutSimd(
 	return pDst;
 }
 
-// ‹@”\ : SIMD‚ğg—p‚µ‚ÄüŒ`•ÏŠ·Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : SIMDã‚’ä½¿ç”¨ã—ã¦ç·šå½¢å¤‰æ›å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
-// •Ô‚è’l : ÀÛ‚É•ÏŠ·Œãƒf[ƒ^‚ª‘‚«‚Ü‚ê‚éæ“ªƒ|ƒCƒ“ƒ^
+// è¿”ã‚Šå€¤ : å®Ÿéš›ã«å¤‰æ›å¾Œãƒ‡ãƒ¼ã‚¿ãŒæ›¸ãè¾¼ã¾ã‚Œã‚‹å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
 //
 int* __fastcall _TransformLinSse2Int(
-	const double* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	double scale, // [in] ƒXƒP[ƒŠƒ“ƒO’l
-	double translate, // [in] •½sˆÚ“®’l
-	int* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^A 16ƒoƒCƒg‹«ŠE‚É‡‚í‚¹‚Äˆ—‚³‚ê‚é‚½‚ß n + 8 —v‘f•ª‚Ì—Ìˆæ‚ª•K—v
+	const double* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scale, // [in] ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translate, // [in] å¹³è¡Œç§»å‹•å€¤
+	int* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿ã€ 16ãƒã‚¤ãƒˆå¢ƒç•Œã«åˆã‚ã›ã¦å‡¦ç†ã•ã‚Œã‚‹ãŸã‚ n + 8 è¦ç´ åˆ†ã®é ˜åŸŸãŒå¿…è¦
 )
 {
-	//	8ƒf[ƒ^ˆÈã‚Å‚È‚¢ê‡–”‚ÍA8A16ƒoƒCƒgƒAƒ‰ƒCƒƒ“ƒg‚Å‚È‚¢ê‡‚ÍSSE‚Åˆ—‚Å‚«‚È‚¢
+	//	8ãƒ‡ãƒ¼ã‚¿ä»¥ä¸Šã§ãªã„å ´åˆåˆã¯ã€8ã€16ãƒã‚¤ãƒˆã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã§ãªã„å ´åˆã¯SSEã§å‡¦ç†ã§ããªã„
 	if((n < 8) | ((intptr_t)pSrc & 7))
 		return _TransformLinIntWithoutSimd(pSrc, n, scale, translate, pDst);
 
-	const double* pSrcEnd = pSrc + n; // •ÏŠ·Œ³ƒf[ƒ^‚ÌI—¹ƒ|ƒCƒ“ƒ^
-	const __m128d* pSrc16 = (__m128d*)(((intptr_t)pSrc + 15) & ~(intptr_t)0xf); // 16ƒoƒCƒg‹«ŠE‚ÉØ‚èã‚°‚½•ÏŠ·Œ³ƒf[ƒ^ƒ|ƒCƒ“ƒ^
-	intptr_t n4 = (((double*)pSrcEnd - (double*)pSrc16) >> 1) & ~(intptr_t)3; // pSrc16 ‚©‚ç4ƒf[ƒ^’PˆÊˆ—‚·‚éƒf[ƒ^”
-	__m128i* pDst16 = (__m128i*)(((intptr_t)pDst + 15) & ~(intptr_t)0xf); // 16ƒoƒCƒg‹«ŠE‚ÉØ‚èã‚°‚½•ÏŠ·æƒf[ƒ^ƒ|ƒCƒ“ƒ^
-	int* pDstStart; // ÀÛ‚É•ÏŠ·æƒf[ƒ^‚ª‘‚«‚Ü‚ê‚éæ“ªƒ|ƒCƒ“ƒ^ASSE‚Å16ƒoƒCƒg’PˆÊ‚Åˆ—‚·‚é‚½‚ß‚Éæ“ªƒ|ƒCƒ“ƒ^‚ğ’²®‚·‚é•K—v‚ª‚ ‚é
+	const double* pSrcEnd = pSrc + n; // å¤‰æ›å…ƒãƒ‡ãƒ¼ã‚¿ã®çµ‚äº†ãƒã‚¤ãƒ³ã‚¿
+	const __m128d* pSrc16 = (__m128d*)(((intptr_t)pSrc + 15) & ~(intptr_t)0xf); // 16ãƒã‚¤ãƒˆå¢ƒç•Œã«åˆ‡ã‚Šä¸Šã’ãŸå¤‰æ›å…ƒãƒ‡ãƒ¼ã‚¿ãƒã‚¤ãƒ³ã‚¿
+	intptr_t n4 = (((double*)pSrcEnd - (double*)pSrc16) >> 1) & ~(intptr_t)3; // pSrc16 ã‹ã‚‰4ãƒ‡ãƒ¼ã‚¿å˜ä½å‡¦ç†ã™ã‚‹ãƒ‡ãƒ¼ã‚¿æ•°
+	__m128i* pDst16 = (__m128i*)(((intptr_t)pDst + 15) & ~(intptr_t)0xf); // 16ãƒã‚¤ãƒˆå¢ƒç•Œã«åˆ‡ã‚Šä¸Šã’ãŸå¤‰æ›å…ˆãƒ‡ãƒ¼ã‚¿ãƒã‚¤ãƒ³ã‚¿
+	int* pDstStart; // å®Ÿéš›ã«å¤‰æ›å…ˆãƒ‡ãƒ¼ã‚¿ãŒæ›¸ãè¾¼ã¾ã‚Œã‚‹å…ˆé ­ãƒã‚¤ãƒ³ã‚¿ã€SSEã§16ãƒã‚¤ãƒˆå˜ä½ã§å‡¦ç†ã™ã‚‹ãŸã‚ã«å…ˆé ­ãƒã‚¤ãƒ³ã‚¿ã‚’èª¿æ•´ã™ã‚‹å¿…è¦ãŒã‚ã‚‹
 
 	if((intptr_t)pSrc == (intptr_t)pSrc16)
 	{
-		//	•ÏŠ·Œ³ƒf[ƒ^‚ªŠù‚É16ƒoƒCƒg‹«ŠE‚É‰ˆ‚Á‚Ä‚¢‚éê‡
+		//	å¤‰æ›å…ƒãƒ‡ãƒ¼ã‚¿ãŒæ—¢ã«16ãƒã‚¤ãƒˆå¢ƒç•Œã«æ²¿ã£ã¦ã„ã‚‹å ´åˆ
 		pDstStart = (int*)pDst16;
 	}
 	else
 	{
-		//	•ÏŠ·Œ³ƒf[ƒ^‚ª16ƒoƒCƒg‹«ŠE‚É‰ˆ‚Á‚Ä‚¢‚È‚¢ê‡
+		//	å¤‰æ›å…ƒãƒ‡ãƒ¼ã‚¿ãŒ16ãƒã‚¤ãƒˆå¢ƒç•Œã«æ²¿ã£ã¦ã„ãªã„å ´åˆ
 
-		//	æ“ª1ƒf[ƒ^‚ğ•ÏŠ·‚·‚é
+		//	å…ˆé ­1ãƒ‡ãƒ¼ã‚¿ã‚’å¤‰æ›ã™ã‚‹
 		pDst16++;
 		pDstStart = (int*)pDst16 - 1;
 		*pDstStart = (int)(pSrc[0] * scale + translate);
@@ -1034,10 +1034,10 @@ int* __fastcall _TransformLinSse2Int(
 #ifdef ERR_CHECK_MODE
 	if(100 <= n)
 #else
-	if(25000 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+	if(25000 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 #endif
 	{
-		//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+		//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 		#pragma omp parallel for
 		for(intptr_t i = 0; i < n4; i += 2)
@@ -1048,7 +1048,7 @@ int* __fastcall _TransformLinSse2Int(
 	}
 	else
 	{
-		//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+		//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 		for(intptr_t i = 0; i < n4; i += 2)
 			pDst16[i >> 1] = _mm_or_si128(
@@ -1057,7 +1057,7 @@ int* __fastcall _TransformLinSse2Int(
 						);
 	}
 
-	//	I’[‚Ì4ƒf[ƒ^’PˆÊ‚Åˆ—‚Å‚«‚È‚¢•”•ª‚ğ•ÏŠ·‚·‚é
+	//	çµ‚ç«¯ã®4ãƒ‡ãƒ¼ã‚¿å˜ä½ã§å‡¦ç†ã§ããªã„éƒ¨åˆ†ã‚’å¤‰æ›ã™ã‚‹
 	pSrc = (double*)(pSrc16 + n4);
 	pDst = (int*)(pDst16 + (n4 >> 1));
 	for(; pSrc < pSrcEnd; pSrc++, pDst++)
@@ -1066,21 +1066,21 @@ int* __fastcall _TransformLinSse2Int(
 	return pDstStart;
 }
 
-// ‹@”\ : double Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚ğó‚¯æ‚èAüŒ`•ÏŠ·‚µ‚Ä int Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚Éo—Í‚·‚é
+// æ©Ÿèƒ½ : double å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã‚’å—ã‘å–ã‚Šã€ç·šå½¢å¤‰æ›ã—ã¦ int å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã«å‡ºåŠ›ã™ã‚‹
 //
 void __fastcall _TransformLinPointToInt2WithoutSimd(
-	const Vector2d* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	double scaleX, // [in] XÀ•WƒXƒP[ƒŠƒ“ƒO’l
-	double translateX, // [in] XÀ•W•½sˆÚ“®’l
-	double scaleY, // [in] YÀ•WƒXƒP[ƒŠƒ“ƒO’l
-	double translateY, // [in] YÀ•W•½sˆÚ“®’l
-	Vector2i* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const Vector2d* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scaleX, // [in] Xåº§æ¨™ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translateX, // [in] Xåº§æ¨™å¹³è¡Œç§»å‹•å€¤
+	double scaleY, // [in] Yåº§æ¨™ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translateY, // [in] Yåº§æ¨™å¹³è¡Œç§»å‹•å€¤
+	Vector2i* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 )
 {
-	if(10000 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+	if(10000 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 	{
-		//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+		//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 		#pragma omp parallel for
 		for (intptr_t i = 0; i < n; i++)
@@ -1093,7 +1093,7 @@ void __fastcall _TransformLinPointToInt2WithoutSimd(
 	}
 	else
 	{
-		//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+		//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 		for (intptr_t i = 0; i < n; i++)
 		{
@@ -1105,42 +1105,42 @@ void __fastcall _TransformLinPointToInt2WithoutSimd(
 	}
 }
 
-// ‹@”\ : double Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚ğó‚¯æ‚èASIMD‚ğg—p‚µ‚ÄüŒ`•ÏŠ·‚µ‚Ä int Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚Éo—Í‚·‚é
+// æ©Ÿèƒ½ : double å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã‚’å—ã‘å–ã‚Šã€SIMDã‚’ä½¿ç”¨ã—ã¦ç·šå½¢å¤‰æ›ã—ã¦ int å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã«å‡ºåŠ›ã™ã‚‹
 //
 void __fastcall _TransformLinPointToInt2WithSse2(
-	const Vector2d* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	double scaleX, // [in] XÀ•WƒXƒP[ƒŠƒ“ƒO’l
-	double translateX, // [in] XÀ•W•½sˆÚ“®’l
-	double scaleY, // [in] YÀ•WƒXƒP[ƒŠƒ“ƒO’l
-	double translateY, // [in] YÀ•W•½sˆÚ“®’l
-	Vector2i* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const Vector2d* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scaleX, // [in] Xåº§æ¨™ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translateX, // [in] Xåº§æ¨™å¹³è¡Œç§»å‹•å€¤
+	double scaleY, // [in] Yåº§æ¨™ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translateY, // [in] Yåº§æ¨™å¹³è¡Œç§»å‹•å€¤
+	Vector2i* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 )
 {
-	//	8ƒf[ƒ^ˆÈã‚Å‚È‚¢ê‡‚ÍSSE‚Åˆ—‚Å‚«‚È‚¢
+	//	8ãƒ‡ãƒ¼ã‚¿ä»¥ä¸Šã§ãªã„å ´åˆã¯SSEã§å‡¦ç†ã§ããªã„
 	if(n < 8)
 		return _TransformLinPointToInt2WithoutSimd(pSrc, n, scaleX, translateX, scaleY, translateY, pDst);
 
-	//	ƒ‹[ƒv‚Åˆ—‚·‚éƒ|ƒCƒ“ƒg”Aƒ‹[ƒv“à‚Å‚Í32ƒoƒCƒg’PˆÊ‚Åˆ—‚·‚é
+	//	ãƒ«ãƒ¼ãƒ—ã§å‡¦ç†ã™ã‚‹ãƒã‚¤ãƒ³ãƒˆæ•°ã€ãƒ«ãƒ¼ãƒ—å†…ã§ã¯32ãƒã‚¤ãƒˆå˜ä½ã§å‡¦ç†ã™ã‚‹
 	intptr_t nLoopPoints = n & ~(intptr_t)1;
 
-	//	ƒ‹[ƒvˆ—‚Ìæ“ªƒ|ƒCƒ“ƒ^
+	//	ãƒ«ãƒ¼ãƒ—å‡¦ç†ã®å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
 	const __m128d* pSrc16 = (__m128d*)pSrc;
 	__m128i* pDst16 = (__m128i*)pDst;
 
-	//	•ÏŠ·ŒW”İ’è
+	//	å¤‰æ›ä¿‚æ•°è¨­å®š
 	__m128d s = { scaleX, scaleY };
 	__m128d t = { translateX, translateY };
 
-	if(25000 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+	if(25000 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 	{
-		//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+		//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 		if((intptr_t)pSrc & 15)
 		{
 			if((intptr_t)pDst & 15)
 			{
-				//	ƒ\[ƒX‚ÆƒfƒXƒeƒBƒl[ƒVƒ‡ƒ“—¼•û‚ª16ƒoƒCƒgƒAƒ‰ƒCƒƒ“ƒg‚³‚ê‚Ä‚¢‚È‚¢ê‡
+				//	ã‚½ãƒ¼ã‚¹ã¨ãƒ‡ã‚¹ãƒ†ã‚£ãƒãƒ¼ã‚·ãƒ§ãƒ³ä¸¡æ–¹ãŒ16ãƒã‚¤ãƒˆã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã•ã‚Œã¦ã„ãªã„å ´åˆ
 
 				//::OutputDebugStringA("Transform MT SU DU\r\n");
 
@@ -1156,7 +1156,7 @@ void __fastcall _TransformLinPointToInt2WithSse2(
 			}
 			else
 			{
-				//	ƒ\[ƒX‚ª16ƒoƒCƒgƒAƒ‰ƒCƒƒ“ƒg‚³‚ê‚Ä‚¢‚È‚¢ê‡
+				//	ã‚½ãƒ¼ã‚¹ãŒ16ãƒã‚¤ãƒˆã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã•ã‚Œã¦ã„ãªã„å ´åˆ
 
 				//::OutputDebugStringA("Transform MT SU DA\r\n");
 
@@ -1175,7 +1175,7 @@ void __fastcall _TransformLinPointToInt2WithSse2(
 		{
 			if((intptr_t)pDst & 15)
 			{
-				//	ƒfƒXƒeƒBƒl[ƒVƒ‡ƒ“‚ª16ƒoƒCƒgƒAƒ‰ƒCƒƒ“ƒg‚³‚ê‚Ä‚¢‚È‚¢ê‡
+				//	ãƒ‡ã‚¹ãƒ†ã‚£ãƒãƒ¼ã‚·ãƒ§ãƒ³ãŒ16ãƒã‚¤ãƒˆã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã•ã‚Œã¦ã„ãªã„å ´åˆ
 
 				//::OutputDebugStringA("Transform MT SA DU\r\n");
 
@@ -1191,7 +1191,7 @@ void __fastcall _TransformLinPointToInt2WithSse2(
 			}
 			else
 			{
-				//	ƒ\[ƒX‚ÆƒfƒXƒeƒBƒl[ƒVƒ‡ƒ“—¼•û‚ª16ƒoƒCƒgƒAƒ‰ƒCƒƒ“ƒg‚³‚ê‚Ä‚¢‚éê‡
+				//	ã‚½ãƒ¼ã‚¹ã¨ãƒ‡ã‚¹ãƒ†ã‚£ãƒãƒ¼ã‚·ãƒ§ãƒ³ä¸¡æ–¹ãŒ16ãƒã‚¤ãƒˆã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã•ã‚Œã¦ã„ã‚‹å ´åˆ
 
 				//::OutputDebugStringA("Transform MT SA DA\r\n");
 
@@ -1209,13 +1209,13 @@ void __fastcall _TransformLinPointToInt2WithSse2(
 	}
 	else
 	{
-		//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+		//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 		if((intptr_t)pSrc & 15)
 		{
 			if((intptr_t)pDst & 15)
 			{
-				//	ƒ\[ƒX‚ÆƒfƒXƒeƒBƒl[ƒVƒ‡ƒ“—¼•û‚ª16ƒoƒCƒgƒAƒ‰ƒCƒƒ“ƒg‚³‚ê‚Ä‚¢‚È‚¢ê‡
+				//	ã‚½ãƒ¼ã‚¹ã¨ãƒ‡ã‚¹ãƒ†ã‚£ãƒãƒ¼ã‚·ãƒ§ãƒ³ä¸¡æ–¹ãŒ16ãƒã‚¤ãƒˆã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã•ã‚Œã¦ã„ãªã„å ´åˆ
 
 				//::OutputDebugStringA("Transform ST SU DU\r\n");
 
@@ -1231,7 +1231,7 @@ void __fastcall _TransformLinPointToInt2WithSse2(
 			}
 			else
 			{
-				//	ƒ\[ƒX‚ª16ƒoƒCƒgƒAƒ‰ƒCƒƒ“ƒg‚³‚ê‚Ä‚¢‚È‚¢ê‡
+				//	ã‚½ãƒ¼ã‚¹ãŒ16ãƒã‚¤ãƒˆã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã•ã‚Œã¦ã„ãªã„å ´åˆ
 
 				//::OutputDebugStringA("Transform ST SU DA\r\n");
 
@@ -1250,7 +1250,7 @@ void __fastcall _TransformLinPointToInt2WithSse2(
 		{
 			if((intptr_t)pDst & 15)
 			{
-				//	ƒfƒXƒeƒBƒl[ƒVƒ‡ƒ“‚ª16ƒoƒCƒgƒAƒ‰ƒCƒƒ“ƒg‚³‚ê‚Ä‚¢‚È‚¢ê‡
+				//	ãƒ‡ã‚¹ãƒ†ã‚£ãƒãƒ¼ã‚·ãƒ§ãƒ³ãŒ16ãƒã‚¤ãƒˆã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã•ã‚Œã¦ã„ãªã„å ´åˆ
 
 				//::OutputDebugStringA("Transform ST SA DU\r\n");
 
@@ -1266,7 +1266,7 @@ void __fastcall _TransformLinPointToInt2WithSse2(
 			}
 			else
 			{
-				//	ƒ\[ƒX‚ÆƒfƒXƒeƒBƒl[ƒVƒ‡ƒ“—¼•û‚ª16ƒoƒCƒgƒAƒ‰ƒCƒƒ“ƒg‚³‚ê‚Ä‚¢‚éê‡
+				//	ã‚½ãƒ¼ã‚¹ã¨ãƒ‡ã‚¹ãƒ†ã‚£ãƒãƒ¼ã‚·ãƒ§ãƒ³ä¸¡æ–¹ãŒ16ãƒã‚¤ãƒˆã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã•ã‚Œã¦ã„ã‚‹å ´åˆ
 
 				//::OutputDebugStringA("Transform ST SA DA\r\n");
 
@@ -1283,7 +1283,7 @@ void __fastcall _TransformLinPointToInt2WithSse2(
 		}
 	}
 
-	//	ƒ‹[ƒv‚Åˆ—‚Å‚«‚È‚©‚Á‚½ƒ|ƒCƒ“ƒg‚ğˆ—
+	//	ãƒ«ãƒ¼ãƒ—ã§å‡¦ç†ã§ããªã‹ã£ãŸãƒã‚¤ãƒ³ãƒˆã‚’å‡¦ç†
 	if(n & 1)
 	{
 		const Vector2d& s = pSrc[nLoopPoints];
@@ -1293,53 +1293,53 @@ void __fastcall _TransformLinPointToInt2WithSse2(
 	}
 }
 
-// ‹@”\ : double Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚ğó‚¯æ‚èA•ÏŠ·‚µ‚Ä int Œ^‚QŸŒ³(X,Y)ƒxƒNƒgƒ‹”z—ñ‚Éo—Í‚·‚é
+// æ©Ÿèƒ½ : double å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã‚’å—ã‘å–ã‚Šã€å¤‰æ›ã—ã¦ int å‹ï¼’æ¬¡å…ƒ(X,Y)ãƒ™ã‚¯ãƒˆãƒ«é…åˆ—ã«å‡ºåŠ›ã™ã‚‹
 //
 JUNKAPI void JUNKCALL TransformLinPointDToPointI(
-	const Vector2d* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	double scaleX, // [in] XÀ•WƒXƒP[ƒŠƒ“ƒO’l
-	double translateX, // [in] XÀ•W•½sˆÚ“®’l
-	double scaleY, // [in] YÀ•WƒXƒP[ƒŠƒ“ƒO’l
-	double translateY, // [in] YÀ•W•½sˆÚ“®’l
-	Vector2i* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const Vector2d* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scaleX, // [in] Xåº§æ¨™ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translateX, // [in] Xåº§æ¨™å¹³è¡Œç§»å‹•å€¤
+	double scaleY, // [in] Yåº§æ¨™ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translateY, // [in] Yåº§æ¨™å¹³è¡Œç§»å‹•å€¤
+	Vector2i* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 )
 {
 	if(TransformLinPointToInt2Best == NULL)
 	{
 		if(IsSSE2Supported())
-			TransformLinPointToInt2Best = _TransformLinPointToInt2WithSse2; // SSE2g—p‰Â”\
+			TransformLinPointToInt2Best = _TransformLinPointToInt2WithSse2; // SSE2ä½¿ç”¨å¯èƒ½
 		else
-			TransformLinPointToInt2Best = _TransformLinPointToInt2WithoutSimd; // SSE2g—p•s‰Â”\
+			TransformLinPointToInt2Best = _TransformLinPointToInt2WithoutSimd; // SSE2ä½¿ç”¨ä¸å¯èƒ½
 	}
 	TransformLinPointToInt2Best(pSrc, n, scaleX, translateX, scaleY, translateY, pDst);
 }
 
-// ‹@”\ : ”ñüŒ`•ÏŠ·(Log,Pow)Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : éç·šå½¢å¤‰æ›(Log,Pow)å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
 JUNKAPI void JUNKCALL TransformNonLinPointDToPointI(
-	const Vector2d* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	const TransformInfo* pTisX, // [in] XÀ•W•ÏŠ·î•ñ”z—ñ
-	intptr_t nTransformX, // [in] pTisX ‚Ì—v‘f”
-	const TransformInfo* pTisY, // [in] YÀ•W•ÏŠ·î•ñ”z—ñ
-	intptr_t nTransformY, // [in] pTisY ‚Ì—v‘f”
-	Vector2i* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	const Vector2d* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	const TransformInfo* pTisX, // [in] Xåº§æ¨™å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTransformX, // [in] pTisX ã®è¦ç´ æ•°
+	const TransformInfo* pTisY, // [in] Yåº§æ¨™å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTransformY, // [in] pTisY ã®è¦ç´ æ•°
+	Vector2i* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 )
 {
 	if(nTransformX == 1 && nTransformY == 1 && !pTisX->LogBeforeLinear && !pTisX->PowAfterLinear && !pTisY->LogBeforeLinear && !pTisY->PowAfterLinear)
 	{
-		//	üŒ`•ÏŠ·‚Ì‚İ‚Ìê‡
+		//	ç·šå½¢å¤‰æ›ã®ã¿ã®å ´åˆ
 
 		TransformLinPointDToPointI(pSrc, n, pTisX->Transform.Scale, pTisX->Transform.Translate, pTisY->Transform.Scale, pTisY->Transform.Translate, pDst);
 	}
 	else
 	{
-		//	”ñüŒ`•ÏŠ·‚ğŠÜ‚Şê‡
+		//	éç·šå½¢å¤‰æ›ã‚’å«ã‚€å ´åˆ
 
-		if(300 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+		if(300 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 		{
-			//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+			//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 			#pragma omp parallel for
 			for (intptr_t i = 0; i < n; i++)
@@ -1370,7 +1370,7 @@ JUNKAPI void JUNKCALL TransformNonLinPointDToPointI(
 		}
 		else
 		{
-			//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+			//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 			for (intptr_t i = 0; i < n; i++)
 			{
@@ -1401,53 +1401,53 @@ JUNKAPI void JUNKCALL TransformNonLinPointDToPointI(
 	}
 }
 
-// ‹@”\ : üŒ`•ÏŠ·Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : ç·šå½¢å¤‰æ›å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
-// •Ô‚è’l : ÀÛ‚É•ÏŠ·Œãƒf[ƒ^‚ª‘‚«‚Ü‚ê‚éæ“ªƒ|ƒCƒ“ƒ^
+// è¿”ã‚Šå€¤ : å®Ÿéš›ã«å¤‰æ›å¾Œãƒ‡ãƒ¼ã‚¿ãŒæ›¸ãè¾¼ã¾ã‚Œã‚‹å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
 //
 int* __fastcall _TransformLinInt(
-	const double* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	double scale, // [in] ƒXƒP[ƒŠƒ“ƒO’l
-	double translate, // [in] •½sˆÚ“®’l
-	int* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^A 16ƒoƒCƒg‹«ŠE‚É‡‚í‚¹‚Äˆ—‚³‚ê‚é‚½‚ß n + 8 —v‘f•ª‚Ì—Ìˆæ‚ª•K—v
+	const double* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scale, // [in] ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translate, // [in] å¹³è¡Œç§»å‹•å€¤
+	int* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿ã€ 16ãƒã‚¤ãƒˆå¢ƒç•Œã«åˆã‚ã›ã¦å‡¦ç†ã•ã‚Œã‚‹ãŸã‚ n + 8 è¦ç´ åˆ†ã®é ˜åŸŸãŒå¿…è¦
 )
 {
 	if(TransformLinIntBest == NULL)
 	{
 		if(IsSSE2Supported())
-			TransformLinIntBest = _TransformLinSse2Int; // SSE2g—p‰Â”\
+			TransformLinIntBest = _TransformLinSse2Int; // SSE2ä½¿ç”¨å¯èƒ½
 		else
-			TransformLinIntBest = _TransformLinIntWithoutSimd; // SSE2g—p•s‰Â”\
+			TransformLinIntBest = _TransformLinIntWithoutSimd; // SSE2ä½¿ç”¨ä¸å¯èƒ½
 	}
 	return TransformLinIntBest(pSrc, n, scale, translate, pDst);
 }
 
-// ‹@”\ : ”ñüŒ`•ÏŠ·(Log,Pow)Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : éç·šå½¢å¤‰æ›(Log,Pow)å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
-// •Ô‚è’l : ÀÛ‚É•ÏŠ·Œãƒf[ƒ^‚ª‘‚«‚Ü‚ê‚éæ“ªƒ|ƒCƒ“ƒ^
+// è¿”ã‚Šå€¤ : å®Ÿéš›ã«å¤‰æ›å¾Œãƒ‡ãƒ¼ã‚¿ãŒæ›¸ãè¾¼ã¾ã‚Œã‚‹å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
 //
 int* __fastcall _TransformNonLinInt(
-	const double* pSrc, // [in] •ÏŠ·Œ³‚Ìƒf[ƒ^
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	const TransformInfo* pTis, // [in] •ÏŠ·î•ñ”z—ñ
-	intptr_t nTransform, // [in] pTis ‚Ì—v‘f”
-	int* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^A 16ƒoƒCƒg‹«ŠE‚É‡‚í‚¹‚Äˆ—‚³‚ê‚é‚½‚ß n + 8 —v‘f•ª‚Ì—Ìˆæ‚ª•K—v
+	const double* pSrc, // [in] å¤‰æ›å…ƒã®ãƒ‡ãƒ¼ã‚¿
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	const TransformInfo* pTis, // [in] å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTransform, // [in] pTis ã®è¦ç´ æ•°
+	int* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿ã€ 16ãƒã‚¤ãƒˆå¢ƒç•Œã«åˆã‚ã›ã¦å‡¦ç†ã•ã‚Œã‚‹ãŸã‚ n + 8 è¦ç´ åˆ†ã®é ˜åŸŸãŒå¿…è¦
 )
 {
 	if(nTransform == 1 && !pTis->LogBeforeLinear && !pTis->PowAfterLinear)
 	{
-		//	üŒ`•ÏŠ·‚Ì‚İ‚Ìê‡
+		//	ç·šå½¢å¤‰æ›ã®ã¿ã®å ´åˆ
 
 		return _TransformLinInt(pSrc, n, pTis->Transform.Scale, pTis->Transform.Translate, pDst);
 	}
 	else
 	{
-		//	”ñüŒ`•ÏŠ·‚ğŠÜ‚Şê‡
+		//	éç·šå½¢å¤‰æ›ã‚’å«ã‚€å ´åˆ
 
-		if(300 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+		if(300 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 		{
-			//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+			//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 			#pragma omp parallel for
 			for (intptr_t i = 0; i < n; i++)
@@ -1467,7 +1467,7 @@ int* __fastcall _TransformNonLinInt(
 		}
 		else
 		{
-			//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+			//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 			for (intptr_t i = 0; i < n; i++)
 			{
@@ -1489,16 +1489,16 @@ int* __fastcall _TransformNonLinInt(
 	}
 }
 
-// ‹@”\ : ƒCƒ“ƒfƒbƒNƒX”Ô†‚ğ1‚¸‚Â‰ÁZ‚µ‚Ä‚¢‚«A‚»‚ê‚ğüŒ`•ÏŠ·Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·ã‚’1ãšã¤åŠ ç®—ã—ã¦ã„ãã€ãã‚Œã‚’ç·šå½¢å¤‰æ›å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
-// •Ô‚è’l : ÀÛ‚É•ÏŠ·Œãƒf[ƒ^‚ª‘‚«‚Ü‚ê‚éæ“ªƒ|ƒCƒ“ƒ^
+// è¿”ã‚Šå€¤ : å®Ÿéš›ã«å¤‰æ›å¾Œãƒ‡ãƒ¼ã‚¿ãŒæ›¸ãè¾¼ã¾ã‚Œã‚‹å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
 //
 int* __fastcall _TransformIndexLinIntWithoutSimd(
-	intptr_t iStartIndex, // [in] ƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	double scale, // [in] ƒXƒP[ƒŠƒ“ƒO’l
-	double translate, // [in] •½sˆÚ“®’l
-	int* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^
+	intptr_t iStartIndex, // [in] ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scale, // [in] ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translate, // [in] å¹³è¡Œç§»å‹•å€¤
+	int* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿
 )
 {
 	double dIdx = (double)iStartIndex;
@@ -1510,44 +1510,44 @@ int* __fastcall _TransformIndexLinIntWithoutSimd(
 	return pDst;
 }
 
-// ‹@”\ : ƒCƒ“ƒfƒbƒNƒX”Ô†‚ğ1‚¸‚Â‰ÁZ‚µ‚Ä‚¢‚«A‚»‚ê‚ğüŒ`•ÏŠ·Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·ã‚’1ãšã¤åŠ ç®—ã—ã¦ã„ãã€ãã‚Œã‚’ç·šå½¢å¤‰æ›å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
-// •Ô‚è’l : ÀÛ‚É•ÏŠ·Œãƒf[ƒ^‚ª‘‚«‚Ü‚ê‚éæ“ªƒ|ƒCƒ“ƒ^
+// è¿”ã‚Šå€¤ : å®Ÿéš›ã«å¤‰æ›å¾Œãƒ‡ãƒ¼ã‚¿ãŒæ›¸ãè¾¼ã¾ã‚Œã‚‹å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
 //
 int* __fastcall _TransformIndexLinIntSse2(
-	intptr_t iStartIndex, // [in] ƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	double scale, // [in] ƒXƒP[ƒŠƒ“ƒO’l
-	double translate, // [in] •½sˆÚ“®’l
-	int* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^A 16ƒoƒCƒg‹«ŠE‚É‡‚í‚¹‚Äˆ—‚³‚ê‚é‚½‚ß n + 8 —v‘f•ª‚Ì—Ìˆæ‚ª•K—v
+	intptr_t iStartIndex, // [in] ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scale, // [in] ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translate, // [in] å¹³è¡Œç§»å‹•å€¤
+	int* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿ã€ 16ãƒã‚¤ãƒˆå¢ƒç•Œã«åˆã‚ã›ã¦å‡¦ç†ã•ã‚Œã‚‹ãŸã‚ n + 8 è¦ç´ åˆ†ã®é ˜åŸŸãŒå¿…è¦
 )
 {
-	//	8ƒf[ƒ^ˆÈã‚Å‚È‚¢ê‡‚ÍSSE‚Åˆ—‚Å‚«‚È‚¢
+	//	8ãƒ‡ãƒ¼ã‚¿ä»¥ä¸Šã§ãªã„å ´åˆã¯SSEã§å‡¦ç†ã§ããªã„
 	if(n < 8)
 		return _TransformIndexLinIntWithoutSimd(iStartIndex, n, scale, translate, pDst);
 
-	__m128d s = { scale, scale }; // ƒXƒP[ƒŠƒ“ƒO’l
-	__m128d t = { translate, translate }; // •½sˆÚ“®’l
-	__m128d inc4 = { 4, 4 }; // 4ƒf[ƒ^ˆ—‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†‘‰Á’l
-	__m128i* pDst16 = (__m128i*)(((intptr_t)pDst + 15) & ~(intptr_t)0xf); // 16ƒoƒCƒg‹«ŠE‚ÉØ‚èã‚°‚½•ÏŠ·æƒf[ƒ^ƒ|ƒCƒ“ƒ^
-	intptr_t n128i = n >> 2; // __m128i(4‚Â‚Ì®”‚ÌƒpƒbƒN)ƒf[ƒ^”A4“_’PˆÊ‚Åˆ—‚·‚é‚½‚ßƒf[ƒ^”‚ğ4‚ÅŠ„‚é
+	__m128d s = { scale, scale }; // ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	__m128d t = { translate, translate }; // å¹³è¡Œç§»å‹•å€¤
+	__m128d inc4 = { 4, 4 }; // 4ãƒ‡ãƒ¼ã‚¿å‡¦ç†æ™‚ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·å¢—åŠ å€¤
+	__m128i* pDst16 = (__m128i*)(((intptr_t)pDst + 15) & ~(intptr_t)0xf); // 16ãƒã‚¤ãƒˆå¢ƒç•Œã«åˆ‡ã‚Šä¸Šã’ãŸå¤‰æ›å…ˆãƒ‡ãƒ¼ã‚¿ãƒã‚¤ãƒ³ã‚¿
+	intptr_t n128i = n >> 2; // __m128i(4ã¤ã®æ•´æ•°ã®ãƒ‘ãƒƒã‚¯)ãƒ‡ãƒ¼ã‚¿æ•°ã€4ç‚¹å˜ä½ã§å‡¦ç†ã™ã‚‹ãŸã‚ãƒ‡ãƒ¼ã‚¿æ•°ã‚’4ã§å‰²ã‚‹
 
 #ifdef ERR_CHECK_MODE
 	if(100 <= n)
 #else
-	if(35000 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+	if(35000 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 #endif
 	{
 		intptr_t nthread = omp_get_max_threads();
 		if(n128i < nthread)
 			nthread = n128i;
 
-		intptr_t divsize = n128i / nthread; // ƒXƒŒƒbƒh–ˆ‚Éˆ—‚·‚é __m128i ƒf[ƒ^”(1‚Â‚Ì __m128i ƒf[ƒ^‚É‚Í4‚Â‚Ì®”ƒf[ƒ^‚ªƒpƒbƒN‚³‚ê‚Ä‚¢‚é)
+		intptr_t divsize = n128i / nthread; // ã‚¹ãƒ¬ãƒƒãƒ‰æ¯ã«å‡¦ç†ã™ã‚‹ __m128i ãƒ‡ãƒ¼ã‚¿æ•°(1ã¤ã® __m128i ãƒ‡ãƒ¼ã‚¿ã«ã¯4ã¤ã®æ•´æ•°ãƒ‡ãƒ¼ã‚¿ãŒãƒ‘ãƒƒã‚¯ã•ã‚Œã¦ã„ã‚‹)
 
 		#pragma omp parallel for 
 		for(intptr_t j = 0; j < nthread; ++j)
 		{
-			intptr_t iS = iStartIndex + j * (divsize << 2); // ‚±‚ÌƒXƒŒƒbƒh‚Å‚ÌŠJnƒCƒ“ƒfƒbƒNƒX”Ô†
+			intptr_t iS = iStartIndex + j * (divsize << 2); // ã“ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã§ã®é–‹å§‹ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·
 			__m128d idx1 = { (double)iS, (double)(iS + 1) };
 			__m128d idx2;
 			{
@@ -1555,8 +1555,8 @@ int* __fastcall _TransformIndexLinIntSse2(
 				idx2 = _mm_add_pd(idx1, inc2);
 			}
 
-			__m128i* p = pDst16 + j * divsize; // ‚±‚ÌƒXƒŒƒbƒh‚Å‚Ì‘‚«‚İŠJnƒ|ƒCƒ“ƒ^
-			__m128i* e = j < (nthread - 1) ? p + divsize : pDst16 + n128i; // ‚±‚ÌƒXƒŒƒbƒh‚Å‚Ì‘‚«‚İI—¹ƒ|ƒCƒ“ƒ^
+			__m128i* p = pDst16 + j * divsize; // ã“ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã§ã®æ›¸ãè¾¼ã¿é–‹å§‹ãƒã‚¤ãƒ³ã‚¿
+			__m128i* e = j < (nthread - 1) ? p + divsize : pDst16 + n128i; // ã“ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã§ã®æ›¸ãè¾¼ã¿çµ‚äº†ãƒã‚¤ãƒ³ã‚¿
 			for(; p < e; p++)
 			{
 				*p = _mm_or_si128(
@@ -1586,8 +1586,8 @@ int* __fastcall _TransformIndexLinIntSse2(
 			idx2 = _mm_add_pd(idx1, inc2);
 		}
 
-		__m128i* p = pDst16; // ‘‚«‚İŠJnƒ|ƒCƒ“ƒ^
-		__m128i* e = p + n128i; // ‘‚«‚İI—¹ƒ|ƒCƒ“ƒ^
+		__m128i* p = pDst16; // æ›¸ãè¾¼ã¿é–‹å§‹ãƒã‚¤ãƒ³ã‚¿
+		__m128i* e = p + n128i; // æ›¸ãè¾¼ã¿çµ‚äº†ãƒã‚¤ãƒ³ã‚¿
 		for(; p < e; p++)
 		{
 			*p = _mm_or_si128(
@@ -1612,53 +1612,53 @@ int* __fastcall _TransformIndexLinIntSse2(
 }
 
 
-// ‹@”\ : ƒCƒ“ƒfƒbƒNƒX”Ô†‚ğ1‚¸‚Â‰ÁZ‚µ‚Ä‚¢‚«A‚»‚ê‚ğüŒ`•ÏŠ·Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·ã‚’1ãšã¤åŠ ç®—ã—ã¦ã„ãã€ãã‚Œã‚’ç·šå½¢å¤‰æ›å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
-// •Ô‚è’l : ÀÛ‚É•ÏŠ·Œãƒf[ƒ^‚ª‘‚«‚Ü‚ê‚éæ“ªƒ|ƒCƒ“ƒ^
+// è¿”ã‚Šå€¤ : å®Ÿéš›ã«å¤‰æ›å¾Œãƒ‡ãƒ¼ã‚¿ãŒæ›¸ãè¾¼ã¾ã‚Œã‚‹å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
 //
 int* __fastcall _TransformIndexLinInt(
-	intptr_t iStartIndex, // [in] ƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	double scale, // [in] ƒXƒP[ƒŠƒ“ƒO’l
-	double translate, // [in] •½sˆÚ“®’l
-	int* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^A 16ƒoƒCƒg‹«ŠE‚É‡‚í‚¹‚Äˆ—‚³‚ê‚é‚½‚ß n + 8 —v‘f•ª‚Ì—Ìˆæ‚ª•K—v
+	intptr_t iStartIndex, // [in] ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	double scale, // [in] ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°å€¤
+	double translate, // [in] å¹³è¡Œç§»å‹•å€¤
+	int* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿ã€ 16ãƒã‚¤ãƒˆå¢ƒç•Œã«åˆã‚ã›ã¦å‡¦ç†ã•ã‚Œã‚‹ãŸã‚ n + 8 è¦ç´ åˆ†ã®é ˜åŸŸãŒå¿…è¦
 )
 {
 	if(TransformIndexLinIntBest == NULL)
 	{
 		if(IsSSE2Supported())
-			TransformIndexLinIntBest = _TransformIndexLinIntSse2; // SSE2g—p‰Â”\
+			TransformIndexLinIntBest = _TransformIndexLinIntSse2; // SSE2ä½¿ç”¨å¯èƒ½
 		else
-			TransformIndexLinIntBest = _TransformIndexLinIntWithoutSimd; // SSE2g—p•s‰Â”\
+			TransformIndexLinIntBest = _TransformIndexLinIntWithoutSimd; // SSE2ä½¿ç”¨ä¸å¯èƒ½
 	}
 	return TransformIndexLinIntBest(iStartIndex, n, scale, translate, pDst);
 }
 
-// ‹@”\ : ƒCƒ“ƒfƒbƒNƒX”Ô†‚ğ1‚¸‚Â‰ÁZ‚µ‚Ä‚¢‚«A‚»‚ê‚ğ”ñüŒ`•ÏŠ·(Log,Pow)Œãint‚É•ÏŠ·‚ğs‚¤
+// æ©Ÿèƒ½ : ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·ã‚’1ãšã¤åŠ ç®—ã—ã¦ã„ãã€ãã‚Œã‚’éç·šå½¢å¤‰æ›(Log,Pow)å¾Œintã«å¤‰æ›ã‚’è¡Œã†
 //
-// •Ô‚è’l : ÀÛ‚É•ÏŠ·Œãƒf[ƒ^‚ª‘‚«‚Ü‚ê‚éæ“ªƒ|ƒCƒ“ƒ^
+// è¿”ã‚Šå€¤ : å®Ÿéš›ã«å¤‰æ›å¾Œãƒ‡ãƒ¼ã‚¿ãŒæ›¸ãè¾¼ã¾ã‚Œã‚‹å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
 //
 int* __fastcall _TransformIndexNonLinInt(
-	intptr_t iStartIndex, // [in] ƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	const TransformInfo* pTis, // [in] •ÏŠ·î•ñ”z—ñ
-	intptr_t nTransform, // [in] pTis ‚Ì—v‘f”
-	int* pDst // [out] •ÏŠ·Œã‚Ìƒf[ƒ^A 16ƒoƒCƒg‹«ŠE‚É‡‚í‚¹‚Äˆ—‚³‚ê‚é‚½‚ß n + 8 —v‘f•ª‚Ì—Ìˆæ‚ª•K—v
+	intptr_t iStartIndex, // [in] ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	const TransformInfo* pTis, // [in] å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTransform, // [in] pTis ã®è¦ç´ æ•°
+	int* pDst // [out] å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿ã€ 16ãƒã‚¤ãƒˆå¢ƒç•Œã«åˆã‚ã›ã¦å‡¦ç†ã•ã‚Œã‚‹ãŸã‚ n + 8 è¦ç´ åˆ†ã®é ˜åŸŸãŒå¿…è¦
 )
 {
 	if(nTransform == 1 && !pTis->LogBeforeLinear && !pTis->PowAfterLinear)
 	{
-		//	üŒ`•ÏŠ·‚Ì‚İ‚Ìê‡
+		//	ç·šå½¢å¤‰æ›ã®ã¿ã®å ´åˆ
 
 		return _TransformIndexLinInt(iStartIndex, n, pTis->Transform.Scale, pTis->Transform.Translate, pDst);
 	}
 	else
 	{
-		//	”ñüŒ`•ÏŠ·‚ğŠÜ‚Şê‡
+		//	éç·šå½¢å¤‰æ›ã‚’å«ã‚€å ´åˆ
 
-		if(300 <= n) // TODO: ŠÂ‹«‚É‚æ‚Á‚Äˆá‚¤‚Ì‚Å‚Ç‚Ì’l‚ªƒxƒXƒg‚©’²¸‚·‚é
+		if(300 <= n) // TODO: ç’°å¢ƒã«ã‚ˆã£ã¦é•ã†ã®ã§ã©ã®å€¤ãŒãƒ™ã‚¹ãƒˆã‹èª¿æŸ»ã™ã‚‹
 		{
-			//	ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh
+			//	ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰
 
 			#pragma omp parallel for
 			for (intptr_t i = 0; i < n; i++)
@@ -1678,7 +1678,7 @@ int* __fastcall _TransformIndexNonLinInt(
 		}
 		else
 		{
-			//	ƒVƒ“ƒOƒ‹ƒXƒŒƒbƒh
+			//	ã‚·ãƒ³ã‚°ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
 
 			for (intptr_t i = 0; i < n; i++)
 			{
@@ -1700,20 +1700,20 @@ int* __fastcall _TransformIndexNonLinInt(
 	return pDst;
 }
 
-// ‹@”\ : •`‰æ—p‚É®”À•W‚É•ÏŠ·‚·‚éA“¯‚¶À•W‚É–³‘Ê‚È•`‰æ‚ğs‚í‚È‚¢‚æ‚¤‚É•ÏŠ·‚·‚é
+// æ©Ÿèƒ½ : æç”»ç”¨ã«æ•´æ•°åº§æ¨™ã«å¤‰æ›ã™ã‚‹ã€åŒã˜åº§æ¨™ã«ç„¡é§„ãªæç”»ã‚’è¡Œã‚ãªã„ã‚ˆã†ã«å¤‰æ›ã™ã‚‹
 //
-// •Ô‚è’l : •ÏŠ·Œã‚Ìƒf[ƒ^”A•‰”‚ª•Ô‚ê‚ÎƒGƒ‰[
-//		-1=ƒƒ‚ƒŠ•s‘«
+// è¿”ã‚Šå€¤ : å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿æ•°ã€è² æ•°ãŒè¿”ã‚Œã°ã‚¨ãƒ©ãƒ¼
+//		-1=ãƒ¡ãƒ¢ãƒªä¸è¶³
 //
 JUNKAPI intptr_t JUNKCALL TransformForDraw(
-	const TransformInfo* pTisX, // [in] X²•ÏŠ·î•ñ”z—ñ
-	intptr_t nTisX, // [in] pTisX ‚Ì—v‘f”
-	const TransformInfo* pTisY, // [in] Y²•ÏŠ·î•ñ”z—ñ
-	intptr_t nTisY, // [in] pTisY ‚Ì—v‘f”
-	const double* pSrcY, // [in] •ÏŠ·Œ³‚ÌY²’lƒf[ƒ^
-	intptr_t iStartIndexX, // [in] X²’lŒvZ—p‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	Vector2i* pDst // [out] •ÏŠ·Œã‚ÌXY’lƒf[ƒ^A•K—v‚È—v‘f”‚ÍÀ•W•ÏŠ·Œã‚Ì’l‚É‚æ‚èˆÙ‚È‚éAÀ•W•ÏŠ·Œã‚ÌX’l”ÍˆÍ*4+4’ö“x•K—v
+	const TransformInfo* pTisX, // [in] Xè»¸å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTisX, // [in] pTisX ã®è¦ç´ æ•°
+	const TransformInfo* pTisY, // [in] Yè»¸å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTisY, // [in] pTisY ã®è¦ç´ æ•°
+	const double* pSrcY, // [in] å¤‰æ›å…ƒã®Yè»¸å€¤ãƒ‡ãƒ¼ã‚¿
+	intptr_t iStartIndexX, // [in] Xè»¸å€¤è¨ˆç®—ç”¨ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	Vector2i* pDst // [out] å¤‰æ›å¾Œã®XYå€¤ãƒ‡ãƒ¼ã‚¿ã€å¿…è¦ãªè¦ç´ æ•°ã¯åº§æ¨™å¤‰æ›å¾Œã®å€¤ã«ã‚ˆã‚Šç•°ãªã‚‹ã€åº§æ¨™å¤‰æ›å¾Œã®Xå€¤ç¯„å›²*4+4ç¨‹åº¦å¿…è¦
 )
 {
 	if(n <= 0)
@@ -1726,20 +1726,20 @@ JUNKAPI intptr_t JUNKCALL TransformForDraw(
 		std::auto_ptr<int> bufX(new int[n + 8]);
 		std::auto_ptr<int> bufY(new int[n + 8]);
 
-		//	ƒCƒ“ƒfƒbƒNƒX”Ô†‚©‚ç‚wÀ•W’l‚ğ¶¬‚·‚é
+		//	ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·ã‹ã‚‰ï¼¸åº§æ¨™å€¤ã‚’ç”Ÿæˆã™ã‚‹
 		pTmpX = _TransformIndexNonLinInt(iStartIndexX, n, pTisX, nTisX, bufX.get());
 
-		//	‚xÀ•W’l‚ğ•ÏŠ·‚·‚é
+		//	ï¼¹åº§æ¨™å€¤ã‚’å¤‰æ›ã™ã‚‹
 		pTmpY = _TransformNonLinInt(pSrcY, n, pTisY, nTisY, bufY.get());
 
 		int p1x;
 		int p1y;
 		int p2x;
 		int p2y;
-		intptr_t nData = 0; // •ÏŠ·Œãƒf[ƒ^”
-		int s; // ‘O‰ñ‚Ì‚wÀ•W‚Å‚ÌŠJn‚x’l
-		int min; // ‘O‰ñ‚Ì‚wÀ•W‚Å‚ÌÅ¬‚x’l
-		int max; // ‘O‰ñ‚Ì‚wÀ•W‚Å‚ÌÅ‘å‚x’l
+		intptr_t nData = 0; // å¤‰æ›å¾Œãƒ‡ãƒ¼ã‚¿æ•°
+		int s; // å‰å›ã®ï¼¸åº§æ¨™ã§ã®é–‹å§‹ï¼¹å€¤
+		int min; // å‰å›ã®ï¼¸åº§æ¨™ã§ã®æœ€å°ï¼¹å€¤
+		int max; // å‰å›ã®ï¼¸åº§æ¨™ã§ã®æœ€å¤§ï¼¹å€¤
 
 		p1x = p2x = pTmpX[0];
 		p1y = p2y = pTmpY[0];
@@ -1761,15 +1761,15 @@ JUNKAPI intptr_t JUNKCALL TransformForDraw(
 			{
 				if(min == max)
 				{
-					//	‘O‚Ì‚wÀ•W‚ÌÅ‘åÅ¬‚x’l‚ª“¯‚¶ê‡‚Í‚P“_‚¾‚¯‚Ì’Ç‰Á
+					//	å‰ã®ï¼¸åº§æ¨™ã®æœ€å¤§æœ€å°ï¼¹å€¤ãŒåŒã˜å ´åˆã¯ï¼‘ç‚¹ã ã‘ã®è¿½åŠ 
 					pDst[nData].X() = p1x;
 					pDst[nData].Y() = min;
 					nData++;
 				}
 				else
 				{
-					//	‘O‚Ì‚wÀ•W‚ÌÅ‘åÅ¬‚x’l‚ªˆÙ‚È‚éê‡‚Í
-					//	ŠJn’lAÅ‘åAÅ¬AI—¹’l‚ğ’Ç‰Á‚·‚é
+					//	å‰ã®ï¼¸åº§æ¨™ã®æœ€å¤§æœ€å°ï¼¹å€¤ãŒç•°ãªã‚‹å ´åˆã¯
+					//	é–‹å§‹å€¤ã€æœ€å¤§ã€æœ€å°ã€çµ‚äº†å€¤ã‚’è¿½åŠ ã™ã‚‹
 					pDst[nData].X() = p1x;
 					pDst[nData].Y() = s;
 					nData++;
@@ -1793,7 +1793,7 @@ JUNKAPI intptr_t JUNKCALL TransformForDraw(
 					}
 				}
 
-				//	ŠJn‚x’lAÅ¬AÅ‘å’l‰Šú‰»
+				//	é–‹å§‹ï¼¹å€¤ã€æœ€å°ã€æœ€å¤§å€¤åˆæœŸåŒ–
 				s = min = max = p2y;
 			}
 
@@ -1803,15 +1803,15 @@ JUNKAPI intptr_t JUNKCALL TransformForDraw(
 
 		if(min == max)
 		{
-			//	‘O‚Ì‚wÀ•W‚ÌÅ‘åÅ¬‚x’l‚ª“¯‚¶ê‡‚Í‚P“_‚¾‚¯‚Ì’Ç‰Á
+			//	å‰ã®ï¼¸åº§æ¨™ã®æœ€å¤§æœ€å°ï¼¹å€¤ãŒåŒã˜å ´åˆã¯ï¼‘ç‚¹ã ã‘ã®è¿½åŠ 
 			pDst[nData].X() = p2x;
 			pDst[nData].Y() = p2y;
 			nData++;
 		}
 		else
 		{
-			//	‘O‚Ì‚wÀ•W‚ÌÅ‘åÅ¬‚x’l‚ªˆÙ‚È‚éê‡‚Í
-			//	ŠJn’lAÅ‘åAÅ¬AI—¹’l‚ğ’Ç‰Á‚·‚é
+			//	å‰ã®ï¼¸åº§æ¨™ã®æœ€å¤§æœ€å°ï¼¹å€¤ãŒç•°ãªã‚‹å ´åˆã¯
+			//	é–‹å§‹å€¤ã€æœ€å¤§ã€æœ€å°ã€çµ‚äº†å€¤ã‚’è¿½åŠ ã™ã‚‹
 			pDst[nData].X() = p2x;
 			pDst[nData].Y() = s;
 			nData++;
@@ -1843,23 +1843,23 @@ JUNKAPI intptr_t JUNKCALL TransformForDraw(
 	}
 }
 
-// ‹@”\ : •`‰æ—p‚É®”À•W‚É•ÏŠ·‚·‚éA“¯‚¶À•W‚É–³‘Ê‚È•`‰æ‚ğs‚í‚È‚¢‚æ‚¤‚É•ÏŠ·‚·‚é(ƒŠƒ“ƒOƒoƒbƒtƒ@”Å)
-//	Y²’lƒf[ƒ^‚Í pSrcY + iStartIndexY ‚©‚çæ“¾ŠJn‚³‚êApSrcY + nSrcYBufLen ‚ğ’´‚¦‚½‚ç pSrcY ‚É–ß‚Á‚Äæ“¾‚ª‘±‚¯‚ç‚ê‚é
+// æ©Ÿèƒ½ : æç”»ç”¨ã«æ•´æ•°åº§æ¨™ã«å¤‰æ›ã™ã‚‹ã€åŒã˜åº§æ¨™ã«ç„¡é§„ãªæç”»ã‚’è¡Œã‚ãªã„ã‚ˆã†ã«å¤‰æ›ã™ã‚‹(ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡ç‰ˆ)
+//	Yè»¸å€¤ãƒ‡ãƒ¼ã‚¿ã¯ pSrcY + iStartIndexY ã‹ã‚‰å–å¾—é–‹å§‹ã•ã‚Œã€pSrcY + nSrcYBufLen ã‚’è¶…ãˆãŸã‚‰ pSrcY ã«æˆ»ã£ã¦å–å¾—ãŒç¶šã‘ã‚‰ã‚Œã‚‹
 //
-// •Ô‚è’l : •ÏŠ·Œã‚Ìƒf[ƒ^”A•‰”‚ª•Ô‚ê‚ÎƒGƒ‰[
-//		-1=ƒƒ‚ƒŠ•s‘«
+// è¿”ã‚Šå€¤ : å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿æ•°ã€è² æ•°ãŒè¿”ã‚Œã°ã‚¨ãƒ©ãƒ¼
+//		-1=ãƒ¡ãƒ¢ãƒªä¸è¶³
 //
 JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
-	const TransformInfo* pTisX, // [in] X²•ÏŠ·î•ñ”z—ñ
-	intptr_t nTisX, // [in] pTisX ‚Ì—v‘f”
-	const TransformInfo* pTisY, // [in] Y²•ÏŠ·î•ñ”z—ñ
-	intptr_t nTisY, // [in] pTisY ‚Ì—v‘f”
-	const double* pSrcY, // [in] •ÏŠ·Œ³‚ÌY²’lƒf[ƒ^(Y²ƒf[ƒ^ƒoƒbƒtƒ@‚Ìæ“ªƒAƒhƒŒƒX)
-	intptr_t nSrcYBufLen, // [in] pSrcY ‚Ìƒoƒbƒtƒ@‚ÌƒTƒCƒY(ƒf[ƒ^”)
-	intptr_t iStartIndexX, // [in] X²’lŒvZ—p‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-	intptr_t iStartIndexY, // [in] Y²’lŒvZ—p‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-	Vector2i* pDst // [out] •ÏŠ·Œã‚ÌXY’lƒf[ƒ^A•K—v‚È—v‘f”‚ÍÀ•W•ÏŠ·Œã‚Ì’l‚É‚æ‚èˆÙ‚È‚éAÀ•W•ÏŠ·Œã‚ÌX’l”ÍˆÍ*4+4’ö“x•K—v
+	const TransformInfo* pTisX, // [in] Xè»¸å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTisX, // [in] pTisX ã®è¦ç´ æ•°
+	const TransformInfo* pTisY, // [in] Yè»¸å¤‰æ›æƒ…å ±é…åˆ—
+	intptr_t nTisY, // [in] pTisY ã®è¦ç´ æ•°
+	const double* pSrcY, // [in] å¤‰æ›å…ƒã®Yè»¸å€¤ãƒ‡ãƒ¼ã‚¿(Yè»¸ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã®å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹)
+	intptr_t nSrcYBufLen, // [in] pSrcY ã®ãƒãƒƒãƒ•ã‚¡ã®ã‚µã‚¤ã‚º(ãƒ‡ãƒ¼ã‚¿æ•°)
+	intptr_t iStartIndexX, // [in] Xè»¸å€¤è¨ˆç®—ç”¨ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+	intptr_t iStartIndexY, // [in] Yè»¸å€¤è¨ˆç®—ç”¨ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+	Vector2i* pDst // [out] å¤‰æ›å¾Œã®XYå€¤ãƒ‡ãƒ¼ã‚¿ã€å¿…è¦ãªè¦ç´ æ•°ã¯åº§æ¨™å¤‰æ›å¾Œã®å€¤ã«ã‚ˆã‚Šç•°ãªã‚‹ã€åº§æ¨™å¤‰æ›å¾Œã®Xå€¤ç¯„å›²*4+4ç¨‹åº¦å¿…è¦
 )
 {
 	if(n <= 0)
@@ -1874,15 +1874,15 @@ JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
 		std::auto_ptr<int> bufX(new int[n + 8]);
 		std::auto_ptr<int> bufYs[2];
 
-		//	ƒCƒ“ƒfƒbƒNƒX”Ô†‚©‚ç‚wÀ•W’l‚ğ¶¬‚·‚é
+		//	ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·ã‹ã‚‰ï¼¸åº§æ¨™å€¤ã‚’ç”Ÿæˆã™ã‚‹
 		pTmpX = _TransformIndexNonLinInt(iStartIndexX, n, pTisX, nTisX, bufX.get());
 
-		//	‚xÀ•W’l‚ğ•ÏŠ·‚·‚é
+		//	ï¼¹åº§æ¨™å€¤ã‚’å¤‰æ›ã™ã‚‹
 		intptr_t copyStart = iStartIndexY % nSrcYBufLen;
 		intptr_t copyEnd = copyStart + n;
 		if(copyEnd <= nSrcYBufLen)
 		{
-			//	‚P‰ñ‚Ìƒf[ƒ^ƒRƒs[‚ÅÏ‚Şê‡‚Í•’Ê‚ÉÀ•W•ÏŠ·ƒRƒs[
+			//	ï¼‘å›ã®ãƒ‡ãƒ¼ã‚¿ã‚³ãƒ”ãƒ¼ã§æ¸ˆã‚€å ´åˆã¯æ™®é€šã«åº§æ¨™å¤‰æ›ã‚³ãƒ”ãƒ¼
 			nTmpYs = 1;
 			nTmpYCounts[0] = n;
 			bufYs[0].reset(new int[nTmpYCounts[0] + 8]);
@@ -1890,7 +1890,7 @@ JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
 		}
 		else
 		{
-			//	‚Q‰ñ‚É•ª‚¯‚Äƒf[ƒ^ƒRƒs[‚·‚é•K—v‚ª‚ ‚éê‡
+			//	ï¼’å›ã«åˆ†ã‘ã¦ãƒ‡ãƒ¼ã‚¿ã‚³ãƒ”ãƒ¼ã™ã‚‹å¿…è¦ãŒã‚ã‚‹å ´åˆ
 			nTmpYs = 2;
 			nTmpYCounts[0] = nSrcYBufLen - copyStart;
 			nTmpYCounts[1] = copyEnd - nSrcYBufLen;
@@ -1904,19 +1904,19 @@ JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
 		int p1y;
 		int p2x;
 		int p2y;
-		intptr_t nData = 0; // •ÏŠ·Œãƒf[ƒ^”
-		int s; // ‘O‰ñ‚Ì‚wÀ•W‚Å‚ÌŠJn‚x’l
-		int min; // ‘O‰ñ‚Ì‚wÀ•W‚Å‚ÌÅ¬‚x’l
-		int max; // ‘O‰ñ‚Ì‚wÀ•W‚Å‚ÌÅ‘å‚x’l
+		intptr_t nData = 0; // å¤‰æ›å¾Œãƒ‡ãƒ¼ã‚¿æ•°
+		int s; // å‰å›ã®ï¼¸åº§æ¨™ã§ã®é–‹å§‹ï¼¹å€¤
+		int min; // å‰å›ã®ï¼¸åº§æ¨™ã§ã®æœ€å°ï¼¹å€¤
+		int max; // å‰å›ã®ï¼¸åº§æ¨™ã§ã®æœ€å¤§ï¼¹å€¤
 
 		p1x = p2x = pTmpX[0];
 		p1y = p2y = pTmpYs[0][0];
 		s = min = max = p1y;
 
-		intptr_t iX = 1; // À•W•ÏŠ·Œã‚ÌXÀ•W’l”z—ñ‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†
+		intptr_t iX = 1; // åº§æ¨™å¤‰æ›å¾Œã®Xåº§æ¨™å€¤é…åˆ—ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·
 
-		//	ƒŠƒ“ƒOƒoƒbƒtƒ@‚È‚Ì‚ÅÅ‘å‚Q‰ñ‚É•ªŠ„‚³‚ê‚é
-		//	‚»‚Ìƒoƒbƒtƒ@–ˆ‚Éˆ—‚ğ‚·‚é
+		//	ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡ãªã®ã§æœ€å¤§ï¼’å›ã«åˆ†å‰²ã•ã‚Œã‚‹
+		//	ãã®ãƒãƒƒãƒ•ã‚¡æ¯ã«å‡¦ç†ã‚’ã™ã‚‹
 		for(intptr_t iBufY = 0; iBufY < nTmpYs; iBufY++)
 		{
 			int* pTmpY = pTmpYs[iBufY];
@@ -1937,15 +1937,15 @@ JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
 				{
 					if(min == max)
 					{
-						//	‘O‚Ì‚wÀ•W‚ÌÅ‘åÅ¬‚x’l‚ª“¯‚¶ê‡‚Í‚P“_‚¾‚¯‚Ì’Ç‰Á
+						//	å‰ã®ï¼¸åº§æ¨™ã®æœ€å¤§æœ€å°ï¼¹å€¤ãŒåŒã˜å ´åˆã¯ï¼‘ç‚¹ã ã‘ã®è¿½åŠ 
 						pDst[nData].X() = p1x;
 						pDst[nData].Y() = min;
 						nData++;
 					}
 					else
 					{
-						//	‘O‚Ì‚wÀ•W‚ÌÅ‘åÅ¬‚x’l‚ªˆÙ‚È‚éê‡‚Í
-						//	ŠJn’lAÅ‘åAÅ¬AI—¹’l‚ğ’Ç‰Á‚·‚é
+						//	å‰ã®ï¼¸åº§æ¨™ã®æœ€å¤§æœ€å°ï¼¹å€¤ãŒç•°ãªã‚‹å ´åˆã¯
+						//	é–‹å§‹å€¤ã€æœ€å¤§ã€æœ€å°ã€çµ‚äº†å€¤ã‚’è¿½åŠ ã™ã‚‹
 						pDst[nData].X() = p1x;
 						pDst[nData].Y() = s;
 						nData++;
@@ -1969,7 +1969,7 @@ JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
 						}
 					}
 
-					//	ŠJn‚x’lAÅ¬AÅ‘å’l‰Šú‰»
+					//	é–‹å§‹ï¼¹å€¤ã€æœ€å°ã€æœ€å¤§å€¤åˆæœŸåŒ–
 					s = min = max = p2y;
 				}
 
@@ -1980,15 +1980,15 @@ JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
 
 		if(min == max)
 		{
-			//	‘O‚Ì‚wÀ•W‚ÌÅ‘åÅ¬‚x’l‚ª“¯‚¶ê‡‚Í‚P“_‚¾‚¯‚Ì’Ç‰Á
+			//	å‰ã®ï¼¸åº§æ¨™ã®æœ€å¤§æœ€å°ï¼¹å€¤ãŒåŒã˜å ´åˆã¯ï¼‘ç‚¹ã ã‘ã®è¿½åŠ 
 			pDst[nData].X() = p2x;
 			pDst[nData].Y() = p2y;
 			nData++;
 		}
 		else
 		{
-			//	‘O‚Ì‚wÀ•W‚ÌÅ‘åÅ¬‚x’l‚ªˆÙ‚È‚éê‡‚Í
-			//	ŠJn’lAÅ‘åAÅ¬AI—¹’l‚ğ’Ç‰Á‚·‚é
+			//	å‰ã®ï¼¸åº§æ¨™ã®æœ€å¤§æœ€å°ï¼¹å€¤ãŒç•°ãªã‚‹å ´åˆã¯
+			//	é–‹å§‹å€¤ã€æœ€å¤§ã€æœ€å°ã€çµ‚äº†å€¤ã‚’è¿½åŠ ã™ã‚‹
 			pDst[nData].X() = p2x;
 			pDst[nData].Y() = s;
 			nData++;
@@ -2021,20 +2021,20 @@ JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
 }
 
 
-//// ‹@”\ : •`‰æ—p‚É®”À•W‚É•ÏŠ·‚·‚éA“¯‚¶À•W‚É–³‘Ê‚È•`‰æ‚ğs‚í‚È‚¢‚æ‚¤‚É•ÏŠ·‚·‚é
+//// æ©Ÿèƒ½ : æç”»ç”¨ã«æ•´æ•°åº§æ¨™ã«å¤‰æ›ã™ã‚‹ã€åŒã˜åº§æ¨™ã«ç„¡é§„ãªæç”»ã‚’è¡Œã‚ãªã„ã‚ˆã†ã«å¤‰æ›ã™ã‚‹
 ////
-//// •Ô‚è’l : •ÏŠ·Œã‚Ìƒf[ƒ^”
+//// è¿”ã‚Šå€¤ : å¤‰æ›å¾Œã®ãƒ‡ãƒ¼ã‚¿æ•°
 ////
 //JUNKAPI intptr_t JUNKCALL TransformForDraw(
-//	const TransformInfo* pTisX, // [in] X²•ÏŠ·î•ñ”z—ñ
-//	intptr_t nTisX, // [in] pTisX ‚Ì—v‘f”
-//	const TransformInfo* pTisY, // [in] Y²•ÏŠ·î•ñ”z—ñ
-//	intptr_t nTisY, // [in] pTisY ‚Ì—v‘f”
-//	const double* pSrcY, // [in] •ÏŠ·Œ³‚ÌY²’lƒf[ƒ^
-//	intptr_t iStartIndexX, // [in] X²’lŒvZ—p‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†ŠJn’l
-//	intptr_t n, // [in] •ÏŠ·ƒf[ƒ^”
-//	int* pDstX, // [out] •ÏŠ·Œã‚ÌX²’lƒf[ƒ^AÅ’á n —v‘f•ª‚ÌƒTƒCƒY‚ª•K—v
-//	int* pDstY // [out] •ÏŠ·Œã‚ÌY²’lƒf[ƒ^AÅ’á n —v‘f•ª‚ÌƒTƒCƒY‚ª•K—v
+//	const TransformInfo* pTisX, // [in] Xè»¸å¤‰æ›æƒ…å ±é…åˆ—
+//	intptr_t nTisX, // [in] pTisX ã®è¦ç´ æ•°
+//	const TransformInfo* pTisY, // [in] Yè»¸å¤‰æ›æƒ…å ±é…åˆ—
+//	intptr_t nTisY, // [in] pTisY ã®è¦ç´ æ•°
+//	const double* pSrcY, // [in] å¤‰æ›å…ƒã®Yè»¸å€¤ãƒ‡ãƒ¼ã‚¿
+//	intptr_t iStartIndexX, // [in] Xè»¸å€¤è¨ˆç®—ç”¨ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·é–‹å§‹å€¤
+//	intptr_t n, // [in] å¤‰æ›ãƒ‡ãƒ¼ã‚¿æ•°
+//	int* pDstX, // [out] å¤‰æ›å¾Œã®Xè»¸å€¤ãƒ‡ãƒ¼ã‚¿ã€æœ€ä½ n è¦ç´ åˆ†ã®ã‚µã‚¤ã‚ºãŒå¿…è¦
+//	int* pDstY // [out] å¤‰æ›å¾Œã®Yè»¸å€¤ãƒ‡ãƒ¼ã‚¿ã€æœ€ä½ n è¦ç´ åˆ†ã®ã‚µã‚¤ã‚ºãŒå¿…è¦
 //)
 //{
 //	if(n <= 0)
@@ -2045,20 +2045,20 @@ JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
 //	std::auto_ptr<int> bufX(pTmpX = new int[n]);
 //	std::auto_ptr<int> bufY(pTmpY = new int[n]);
 //
-//	//	ƒCƒ“ƒfƒbƒNƒX”Ô†‚©‚ç‚wÀ•W’l‚ğ¶¬‚·‚é
+//	//	ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·ã‹ã‚‰ï¼¸åº§æ¨™å€¤ã‚’ç”Ÿæˆã™ã‚‹
 //	TransformIndexNonLinInt(iStartIndexX, n, pTisX, nTisX, pTmpX);
 //
-//	//	‚xÀ•W’l‚ğ•ÏŠ·‚·‚é
+//	//	ï¼¹åº§æ¨™å€¤ã‚’å¤‰æ›ã™ã‚‹
 //	TransformNonLinInt(pSrcY, n, pTisY, nTisY, pTmpY);
 //
 //	int p1x;
 //	int p1y;
 //	int p2x;
 //	int p2y;
-//	intptr_t nData = 0; // •ÏŠ·Œãƒf[ƒ^”
-//	int s; // ‘O‰ñ‚Ì‚wÀ•W‚Å‚ÌŠJn‚x’l
-//	int min; // ‘O‰ñ‚Ì‚wÀ•W‚Å‚ÌÅ¬‚x’l
-//	int max; // ‘O‰ñ‚Ì‚wÀ•W‚Å‚ÌÅ‘å‚x’l
+//	intptr_t nData = 0; // å¤‰æ›å¾Œãƒ‡ãƒ¼ã‚¿æ•°
+//	int s; // å‰å›ã®ï¼¸åº§æ¨™ã§ã®é–‹å§‹ï¼¹å€¤
+//	int min; // å‰å›ã®ï¼¸åº§æ¨™ã§ã®æœ€å°ï¼¹å€¤
+//	int max; // å‰å›ã®ï¼¸åº§æ¨™ã§ã®æœ€å¤§ï¼¹å€¤
 //
 //	p1x = p2x = pTmpX[0];
 //	p1y = p2y = pTmpY[0];
@@ -2080,15 +2080,15 @@ JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
 //		{
 //			if(min == max)
 //			{
-//				//	‘O‚Ì‚wÀ•W‚ÌÅ‘åÅ¬‚x’l‚ª“¯‚¶ê‡‚Í‚P“_‚¾‚¯‚Ì’Ç‰Á
+//				//	å‰ã®ï¼¸åº§æ¨™ã®æœ€å¤§æœ€å°ï¼¹å€¤ãŒåŒã˜å ´åˆã¯ï¼‘ç‚¹ã ã‘ã®è¿½åŠ 
 //				pDstX[nData] = p1x;
 //				pDstY[nData] = min;
 //				nData++;
 //			}
 //			else
 //			{
-//				//	‘O‚Ì‚wÀ•W‚ÌÅ‘åÅ¬‚x’l‚ªˆÙ‚È‚éê‡‚Í
-//				//	ŠJn’lAÅ‘åAÅ¬AI—¹’l‚ğ’Ç‰Á‚·‚é
+//				//	å‰ã®ï¼¸åº§æ¨™ã®æœ€å¤§æœ€å°ï¼¹å€¤ãŒç•°ãªã‚‹å ´åˆã¯
+//				//	é–‹å§‹å€¤ã€æœ€å¤§ã€æœ€å°ã€çµ‚äº†å€¤ã‚’è¿½åŠ ã™ã‚‹
 //				pDstX[nData] = p1x;
 //				pDstY[nData] = s;
 //				nData++;
@@ -2112,7 +2112,7 @@ JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
 //				}
 //			}
 //
-//			//	ŠJn‚x’lAÅ¬AÅ‘å’l‰Šú‰»
+//			//	é–‹å§‹ï¼¹å€¤ã€æœ€å°ã€æœ€å¤§å€¤åˆæœŸåŒ–
 //			s = min = max = p2y;
 //		}
 //
@@ -2122,15 +2122,15 @@ JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
 //
 //	if(min == max)
 //	{
-//		//	‘O‚Ì‚wÀ•W‚ÌÅ‘åÅ¬‚x’l‚ª“¯‚¶ê‡‚Í‚P“_‚¾‚¯‚Ì’Ç‰Á
+//		//	å‰ã®ï¼¸åº§æ¨™ã®æœ€å¤§æœ€å°ï¼¹å€¤ãŒåŒã˜å ´åˆã¯ï¼‘ç‚¹ã ã‘ã®è¿½åŠ 
 //		pDstX[nData] = p2x;
 //		pDstY[nData] = p2y;
 //		nData++;
 //	}
 //	else
 //	{
-//		//	‘O‚Ì‚wÀ•W‚ÌÅ‘åÅ¬‚x’l‚ªˆÙ‚È‚éê‡‚Í
-//		//	ŠJn’lAÅ‘åAÅ¬AI—¹’l‚ğ’Ç‰Á‚·‚é
+//		//	å‰ã®ï¼¸åº§æ¨™ã®æœ€å¤§æœ€å°ï¼¹å€¤ãŒç•°ãªã‚‹å ´åˆã¯
+//		//	é–‹å§‹å€¤ã€æœ€å¤§ã€æœ€å°ã€çµ‚äº†å€¤ã‚’è¿½åŠ ã™ã‚‹
 //		pDstX[nData] = p2x;
 //		pDstY[nData] = s;
 //		nData++;
@@ -2157,18 +2157,18 @@ JUNKAPI intptr_t JUNKCALL TransformForDrawRing(
 //	return nData;
 //}
 
-// ‹@”\ : •¡”’¸“_‚Å\¬‚³‚ê‚éƒ‰ƒCƒ“‚Æw’èƒ|ƒCƒ“ƒg‚Æ‚ÌÚG”»’è‚ğs‚¤
+// æ©Ÿèƒ½ : è¤‡æ•°é ‚ç‚¹ã§æ§‹æˆã•ã‚Œã‚‹ãƒ©ã‚¤ãƒ³ã¨æŒ‡å®šãƒã‚¤ãƒ³ãƒˆã¨ã®æ¥è§¦åˆ¤å®šã‚’è¡Œã†
 //
-// –ß‚è’l: ÚG‚µ‚Ä‚¢‚é‚È‚çÚG’¸“_”Ô†‚ª•Ô‚éA‚»‚êˆÈŠO‚Í•‰”‚ª•Ô‚é
+// æˆ»ã‚Šå€¤: æ¥è§¦ã—ã¦ã„ã‚‹ãªã‚‰æ¥è§¦é ‚ç‚¹ç•ªå·ãŒè¿”ã‚‹ã€ãã‚Œä»¥å¤–ã¯è² æ•°ãŒè¿”ã‚‹
 //
 JUNKAPI intptr_t JUNKCALL HitTestPointAndPolyline(
-	const Vector2d* vts, // [in] ’¸“_”z—ñæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t count, // [in] ’¸“_”
-	Vector2d pt, // [in] ÚG”»’èƒ|ƒCƒ“ƒgÀ•W
-	double vertexRadius, // [in] ’¸“_‚Ì”¼Œa
-	double edgeThickness, // [in] •Ó‚Ì‘¾‚³
-	double& t, // [out] •Ó‚ÆÚG‚µ‚½Û‚Ìƒpƒ‰ƒ[ƒ^ t ‚ª•Ô‚é(0 ‚È‚ç–ß‚è’l‚Ì’¸“_A1‚È‚çŸ‚Ì’¸“_)
-	Vector2d& pointOnEdge // [out] ÚG‚µ‚½•Ó‚ÌÅ‹ß“_À•W‚ª•Ô‚é
+	const Vector2d* vts, // [in] é ‚ç‚¹é…åˆ—å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t count, // [in] é ‚ç‚¹æ•°
+	Vector2d pt, // [in] æ¥è§¦åˆ¤å®šãƒã‚¤ãƒ³ãƒˆåº§æ¨™
+	double vertexRadius, // [in] é ‚ç‚¹ã®åŠå¾„
+	double edgeThickness, // [in] è¾ºã®å¤ªã•
+	double& t, // [out] è¾ºã¨æ¥è§¦ã—ãŸéš›ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ t ãŒè¿”ã‚‹(0 ãªã‚‰æˆ»ã‚Šå€¤ã®é ‚ç‚¹ã€1ãªã‚‰æ¬¡ã®é ‚ç‚¹)
+	Vector2d& pointOnEdge // [out] æ¥è§¦ã—ãŸè¾ºã®æœ€è¿‘ç‚¹åº§æ¨™ãŒè¿”ã‚‹
 )
 {
 	return HitTestPointAndPolylineTmpl(vts, count, pt, vertexRadius, edgeThickness, t, pointOnEdge);
@@ -2178,36 +2178,36 @@ JUNKAPI intptr_t JUNKCALL HitTestPointAndPolyline(
 double (__fastcall *PolylineLengthBest)(const Vector2d* vts, intptr_t count);
 
 double __fastcall PolylineLengthWithoutSimd(
-	const Vector2d* vts, // [in] ’¸“_”z—ñæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t count // [in] ’¸“_”
+	const Vector2d* vts, // [in] é ‚ç‚¹é…åˆ—å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t count // [in] é ‚ç‚¹æ•°
 )
 {
 	return PolylineLength(vts, count);
 }
 
 double __fastcall PolylineLengthSSE3FastCall(
-	const Vector2d* vts, // [in] ’¸“_”z—ñæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t count // [in] ’¸“_”
+	const Vector2d* vts, // [in] é ‚ç‚¹é…åˆ—å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t count // [in] é ‚ç‚¹æ•°
 )
 {
 	return PolylineLengthSSE3(vts, count);
 }
 
-// ‹@”\ : •¡”’¸“_‚Å\¬‚³‚ê‚éƒ‰ƒCƒ“‚Ì‘S‚Ä‚Ì•Ó‚Ì’·‚³‚Ì‡Œv‚ğŒvZ‚·‚é
+// æ©Ÿèƒ½ : è¤‡æ•°é ‚ç‚¹ã§æ§‹æˆã•ã‚Œã‚‹ãƒ©ã‚¤ãƒ³ã®å…¨ã¦ã®è¾ºã®é•·ã•ã®åˆè¨ˆã‚’è¨ˆç®—ã™ã‚‹
 //
-// –ß‚è’l: ’·‚³
+// æˆ»ã‚Šå€¤: é•·ã•
 //
 JUNKAPI double JUNKCALL PolylineLength(
-	const Vector2d* vts, // [in] ’¸“_”z—ñæ“ªƒ|ƒCƒ“ƒ^
-	intptr_t count // [in] ’¸“_”
+	const Vector2d* vts, // [in] é ‚ç‚¹é…åˆ—å…ˆé ­ãƒã‚¤ãƒ³ã‚¿
+	intptr_t count // [in] é ‚ç‚¹æ•°
 )
 {
 	if(PolylineLengthBest == NULL)
 	{
 		if(IsSSE3Supported())
-			PolylineLengthBest = PolylineLengthSSE3FastCall; // SSE3g—p‰Â”\
+			PolylineLengthBest = PolylineLengthSSE3FastCall; // SSE3ä½¿ç”¨å¯èƒ½
 		else
-			PolylineLengthBest = PolylineLengthWithoutSimd; // SSE3g—p•s‰Â”\
+			PolylineLengthBest = PolylineLengthWithoutSimd; // SSE3ä½¿ç”¨ä¸å¯èƒ½
 	}
 	return PolylineLengthBest(vts, count);
 }
