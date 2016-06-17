@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifndef __JUNK_RINGBUFFER_H__
 #define __JUNK_RINGBUFFER_H__
 
@@ -9,16 +9,16 @@
 
 _JUNK_BEGIN
 
-//! �����O�o�b�t�@���̗̈���w���|�C���^
-//! @remarks �������ꂽ�Q�̗̈���w���悤�ɂȂ��Ă�
+//! リングバッファ内の領域を指すポインタ
+//! @remarks 分割された２つの領域を指すようになってる
 template<
-	class T //!< �v�f�^
+	class T //!< 要素型
 >
 struct RingPtr {
-	T* p1; //!< �������ꂽ�O���̈�ւ̃|�C���^�ANULL �ɂȂ蓾��A���ꂪ NULL �Ȃ瑼�����o�S������
-	intptr_t n1; //!< p1 ���w���̈�̃T�C�Y�A0 �ɂȂ蓾��
-	T* p2; //!< �������ꂽ�㔼�̈�ւ̃|�C���^�ANULL �ɂȂ蓾��
-	intptr_t n2; //!< p2 ���w���̈�̃T�C�Y�A0 �ɂȂ蓾��
+	T* p1; //!< 分割された前半領域へのポインタ、NULL になり得る、これが NULL なら他メンバ全部無効
+	intptr_t n1; //!< p1 が指す領域のサイズ、0 になり得る
+	T* p2; //!< 分割された後半領域へのポインタ、NULL になり得る
+	intptr_t n2; //!< p2 が指す領域のサイズ、0 になり得る
 
 	RingPtr() {
 	}
@@ -36,13 +36,13 @@ struct RingPtr {
 	}
 };
 
-//! �T�C�Y�Œ胊���O�o�b�t�@
-//! @remarks �������ݐ�p�X���b�h�Ɠǂݍ��ݐ�p�X���b�h�̍\���Ȃ�X���b�h�Z�[�t�A�N���A�͓Ǐ��������ύX����̂ŃX���b�h�Z�[�t�ł͂Ȃ�
-//! @remarks �������ݎ��Ƀo�b�t�@�t���Ȃ珑�����݂͍s���Ȃ�
-//! @remarks �������ނ� Tail ���ړ����A�ǂݍ��ނ� Head ���ړ����܂��A�Â��f�[�^�̕��� Head �ł�
+//! サイズ固定リングバッファ
+//! @remarks 書き込み専用スレッドと読み込み専用スレッドの構成ならスレッドセーフ、クリアは読書き両方変更するのでスレッドセーフではない
+//! @remarks 書き込み時にバッファフルなら書き込みは行われない
+//! @remarks 書き込むと Tail が移動し、読み込むと Head が移動します、古いデータの方が Head です
 template<
-	class T, //!< �v�f�^
-	intptr_t SIZE //!< �ő�v�f��
+	class T, //!< 要素型
+	intptr_t SIZE //!< 最大要素数
 >
 struct RingBufferSizeFixed {
 	T Buffer[SIZE];
