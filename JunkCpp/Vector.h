@@ -240,7 +240,7 @@ struct VectorN {
 		if(len != T(0))
 			Order<TmMul, N>::OpS(e, T(1) / len);
 	}
-	_FINLINE VectorN Normalized() {
+	_FINLINE VectorN Normalize() {
 		T len = T(Length());
 		if(len != T(0)) {
 			VectorN nv;

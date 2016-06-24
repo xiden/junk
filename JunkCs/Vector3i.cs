@@ -89,7 +89,7 @@ namespace Jk {
 			get { return (element)Math.Sqrt(LengthSquare); }
 		}
 
-		public void Normalize() {
+		public void NormalizeSelf() {
 			element l = LengthSquare;
 			if (l == 0)
 				return;
@@ -101,9 +101,9 @@ namespace Jk {
 			Z /= l;
 		}
 
-		public Vector3i GetNormalized() {
+		public Vector3i Normalize() {
 			Vector3i v = this;
-			v.Normalize();
+			v.NormalizeSelf();
 			return v;
 		}
 

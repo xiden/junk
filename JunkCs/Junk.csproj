@@ -52,6 +52,8 @@
     <Compile Include="Csv.cs" />
     <Compile Include="CsvReader.cs" />
     <Compile Include="CsvWriter.cs" />
+    <Compile Include="DegRange.cs" />
+    <Compile Include="Degree.cs" />
     <Compile Include="ExceptionHandler.cs" />
     <Compile Include="ExceptionMessageForm.cs">
       <SubType>Form</SubType>
@@ -92,6 +94,8 @@
     <Compile Include="Matrix.cs" />
     <Compile Include="MemMapFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Radian.cs" />
+    <Compile Include="RadRange.cs" />
     <Compile Include="Ranged.cs" />
     <Compile Include="Serialization.cs" />
     <Compile Include="Shell.cs" />
