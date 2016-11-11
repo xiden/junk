@@ -1,29 +1,28 @@
-#pragma once
-#ifndef __JUNK_TRIANGLEDIVISION_H__
-#define __JUNK_TRIANGLEDIVISION_H__
+﻿#pragma once
+#ifndef __JUNK_TRIANGULATION_H__
+#define __JUNK_TRIANGULATION_H__
 
 #include "Vector.h"
+#include <vector>
 
 _JUNK_BEGIN
 
 //! 2次元以上のベクトルから2次元ベクトル抽出するクラス
 template<
-	class Vn, //!< 2次元以上の VectorN を継承するクラス
 	class V2 //!< 2次元ベクトル型、Vector2 を継承するクラス
 >
 struct ExtractVector2FromVectorN {
-	static _FINLINE V2 Get(const Vn& v) {
+	template<class Vn> static _FINLINE V2 Get(const Vn& v) {
 		return V2(v(0), v(1));
 	}
 };
 
 //! 頂点から2次元ベクトル抽出するクラス
 template<
-	class Vtx, //!< 2次元以上の VectorN を継承するメンバ Pos を持つクラス
 	class V2 //!< 2次元ベクトル型、Vector2 を継承するクラス
 >
 struct ExtractVector2FromVertex {
-	static _FINLINE V2 Get(const Vtx& vtx) {
+	template<class Vtx> static _FINLINE V2 Get(const Vtx& vtx) {
 		return V2(vtx.Pos(0), vtx.Pos(1));
 	}
 };
@@ -32,14 +31,14 @@ struct ExtractVector2FromVertex {
 template<
 	class Vtx, //!< 頂点型、内部に2次元以上のベクトルを持っていなければならない
 	class V2, //!< 2次元ベクトル型、Vector2 を継承するクラス
-	class Ext = ExtractVector2FromVertex<Vtx, V2> //!< 頂点から2次元ベクトルを抽出するクラス
+	class Ext = ExtractVector2FromVertex<V2> //!< 頂点から2次元ベクトルを抽出するクラス
 >
-struct TriangleDivision {
+struct Triangulation {
 	typedef typename V2::ValueType ValueType;
 	typedef Ext V2FromVtx;
 
 	struct Node {
-		Vtx* pVertex;
+		const Vtx* pVertex;
 		Node* pPrev;
 		Node* pNext;
 		_FINLINE V2 Vec2() const {
@@ -107,7 +106,12 @@ struct TriangleDivision {
 		return max;
 	}
 
-	template<class Index> void Divide(Vtx* pVertices, intptr_t nVertices, std::vector<Index>& triangleIndices) { // 三角形分割する
+	//! 三角形分割する
+	template<class Index> void Do(
+		Vtx* pVertices, //!< [in] 頂点配列へのポインタ
+		intptr_t nVertices, //!< [in] pVertices が指す頂点数
+		std::vector<Index>& triangleIndices //!< [out] 三角形を構成する頂点インデックス配列が返る
+	) {
 		if (nVertices < 3)
 			return;
 

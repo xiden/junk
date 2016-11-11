@@ -101,9 +101,6 @@
     <ClInclude Include="..\..\..\JunkCpp\ThreadLocalStorage.h">
       <Filter>Junk</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\JunkCpp\TriangleDivision.h">
-      <Filter>Junk</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\JunkCpp\Vector.h">
       <Filter>Junk</Filter>
     </ClInclude>
@@ -120,6 +117,9 @@
       <Filter>Junk</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\JunkCpp\RingBuffer.h">
+      <Filter>Junk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\JunkCpp\Triangulation.h">
       <Filter>Junk</Filter>
     </ClInclude>
   </ItemGroup>
