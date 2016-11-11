@@ -104,6 +104,9 @@
     <Compile Include="ShellLink.cs" />
     <Compile Include="SystemImageList.cs" />
     <Compile Include="TransformLinear.cs" />
+    <Compile Include="TriangulationD.cs" />
+    <Compile Include="TriangulationF.cs" />
+    <Compile Include="Vector2f.cs" />
     <Compile Include="Vector2d.cs" />
     <Compile Include="Vector2i.cs" />
     <Compile Include="Vector3d.cs" />

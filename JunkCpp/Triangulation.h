@@ -38,15 +38,12 @@ struct Triangulation {
 	typedef Ext V2FromVtx;
 
 	struct Node {
-		const Vtx* pVertex;
+		V2 Vec2;
+		intptr_t Index;
+		ValueType Distance2;
 		Node* pPrev;
 		Node* pNext;
-		_FINLINE V2 Vec2() const {
-			return Ext::Get(*pVertex);
-		}
 	};
-
-	std::vector<Node> Nodes;
 
 	static _FINLINE intptr_t Side(const V2& v1, const V2& v2) {
 		ValueType a = v1(0) * v2(1) - v1(1) * v2(0);
@@ -68,19 +65,16 @@ struct Triangulation {
 		intptr_t result1 = Side(v1, v2);
 		intptr_t result2 = Side(v2, v3);
 		intptr_t result3 = Side(v3, v1);
-		if (result1 == result2 && result2 == result3)
-			return 1;
-		else
-			return 0;
+		return result1 == result2 && result2 == result3;
 	}
 
 	static _FINLINE intptr_t OtherPointsInside(Node* node) {
 		Node* p = node->pNext->pNext;
-		V2 p1 = node->Vec2();
-		V2 p2 = node->pNext->Vec2();
-		V2 p3 = node->pPrev->Vec2();
+		V2 p1 = node->Vec2;
+		V2 p2 = node->pNext->Vec2;
+		V2 p3 = node->pPrev->Vec2;
 		while (1) {
-			if (PointInTriangle(p1, p2, p3, p->Vec2()))
+			if (PointInTriangle(p1, p2, p3, p->Vec2))
 				return 1;
 			p = p->pNext;
 			if (p == node->pPrev)
@@ -94,7 +88,7 @@ struct Triangulation {
 		Node* p = pHead;
 		Node* max = pHead;
 		while (1) {
-			ValueType abs = p->Vec2().LengthSquare();
+			ValueType abs = p->Distance2;
 			if (abs > distance) {
 				distance = abs;
 				max = p;
@@ -115,29 +109,31 @@ struct Triangulation {
 		if (nVertices < 3)
 			return;
 
-		Nodes.resize(nVertices);
-		Node* pLast = &Nodes[0];
+		std::vector<Node> nodes(nVertices);
+		Node* pLast = &nodes[0];
 		for (intptr_t i = nVertices - 1; i != -1; i--) {
-			Node* pNode = &Nodes[i];
-			pNode->pVertex = &pVertices[i];
+			Node* pNode = &nodes[i];
+			pNode->Vec2 = V2FromVtx::Get(pVertices[i]);
+			pNode->Index = i;
+			pNode->Distance2 = pNode->Vec2.LengthSquare();
 			pNode->pNext = pLast;
 			pLast->pPrev = pNode;
 			pLast = pNode;
 		}
 		Node* pHead = pLast;
-		intptr_t Counter = nVertices;
+		intptr_t counter = nVertices;
 
-		while (Counter > 2) {
+		while (counter > 2) {
 			Node* start = GetFarthestPoint(pHead);
 			Node* p = pHead;
-			intptr_t way = SideOfNormal(start->Vec2(), start->pPrev->Vec2(), start->pNext->Vec2());
+			intptr_t way = SideOfNormal(start->Vec2, start->pPrev->Vec2, start->pNext->Vec2);
 			p = start;
 			ibool ok = false;
 			while (1) {
-				if (way == SideOfNormal(p->Vec2(), p->pPrev->Vec2(), p->pNext->Vec2())) {
+				if (way == SideOfNormal(p->Vec2, p->pPrev->Vec2, p->pNext->Vec2)) {
 					if (!OtherPointsInside(p)) {
 						Node tp = *p;
-						Counter--;
+						counter--;
 						if (p->pPrev == p || p->pNext == p) {
 							pHead = NULL;
 						} else {
@@ -146,9 +142,9 @@ struct Triangulation {
 							p->pNext->pPrev = p->pPrev;
 							p->pPrev->pNext = p->pNext;
 						}
-						triangleIndices.push_back((Index)(tp.pVertex - pVertices));
-						triangleIndices.push_back((Index)(tp.pNext->pVertex - pVertices));
-						triangleIndices.push_back((Index)(tp.pPrev->pVertex - pVertices));
+						triangleIndices.push_back(tp.Index);
+						triangleIndices.push_back(tp.pNext->Index);
+						triangleIndices.push_back(tp.pPrev->Index);
 						ok = true;
 						break;
 					}

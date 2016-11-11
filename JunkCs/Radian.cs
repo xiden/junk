@@ -5,7 +5,7 @@ using System.Text;
 
 using element = System.Double;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// ラジアン同士の計算などをまとめたクラス
 	/// </summary>
