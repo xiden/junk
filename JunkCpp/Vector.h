@@ -76,6 +76,13 @@ struct VectorN {
 		return e[i];
 	}
 
+	_FINLINE const T& operator[](intptr_t i) const {
+		return e[i];
+	}
+	_FINLINE T& operator[](intptr_t i) {
+		return e[i];
+	}
+
 	_FINLINE VectorN& Minus(const VectorN& v) {
 		Order<TmMinus, N>::Op(e, v.e);
 		return *this;

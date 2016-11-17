@@ -90,7 +90,7 @@ namespace Jk {
 			}
 
 			var last = nodes[0];
-			for (var i = vertices.Length - 1; i != -1; i--) {
+			for (var i = vlen - 1; i != -1; i--) {
 				var node = nodes[i];
 				node.Vec2 = vertices[i];
 				node.Index = i;
