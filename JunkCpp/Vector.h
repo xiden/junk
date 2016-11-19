@@ -4,6 +4,8 @@
 
 #include "JunkDef.h"
 #include "TemplateMeta.h"
+#include <cstdlib>
+#include <cmath>
 
 _JUNK_BEGIN
 
@@ -11,42 +13,90 @@ template<class T, intptr_t R, intptr_t C, class SEL> struct MatrixMxN;
 
 #pragma pack(push,1)
 
-//! math.h で宣言されている数学関数クラス、Vector、Matrix、Intersects クラスで使用する
-struct MathFuncs_Math_H {
-	static _FINLINE double SinRad(double rad) {
-		return sin(rad);
+//! math.h で宣言されている数学関数クラスの基本形、Vector、Matrix、Intersects クラスで使用する
+//! SSEなどを使う数学関数を作ったらこれを置き換えることで高速化とかできるかもしれない
+template<
+	class T //!< 扱う値型
+> struct MathForVectorDefault {
+	static _FINLINE T SinRad(T rad) {
+		return std::sin(rad);
 	}
 
-	static _FINLINE double CosRad(double rad) {
-		return cos(rad);
+	static _FINLINE T CosRad(T rad) {
+		return std::cos(rad);
 	}
 
-	static _FINLINE double ATan2Rad(double y, double x) {
-		return atan2(y, x);
+	static _FINLINE T ATan2Rad(T y, T x) {
+		return std::atan2(y, x);
 	}
 
-	static _FINLINE double SinDeg(double deg) {
-		return sin(JUNK_DEGTORAD * deg);
+	static _FINLINE T SinDeg(T deg) {
+		return std::sin(JUNK_DEGTORAD * deg);
 	}
 
-	static _FINLINE double CosDeg(double deg) {
-		return cos(JUNK_DEGTORAD * deg);
+	static _FINLINE T CosDeg(T deg) {
+		return std::cos(JUNK_DEGTORAD * deg);
 	}
-	static _FINLINE double Sqrt(double a) {
-		return sqrt(a);
+
+	static _FINLINE T ATan2Deg(T y, T x) {
+		return std::atan2(y, x) * JUNK_RADTODEG;
+	}
+
+	static _FINLINE T Sqrt(T a) {
+		return std::sqrt(a);
+	}
+
+	static _FINLINE T Abs(T a) {
+		return std::abs(a);
+	}
+};
+
+//! 入力データから２次元ベクトルのみを抽出するクラスの基本形
+template<
+	class OutputVector //!< 2次元ベクトル型、Vector2 を継承するクラス
+> struct ProjectVector2 {
+	template<
+		class D //!< 入力データ型
+	> static _FINLINE OutputVector Project(const D& data) {
+		return OutputVector(data(0), data(1));
+	}
+};
+
+//! 入力データから３次元ベクトルのみを抽出するクラスの基本形
+template<
+	class OutputVector //!< ３次元ベクトル型、Vector3 を継承するクラス
+> struct ProjectVector3 {
+	template<
+		class D //!< 入力データ型
+	> static _FINLINE OutputVector Project(const D& vtx) {
+		return OutputVector(data(0), data(1), data(2));
+	}
+};
+
+//! 入力データから４次元ベクトルのみを抽出するクラスの基本形
+template<
+	class OutputVector //!< ４次元ベクトル型、Vector4 を継承するクラス
+> struct ProjectVector4 {
+	template<
+		class D //!< 入力データ型
+	> static _FINLINE OutputVector Project(const D& vtx) {
+		return OutputVector(data(0), data(1), data(2), data(3));
 	}
 };
 
 //! 固定サイズn次元ベクトルクラステンプレート
-template<class T, intptr_t NUM, class MathFuncs = MathFuncs_Math_H>
-struct VectorN {
+template<
+	class T, //!< 要素値の型
+	intptr_t NUM, //!< 要素数
+	class MathFuncs = MathForVectorDefault<T> //!< ベクトル用算術関数群
+> struct VectorN {
 	enum {
-		N = NUM
+		N = NUM //!< 要素数
 	};
 
-	typedef T ValueType;
+	typedef T ValueType; //!< 要素値の型
 
-	T e[N];
+	T e[N]; //!< 要素配列
 
 	_FINLINE VectorN() {}
 	_FINLINE VectorN(const T* p) {
@@ -266,8 +316,10 @@ struct VectorN {
 };
 
 //! 固定サイズ2次元ベクトルクラステンプレート
-template<class T, class MathFuncs = MathFuncs_Math_H>
-struct Vector2 : public VectorN<T, 2, MathFuncs> {
+template<
+	class T, //!< 要素値の型
+	class MathFuncs = MathForVectorDefault<T> //!< ベクトル用算術関数群
+> struct Vector2 : public VectorN<T, 2, MathFuncs> {
 	enum {
 		N = 2
 	};
@@ -351,8 +403,10 @@ struct Vector2 : public VectorN<T, 2, MathFuncs> {
 };
 
 //! 固定サイズ3次元ベクトルクラステンプレート
-template<class T, class MathFuncs = MathFuncs_Math_H>
-struct Vector3 : public VectorN<T, 3, MathFuncs> {
+template<
+	class T, //!< 要素値の型
+	class MathFuncs = MathForVectorDefault<T> //!< ベクトル用算術関数群
+> struct Vector3 : public VectorN<T, 3, MathFuncs> {
 	enum {
 		N = 3
 	};
@@ -439,8 +493,10 @@ struct Vector3 : public VectorN<T, 3, MathFuncs> {
 };
 
 //! 固定サイズ4次元ベクトルクラステンプレート
-template<class T, class MathFuncs = MathFuncs_Math_H>
-struct Vector4 : public VectorN<T, 4, MathFuncs> {
+template<
+	class T, //!< 要素値の型
+	class MathFuncs = MathForVectorDefault<T> //!< ベクトル用算術関数群
+> struct Vector4 : public VectorN<T, 4, MathFuncs> {
 	enum {
 		N = 4
 	};

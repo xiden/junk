@@ -9,7 +9,7 @@ _JUNK_BEGIN
 //! 衝突判定処理クラス
 template<
 	class V, //!< VectorN クラスから継承したクラスを指定する
-	class MathFuncs = MathFuncs_Math_H //!< 数学関数クラス
+	class MathFuncs = MathForVectorDefault<typename V::ValueType> //!< 数学関数クラス
 >
 struct Intersects {
 	typedef V Vector; //!< 内部で扱うベクトル型

@@ -3,6 +3,7 @@
 #define __JUNK_MATRIX_H__
 
 #include "Vector.h"
+#include <algorithm>
 
 _JUNK_BEGIN
 
@@ -347,7 +348,7 @@ struct Matrix3x3 : public MatrixMxN<T, 3, 3, SEL> {
 
 
 //! 固定サイズ4x4行列クラステンプレート
-template<class T, class SEL = RowColSel<4, 4>, class Angle = double, class MathFuncs = MathFuncs_Math_H>
+template<class T, class SEL = RowColSel<4, 4>, class Angle = double, class MathFuncs = MathForVectorDefault<T> >
 struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
 	typedef T ValueType;
 	typedef SEL Selector;

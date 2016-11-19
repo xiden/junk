@@ -7,8 +7,13 @@ using namespace System::Drawing;
 
 #include <vector>
 #include "../../../JunkCpp/Triangulation.h"
+#include "../../../JunkCpp/Geo.h"
 
-void TestTriangulation(std::vector<int>& indices);
+extern std::vector<jk::Vector2f> UnmanagedPolygon;
+
+#pragma unmanaged
+int PtInPolygon(int x, int y);
+#pragma managed
 
 namespace Triangulation {
 
@@ -43,11 +48,22 @@ namespace Triangulation {
 
 	private:
 		System::Windows::Forms::Button^  button1;
+		System::Windows::Forms::Label^  label1;
 
 	protected:
 		List<PointF>^ _Lines = gcnew List<PointF>();
 		List<PointF>^ _Polygon = nullptr;
+
+	protected:
 		List<int>^ _Triangles = nullptr;
+
+		virtual void OnMouseMove(System::Windows::Forms::MouseEventArgs^ e) override {
+			if (!UnmanagedPolygon.empty()) {
+				this->label1->Text = PtInPolygon(e->X, e->Y).ToString();
+			}
+
+			Form::OnMouseMove(e);
+		}
 
 		virtual void OnMouseDown(System::Windows::Forms::MouseEventArgs^ e) override {
 			if (e->Button == System::Windows::Forms::MouseButtons::Left) {
@@ -55,6 +71,7 @@ namespace Triangulation {
 				_Triangles = nullptr;
 
 				_Lines->Add(PointF((float)e->X, (float)e->Y));
+				UnmanagedPolygon.clear();
 				this->Invalidate();
 			}
 		}
@@ -101,15 +118,16 @@ namespace Triangulation {
 				return;
 
 			std::vector<jk::Vector2f> points;
-			std::vector<int> indices;
+			std::vector<intptr_t> indices;
 
 			// 頂点座標 _Lines から vector に入れる
 			for each(auto p in _Lines) {
 				points.push_back(jk::Vector2f(p.X, p.Y));
 			}
+			UnmanagedPolygon = points;
 
 			// 三角形分割を行う
-			jk::Triangulation<jk::Vector2f, jk::Vector2f, jk::ExtractVector2FromVectorN<jk::Vector2f>> t;
+			jk::Triangulation<jk::Vector2f, jk::Vector2f> t;
 			t.Do(&points[0], points.size(), indices);
 
 			// 頂点座標 _Lines から _Polygon を作成
@@ -119,7 +137,7 @@ namespace Triangulation {
 			// 三角形インデックス番号 vector から _Triangles に入れる
 			_Triangles = gcnew List<int>();
 			for (auto i : indices) {
-				_Triangles->Add(i);
+				_Triangles->Add((int)i);
 			}
 
 			this->Invalidate();
@@ -138,6 +156,7 @@ namespace Triangulation {
 		/// </summary>
 		void InitializeComponent(void) {
 			this->button1 = (gcnew System::Windows::Forms::Button());
+			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// button1
@@ -150,15 +169,26 @@ namespace Triangulation {
 			this->button1->UseVisualStyleBackColor = true;
 			this->button1->Click += gcnew System::EventHandler(this, &MyForm::button1_Click);
 			// 
+			// label1
+			// 
+			this->label1->AutoSize = true;
+			this->label1->Location = System::Drawing::Point(106, 24);
+			this->label1->Name = L"label1";
+			this->label1->Size = System::Drawing::Size(35, 12);
+			this->label1->TabIndex = 1;
+			this->label1->Text = L"label1";
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(666, 409);
+			this->Controls->Add(this->label1);
 			this->Controls->Add(this->button1);
 			this->Name = L"MyForm";
 			this->Text = L"MyForm";
 			this->ResumeLayout(false);
+			this->PerformLayout();
 
 		}
 #pragma endregion

@@ -7,35 +7,15 @@
 
 _JUNK_BEGIN
 
-//! 2次元以上のベクトルから2次元ベクトル抽出するクラス
-template<
-	class V2 //!< 2次元ベクトル型、Vector2 を継承するクラス
->
-struct ExtractVector2FromVectorN {
-	template<class Vn> static _FINLINE V2 Get(const Vn& v) {
-		return V2(v(0), v(1));
-	}
-};
-
-//! 頂点から2次元ベクトル抽出するクラス
-template<
-	class V2 //!< 2次元ベクトル型、Vector2 を継承するクラス
->
-struct ExtractVector2FromVertex {
-	template<class Vtx> static _FINLINE V2 Get(const Vtx& vtx) {
-		return V2(vtx.Pos(0), vtx.Pos(1));
-	}
-};
-
 //! 三角形分割クラス、三角形分割して頂点インデックスを作成する
 template<
 	class Vtx, //!< 頂点型、内部に2次元以上のベクトルを持っていなければならない
 	class V2, //!< 2次元ベクトル型、Vector2 を継承するクラス
-	class Ext = ExtractVector2FromVertex<V2> //!< 頂点から2次元ベクトルを抽出するクラス
+	class Ext = ProjectVector2<V2> //!< 頂点から2次元ベクトルを抽出するクラス
 >
 struct Triangulation {
 	typedef typename V2::ValueType ValueType;
-	typedef Ext V2FromVtx;
+	typedef Ext Projecter;
 
 	struct Node {
 		V2 Vec2;
@@ -113,7 +93,7 @@ struct Triangulation {
 		Node* pLast = &nodes[0];
 		for (intptr_t i = nVertices - 1; i != -1; i--) {
 			Node* pNode = &nodes[i];
-			pNode->Vec2 = V2FromVtx::Get(pVertices[i]);
+			pNode->Vec2 = Projecter::Project(pVertices[i]);
 			pNode->Index = i;
 			pNode->Distance2 = pNode->Vec2.LengthSquare();
 			pNode->pNext = pLast;
