@@ -10,12 +10,10 @@ _JUNK_BEGIN
 //! 三角形分割クラス、三角形分割して頂点インデックスを作成する
 template<
 	class Vtx, //!< 頂点型、内部に2次元以上のベクトルを持っていなければならない
-	class V2, //!< 2次元ベクトル型、Vector2 を継承するクラス
-	class Ext = ProjectVector2<V2> //!< 頂点から2次元ベクトルを抽出するクラス
+	class V2 //!< 2次元ベクトル型、Vector2 を継承するクラス
 >
 struct Triangulation {
 	typedef typename V2::ValueType ValueType;
-	typedef Ext Projecter;
 
 	struct Node {
 		V2 Vec2;
@@ -81,10 +79,14 @@ struct Triangulation {
 	}
 
 	//! 三角形分割する
-	template<class Index> void Do(
+	template<
+		class Index, //!< 戻りインデックスの型
+		class PRJ = ProjectVector2<Vector2<typename V2::ValueType> > //!< 入力頂点から２次元ベクトルのみを抽出するクラス
+	> void Do(
 		Vtx* pVertices, //!< [in] 頂点配列へのポインタ
 		intptr_t nVertices, //!< [in] pVertices が指す頂点数
-		std::vector<Index>& triangleIndices //!< [out] 三角形を構成する頂点インデックス配列が返る
+		std::vector<Index>& triangleIndices, //!< [out] 三角形を構成する頂点インデックス配列が返る
+		PRJ prj = ProjectVector2<Vector2<typename V2::ValueType> >() //!< [in] 入力頂点から２次元ベクトルのみを抽出するクラス
 	) {
 		if (nVertices < 3)
 			return;
@@ -93,7 +95,7 @@ struct Triangulation {
 		Node* pLast = &nodes[0];
 		for (intptr_t i = nVertices - 1; i != -1; i--) {
 			Node* pNode = &nodes[i];
-			pNode->Vec2 = Projecter::Project(pVertices[i]);
+			pNode->Vec2 = prj(pVertices[i]);
 			pNode->Index = i;
 			pNode->Distance2 = pNode->Vec2.LengthSquare();
 			pNode->pNext = pLast;

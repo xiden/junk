@@ -13,8 +13,14 @@ _JUNK_BEGIN
 #pragma pack(push,1)
 
 //! D3D用のMatrixMxNの行と列のセレクタ
-template<intptr_t R, intptr_t C> struct RowColSel {
-	enum { RightHand = 0 };
+template<
+	intptr_t R, //!< 行数
+	intptr_t C //!< 列数
+> struct RowColSel {
+	enum {
+		RightHand = 0 //!< 右手系かどうか、D3Dは左手系なので0とする
+	};
+
 	//! 行番号と列番号を指定して配列インデックス番号を取得する
 	_FINLINE static intptr_t Index(intptr_t row, intptr_t col) {
 		return row * C + col;
@@ -26,8 +32,14 @@ template<intptr_t R, intptr_t C> struct RowColSel {
 };
 
 //! OpenGL用のMatrixMxNの行と列のセレクタ
-template<intptr_t R, intptr_t C> struct ColRowSel {
-	enum { RightHand = 1 };
+template<
+	intptr_t R, //!< 行数
+	intptr_t C //!< 列数
+> struct ColRowSel {
+	enum {
+		RightHand = 1 //!< 右手系かどうか、OpenGLは右手系なので1とする
+	};
+
 	//! 行番号と列番号を指定して配列インデックス番号を取得する
 	_FINLINE static intptr_t Index(intptr_t row, intptr_t col) {
 		return col * R + row;
@@ -39,8 +51,13 @@ template<intptr_t R, intptr_t C> struct ColRowSel {
 };
 
 //! 固定サイズMxN行列クラステンプレート
-template<class T, intptr_t R, intptr_t C, class SEL = RowColSel<R, C> >
-struct MatrixMxN {
+template<
+	class T, //!< 要素型
+	intptr_t R, //!< 行数
+	intptr_t C, //!< 列数
+	class SEL = RowColSel<R, C>, //!< 行と列から要素インデックスを取得するクラス
+	class Math = DefaultMath<T> //!< ベクトル用算術関数群
+> struct MatrixMxN {
 	enum {
 		ROW = R,
 		COLUMN = C,
@@ -49,7 +66,7 @@ struct MatrixMxN {
 
 	typedef T ValueType;
 	typedef SEL Selector;
-	typedef MatrixMxN<T, R, C, SEL> Self;
+	typedef MatrixMxN<T, R, C, SEL, Math> Self;
 
 	T e[LENGTH];
 
@@ -59,11 +76,11 @@ struct MatrixMxN {
 		Order<TmSet, LENGTH>::Op(e, p);
 	}
 
-	template<class S> MatrixMxN(const MatrixMxN<S, R, C, SEL>& c) {
+	template<class S> MatrixMxN(const MatrixMxN<S, R, C, SEL, Math>& c) {
 		Order<TmSet, LENGTH>::Op(e, c.e);
 	}
 
-	template<class S> MatrixMxN& operator=(const MatrixMxN<S, R, C, SEL>& c) {
+	template<class S> MatrixMxN& operator=(const MatrixMxN<S, R, C, SEL, Math>& c) {
 		Order<TmSet, LENGTH>::Op(e, c.e);
 		return *this;
 	}
@@ -130,7 +147,7 @@ struct MatrixMxN {
 		return *this;
 	}
 
-	template<intptr_t L> Self& Mul(const MatrixMxN<T, R, L, SEL>& m1, const MatrixMxN<T, L, C, SEL>& m2) {
+	template<intptr_t L> Self& Mul(const MatrixMxN<T, R, L, SEL, Math>& m1, const MatrixMxN<T, L, C, SEL, Math>& m2) {
 		for(intptr_t i = 0; i < R; i++) {
 			for(intptr_t j = 0; j < C; j++) {
 				T t = m1(i, 0) * m2(0, j);
@@ -142,21 +159,21 @@ struct MatrixMxN {
 		return *this;
 	}
 
-	template<intptr_t L> _FINLINE Self& MulL(const MatrixMxN<T, R, L, SEL>& m) {
+	template<intptr_t L> _FINLINE Self& MulL(const MatrixMxN<T, R, L, SEL, Math>& m) {
 		Self t;
 		t.Mul(m, *this);
 		*this = t;
 		return *this;
 	}
 
-	template<intptr_t L> _FINLINE Self& MulR(const MatrixMxN<T, R, L, SEL>& m) {
+	template<intptr_t L> _FINLINE Self& MulR(const MatrixMxN<T, R, L, SEL, Math>& m) {
 		Self t;
 		t.Mul(*this, m);
 		*this = t;
 		return *this;
 	}
 
-	template<intptr_t L> _FINLINE Self& Mul(const MatrixMxN<T, R, L, SEL>& m) {
+	template<intptr_t L> _FINLINE Self& Mul(const MatrixMxN<T, R, L, SEL, Math>& m) {
 		Self t;
 		return *this = SEL::RightHand ? t.Mul(m, *this) : t.Mul(*this, m);
 	}
@@ -178,10 +195,10 @@ struct MatrixMxN {
 				ip[k] = k;             // 行交換情報の初期値
 				u = T(0);              // その行の絶対値最大の要素を求める
 				for (j = 0; j < N; j++) {
-					t = fabs((*this)(k, j));
+					t = Math::Abs((*this)(k, j));
 					if (t > u) u = t;
 				}
-				if (fabs(u) <= eps) return false; // 0 なら行列はLU分解できない
+				if (Math::Abs(u) <= eps) return false; // 0 なら行列はLU分解できない
 				weight[k] = T(1) / u;   // 最大絶対値の逆数
 			}
 			det = T(1);                   // 行列式の初期値
@@ -189,7 +206,7 @@ struct MatrixMxN {
 				u = T(-1);
 				for (i = k; i < N; i++) {  // より下の各行について
 					ii = ip[i];            // 重み×絶対値 が最大の行を見つける
-					t = fabs((*this)(ii, k)) * weight[ii];
+					t = Math::Abs((*this)(ii, k)) * weight[ii];
 					if (t > u) {
 						u = t;
 						j = i;
@@ -203,7 +220,7 @@ struct MatrixMxN {
 				}
 				u = (*this)(ik, k);
 				det *= u;  // 対角成分
-				if (fabs(u) <= eps) return false;    // 0 なら行列はLU分解できない
+				if (Math::Abs(u) <= eps) return false;    // 0 なら行列はLU分解できない
 				for (i = k + 1; i < N; i++) {  // Gauss消去法
 					ii = ip[i];
 					t = ((*this)(ii, k) /= u);
@@ -246,7 +263,7 @@ struct MatrixMxN {
 				for (j = i + 1; j < N; j++)
 					t -= (*this)(ii, j) * x(j);
 				T buf = (*this)(ii, i);
-				if(fabs(buf) <= eps)
+				if(Math::Abs(buf) <= eps)
 					return false;
 				x(i) = t / buf;
 			}
@@ -272,7 +289,7 @@ struct MatrixMxN {
 			int ip[N];   // 行交換の情報
 			Self m2 = m;
 
-			if(!m2.Lu(ip, rdet, eps) || fabs(rdet) <= eps)
+			if(!m2.Lu(ip, rdet, eps) || Math::Abs(rdet) <= eps)
 				return false;
 
 			for (k = 0; k < N; k++) {
@@ -301,12 +318,15 @@ struct MatrixMxN {
 };
 
 //! 固定サイズ2x2行列クラステンプレート
-template<class T, class SEL = RowColSel<2, 2> >
-struct Matrix2x2 : public MatrixMxN<T, 2, 2, SEL> {
+template<
+	class T, //!< 要素型
+	class SEL = RowColSel<2, 2>, //!< 行と列から要素インデックスを取得するクラス
+	class Math = DefaultMath<T> //!< ベクトル用算術関数群
+> struct Matrix2x2 : public MatrixMxN<T, 2, 2, SEL, Math> {
 	typedef T ValueType;
 	typedef SEL Selector;
-	typedef MatrixMxN<T, 2, 2, SEL> Base;
-	typedef Matrix2x2<T, SEL> Self;
+	typedef MatrixMxN<T, 2, 2, SEL, Math> Base;
+	typedef Matrix2x2<T, SEL, Math> Self;
 	enum {
 		ROW = Base::ROW,
 		COLUMN = Base::COLUMN,
@@ -315,21 +335,24 @@ struct Matrix2x2 : public MatrixMxN<T, 2, 2, SEL> {
 
 	_FINLINE Matrix2x2() {}
 	Matrix2x2(const T* p) : Base(p) {}
-	template<class S> Matrix2x2(const MatrixMxN<S, ROW, COLUMN, SEL>& c) : Base(c) {}
+	template<class S> Matrix2x2(const MatrixMxN<S, ROW, COLUMN, SEL, Math>& c) : Base(c) {}
 
-	template<class S> Self& operator=(const MatrixMxN<S, ROW, COLUMN, SEL>& c) {
+	template<class S> Self& operator=(const MatrixMxN<S, ROW, COLUMN, SEL, Math>& c) {
 		Base::operator=(c);
 		return *this;
 	}
 };
 
 //! 固定サイズ3x3行列クラステンプレート
-template<class T, class SEL = RowColSel<3, 3> >
-struct Matrix3x3 : public MatrixMxN<T, 3, 3, SEL> {
+template<
+	class T, //!< 要素型
+	class SEL = RowColSel<3, 3>, //!< 行と列から要素インデックスを取得するクラス
+	class Math = DefaultMath<T> //!< ベクトル用算術関数群
+> struct Matrix3x3 : public MatrixMxN<T, 3, 3, SEL, Math> {
 	typedef T ValueType;
 	typedef SEL Selector;
-	typedef MatrixMxN<T, 3, 3, SEL> Base;
-	typedef Matrix3x3<T, SEL> Self;
+	typedef MatrixMxN<T, 3, 3, SEL, Math> Base;
+	typedef Matrix3x3<T, SEL, Math> Self;
 	enum {
 		ROW = Base::ROW,
 		COLUMN = Base::COLUMN,
@@ -338,9 +361,9 @@ struct Matrix3x3 : public MatrixMxN<T, 3, 3, SEL> {
 
 	Matrix3x3() {}
 	Matrix3x3(const T* p) : Base(p) {}
-	template<class S> Matrix3x3(const MatrixMxN<S, ROW, COLUMN, SEL>& c) : Base(c) {}
+	template<class S> Matrix3x3(const MatrixMxN<S, ROW, COLUMN, SEL, Math>& c) : Base(c) {}
 
-	template<class S> Matrix3x3& operator=(const MatrixMxN<S, ROW, COLUMN, SEL>& c) {
+	template<class S> Matrix3x3& operator=(const MatrixMxN<S, ROW, COLUMN, SEL, Math>& c) {
 		Base::operator=(c);
 		return *this;
 	}
@@ -348,13 +371,16 @@ struct Matrix3x3 : public MatrixMxN<T, 3, 3, SEL> {
 
 
 //! 固定サイズ4x4行列クラステンプレート
-template<class T, class SEL = RowColSel<4, 4>, class Angle = double, class MathFuncs = MathForVectorDefault<T> >
-struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
+template<
+	class T, //!< 要素型
+	class SEL = RowColSel<4, 4>, //!< 行と列から要素インデックスを取得するクラス
+	class Math = DefaultMath<T> //!< ベクトル用算術関数群
+> struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL, Math> {
 	typedef T ValueType;
 	typedef SEL Selector;
-	typedef Angle AngleType;
-	typedef MatrixMxN<T, 4, 4, SEL> Base;
-	typedef Matrix4x4<T, SEL, Angle, MathFuncs> Self;
+	typedef typename Math::AngleType AngleType;
+	typedef MatrixMxN<T, 4, 4, SEL, Math> Base;
+	typedef Matrix4x4<T, SEL, Math> Self;
 	enum {
 		ROW = Base::ROW,
 		COLUMN = Base::COLUMN,
@@ -364,9 +390,9 @@ struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
 
 	_FINLINE Matrix4x4() {}
 	Matrix4x4(const T* p) : Base(p) {}
-	template<class S> Matrix4x4(const MatrixMxN<S, ROW, COLUMN, SEL>& c) : Base(c) {}
+	template<class S> Matrix4x4(const MatrixMxN<S, ROW, COLUMN, SEL, Math>& c) : Base(c) {}
 
-	template<class S> Matrix4x4& operator=(const MatrixMxN<S, ROW, COLUMN, SEL>& c) {
+	template<class S> Matrix4x4& operator=(const MatrixMxN<S, ROW, COLUMN, SEL, Math>& c) {
 		Base::operator=(c);
 		return *this;
 	}
@@ -379,20 +405,20 @@ struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
 		return this->e[SEL::TranslateIndex(index)];
 	}
 
-	_FINLINE Vector4<T, MathFuncs> GetRowVector(intptr_t row) const {
-		return Vector4<T, MathFuncs>((*this)(row, 0), (*this)(row, 1), (*this)(row, 2), (*this)(row, 3));
+	_FINLINE Vector4<T, Math> GetRowVector(intptr_t row) const {
+		return Vector4<T, Math>((*this)(row, 0), (*this)(row, 1), (*this)(row, 2), (*this)(row, 3));
 	}
 
-	_FINLINE Vector4<T, MathFuncs> GetColVector(intptr_t col) const {
-		return Vector4<T, MathFuncs>((*this)(0, col), (*this)(1, col), (*this)(2, col), (*this)(3, col));
+	_FINLINE Vector4<T, Math> GetColVector(intptr_t col) const {
+		return Vector4<T, Math>((*this)(0, col), (*this)(1, col), (*this)(2, col), (*this)(3, col));
 	}
 
-	_FINLINE Vector3<T, MathFuncs> GetRowVector3(intptr_t row) const {
-		return Vector3<T, MathFuncs>((*this)(row, 0), (*this)(row, 1), (*this)(row, 2));
+	_FINLINE Vector3<T, Math> GetRowVector3(intptr_t row) const {
+		return Vector3<T, Math>((*this)(row, 0), (*this)(row, 1), (*this)(row, 2));
 	}
 
-	_FINLINE Vector3<T, MathFuncs> GetColVector3(intptr_t col) const {
-		return Vector3<T, MathFuncs>((*this)(0, col), (*this)(1, col), (*this)(2, col));
+	_FINLINE Vector3<T, Math> GetColVector3(intptr_t col) const {
+		return Vector3<T, Math>((*this)(0, col), (*this)(1, col), (*this)(2, col));
 	}
 
 	template<class MF> _FINLINE void SetRowVector(intptr_t row, VectorN<T, COLUMN, MF> v) {
@@ -458,7 +484,7 @@ struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
 	}
 
 #define _JMATMUL(r, c) (*this)(r, c) = m1(r, 0) * m2(0, c) + m1(r, 1) * m2(1, c) + m1(r, 2) * m2(2, c) + m1(r, 3) * m2(3, c)
-	Self& Mul(const MatrixMxN<T, ROW, COLUMN, SEL>& m1, const MatrixMxN<T, ROW, COLUMN, SEL>& m2) {
+	Self& Mul(const MatrixMxN<T, ROW, COLUMN, SEL, Math>& m1, const MatrixMxN<T, ROW, COLUMN, SEL, Math>& m2) {
 		_JMATMUL(0, 0);
 		_JMATMUL(1, 0);
 		_JMATMUL(2, 0);
@@ -479,21 +505,21 @@ struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
 	}
 #undef _JMATMUL
 
-	_FINLINE Self& MulL(const MatrixMxN<T, ROW, COLUMN, SEL>& m) {
+	_FINLINE Self& MulL(const MatrixMxN<T, ROW, COLUMN, SEL, Math>& m) {
 		Self t;
 		t.Mul(m, *this);
 		*this = t;
 		return *this;
 	}
 
-	_FINLINE Self& MulR(const MatrixMxN<T, ROW, COLUMN, SEL>& m) {
+	_FINLINE Self& MulR(const MatrixMxN<T, ROW, COLUMN, SEL, Math>& m) {
 		Self t;
 		t.Mul(*this, m);
 		*this = t;
 		return *this;
 	}
 
-	_FINLINE Self& Mul(const MatrixMxN<T, ROW, COLUMN, SEL>& m) {
+	_FINLINE Self& Mul(const MatrixMxN<T, ROW, COLUMN, SEL, Math>& m) {
 		Self t;
 		return *this = SEL::RightHand ? t.Mul(m, *this) : t.Mul(*this, m);
 	}
@@ -539,11 +565,11 @@ struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
 	}
 
 	Self& RotateXRad(AngleType rad) {
-		return RotateX(T(MathFuncs::SinRad(rad)), T(MathFuncs::CosRad(rad)));
+		return RotateX(T(Math::SinRad(rad)), T(Math::CosRad(rad)));
 	}
 
 	Self& RotateXDeg(AngleType deg) {
-		return RotateX(T(MathFuncs::SinDeg(deg)), T(MathFuncs::CosDeg(deg)));
+		return RotateX(T(Math::SinDeg(deg)), T(Math::CosDeg(deg)));
 	}
 
 	Self& RotateY(T s, T c) {
@@ -560,11 +586,11 @@ struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
 	}
 
 	Self& RotateYRad(AngleType rad) {
-		return RotateY(T(MathFuncs::SinRad(rad)), T(MathFuncs::CosRad(rad)));
+		return RotateY(T(Math::SinRad(rad)), T(Math::CosRad(rad)));
 	}
 
 	Self& RotateYDeg(AngleType deg) {
-		return RotateY(T(MathFuncs::SinDeg(deg)), T(MathFuncs::CosDeg(deg)));
+		return RotateY(T(Math::SinDeg(deg)), T(Math::CosDeg(deg)));
 	}
 
 	Self& RotateZ(T s, T c) {
@@ -581,11 +607,11 @@ struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
 	}
 
 	Self& RotateZRad(AngleType rad) {
-		return RotateZ(T(MathFuncs::SinRad(rad)), T(MathFuncs::CosRad(rad)));
+		return RotateZ(T(Math::SinRad(rad)), T(Math::CosRad(rad)));
 	}
 
 	Self& RotateZDeg(AngleType deg) {
-		return RotateZ(T(MathFuncs::SinDeg(deg)), T(MathFuncs::CosDeg(deg)));
+		return RotateZ(T(Math::SinDeg(deg)), T(Math::CosDeg(deg)));
 	}
 
 	Self& RotateAxis(T x, T y, T z, T s, T c) {
@@ -611,11 +637,11 @@ struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
 	}
 
 	Self& RotateAxisRad(T x, T y, T z, AngleType rad) {
-		return RotateAxis(x, y, z, T(MathFuncs::SinRad(rad)), T(MathFuncs::CosRad(rad)));
+		return RotateAxis(x, y, z, T(Math::SinRad(rad)), T(Math::CosRad(rad)));
 	}
 
 	Self& RotateAxisDeg(T x, T y, T z, AngleType deg) {
-		return RotateAxis(x, y, z, T(MathFuncs::SinDeg(deg)), T(MathFuncs::CosDeg(deg)));
+		return RotateAxis(x, y, z, T(Math::SinDeg(deg)), T(Math::CosDeg(deg)));
 	}
 
 	Self& Transpose() {
@@ -678,7 +704,7 @@ struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
 	//		ip[k] = k;             /* 行交換情報の初期値 */
 	//		u = T(0);              /* その行の絶対値最大の要素を求める */
 	//		for (j = 0; j < N; j++) {
-	//			t = fabs((*this)(k, j));
+	//			t = Math::Abs((*this)(k, j));
 	//			if (t > u) u = t;
 	//		}
 	//		if (u == T(0)) return T(0); /* 0 なら行列はLU分解できない */
@@ -689,7 +715,7 @@ struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
 	//		u = T(-1);
 	//		for (i = k; i < N; i++) {  /* より下の各行について */
 	//			ii = ip[i];            /* 重み×絶対値 が最大の行を見つける */
-	//			t = fabs((*this)(ii, k)) * weight[ii];
+	//			t = Math::Abs((*this)(ii, k)) * weight[ii];
 	//			if (t > u) {
 	//				u = t;
 	//				j = i;
@@ -767,7 +793,7 @@ struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
 		SetRowVector(2, m(0, 2), m(1, 2), m(2, 2));
 		(*this)(3, 3) = T(1);
 		if(SEL::RightHand) {
-			VectorN<T, 3, MathFuncs> t = m.GetColVector3(3);
+			VectorN<T, 3, Math> t = m.GetColVector3(3);
 			(*this)(0, 3) = -m(0, 0) * t(0) - m(1, 0) * t(1) - m(2, 0) * t(2);
 			(*this)(1, 3) = -m(0, 1) * t(0) - m(1, 1) * t(1) - m(2, 1) * t(2);
 			(*this)(2, 3) = -m(0, 2) * t(0) - m(1, 2) * t(1) - m(2, 2) * t(2);
@@ -775,7 +801,7 @@ struct Matrix4x4 : public MatrixMxN<T, 4, 4, SEL> {
 			(*this)(3, 1) = T(0);
 			(*this)(3, 2) = T(0);
 		} else {
-			VectorN<T, 3, MathFuncs> t = m.GetRowVector3(3);
+			VectorN<T, 3, Math> t = m.GetRowVector3(3);
 			(*this)(3, 0) = -m(0, 0) * t(0) - m(0, 1) * t(1) - m(0, 2) * t(2);
 			(*this)(3, 1) = -m(1, 0) * t(0) - m(1, 1) * t(1) - m(1, 2) * t(2);
 			(*this)(3, 2) = -m(2, 0) * t(0) - m(2, 1) * t(1) - m(2, 2) * t(2);

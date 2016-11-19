@@ -9,7 +9,7 @@ _JUNK_BEGIN
 //! 衝突判定処理クラス
 template<
 	class V, //!< VectorN クラスから継承したクラスを指定する
-	class MathFuncs = MathForVectorDefault<typename V::ValueType> //!< 数学関数クラス
+	class Math = DefaultMath<typename V::ValueType> //!< 数学関数クラス
 >
 struct Intersects {
 	typedef V Vector; //!< 内部で扱うベクトル型
@@ -197,7 +197,7 @@ struct Intersects {
 			if(tmp1 < 0.0)
 				return 0;
 
-			ValueType t = -(MathFuncs::Sqrt(tmp1) + dvz + dvy + dvx) / e;
+			ValueType t = -(Math::Sqrt(tmp1) + dvz + dvy + dvx) / e;
 			if(t < ValueType(0) || ValueType(1) < t) // 移動範囲内では接触しない
 				return 0;
 

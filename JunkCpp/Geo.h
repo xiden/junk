@@ -216,7 +216,7 @@ namespace Geo {
 		return dist2 <= thic2;
 	}
 
-	//! 点が２次元多角形の内にあるか調べる
+	//! 点が２次元多角形の内にあるか調べる、辺と点上の座標は接触しているとみなされない
 	//! @return 点が多角形内にあるなら0以外が返る
 	template<
 		class CT, //!< VectorN 形式のクラス
@@ -226,15 +226,16 @@ namespace Geo {
 		CT c, //!< [in] 点の座標
 		const VT* pvts, //!< [in] 多角形の頂点列ポインタ
 		intptr_t nvts, //!< [in] 多角形の頂点数、３以上でなければならない
-		ibool close = false //!< [in] 多角形の始点と終点を閉じて判定をする場合は０以外を指定する
+		ibool close = false, //!< [in] 多角形の始点と終点を閉じて判定をする場合は０以外を指定する
+		PRJ prj = ProjectVector2<Vector2<typename VT::ValueType> >() //!< [in] 入力頂点から２次元ベクトルのみを抽出するクラス
 	) {
 		intptr_t i, count = 0;
 		intptr_t n = close ? nvts + 1 : nvts;
-		auto p1 = PRJ::Project(pvts[0]);
+		auto p1 = prj(pvts[0]);
 		auto x1 = c(0) - p1(0);
 		decltype(x1) zero(0);
 		for (i = 1; i < n; i++) {
-			auto p2 = PRJ::Project(pvts[close ? i % nvts : i]);
+			auto p2 = prj(pvts[close ? i % nvts : i]);
 			auto x2 = c(0) - p2(0);
 			if ((x1 < zero && zero <= x2) || (zero <= x1 && x2 < zero))
 				count += x1 * (p2(1) - p1(1)) < (c(1) - p1(1)) * (p2(0) - p1(0)) ? -1 : 1;
@@ -254,15 +255,16 @@ namespace Geo {
 		CT c, //!< [in] 点の座標
 		const VT* pvts, //!< [in] 多角形の頂点列ポインタ
 		intptr_t nvts, //!< [in] 多角形の頂点数、３以上でなければならない
-		ibool close = false //!< [in] 多角形の始点と終点を閉じて判定をする場合は０以外を指定する
+		ibool close = false, //!< [in] 多角形の始点と終点を閉じて判定をする場合は０以外を指定する
+		PRJ prj = ProjectVector2<Vector2<typename VT::ValueType> >() //!< [in] 入力頂点から２次元ベクトルのみを抽出するクラス
 	) {
 		intptr_t i, count = 0;
 		intptr_t n = close ? nvts + 1 : nvts;
-		auto p1 = PRJ::Project(pvts[0]);
+		auto p1 = prj(pvts[0]);
 		auto y1 = c(1) - p1(1);
 		decltype(y1) zero(0);
 		for (i = 1; i < n; i++) {
-			auto p2 = PRJ::Project(pvts[close ? i % nvts : i]);
+			auto p2 = prj(pvts[close ? i % nvts : i]);
 			auto y2 = c(1) - p2(1);
 			if ((y1 < zero && zero <= y2) || (zero <= y1 && y2 < zero)) {
 				auto rx = c(0) - p1(0);
@@ -294,14 +296,15 @@ namespace Geo {
 		class PRJ = ProjectVector2<Vector2<typename VT::ValueType> > //!< 入力頂点から２次元ベクトルのみを抽出するクラス
 	> inline typename VT::ValueType Polygon2Area(
 		const VT* pvts, //!< [in] 多角形の頂点列ポインタ
-		intptr_t nvts //!< [in] 多角形の頂点数、３以上でなければならない
+		intptr_t nvts, //!< [in] 多角形の頂点数、３以上でなければならない
+		PRJ prj = ProjectVector2<Vector2<typename VT::ValueType> >() //!< [in] 入力頂点から２次元ベクトルのみを抽出するクラス
 	) {
 		typedef typename VT::ValueType val;
 		intptr_t i, n = nvts + 1;
 		val s(0);
-		auto p1 = PRJ::Project(pvts[0]);
+		auto p1 = prj(pvts[0]);
 		for (i = 1; i < n; i++) {
-			auto p2 = PRJ::Project(pvts[i % nvts]);
+			auto p2 = prj(pvts[i % nvts]);
 			s += (p1(0) - p2(0)) * (p1(1) + p2(1));
 			p1 = p2;
 		}

@@ -4,11 +4,12 @@
 #include "stdafx.h"
 #include <iostream>
 #include <numeric>
-#include <cmath>
 #include <vector>
 #include "../../../JunkCpp/Geo.h"
+#include "../../../JunkCpp/Matrix.h"
 
 using namespace jk;
+
 
 int main() {
 	//auto a = 12.0f;
@@ -25,10 +26,11 @@ int main() {
 		{ 0, 1 },
 		{ 0, 0 },
 	};
-	for (auto& v : vts) {
-		std::cout << v.X() << "," << v.Y() << std::endl;
-	}
-	std::cout << "area=" << jk::Geo::Polygon2Area(&vts[0], vts.size()) << std::endl;
+	auto pointToCheck = jk::Vector2f(1.0f, 1.0f);
+	std::cout << "Polygon2Area=" << jk::Geo::Polygon2Area(&vts[0], vts.size()) << std::endl;
+	std::cout << "pointToCheck=" << pointToCheck.X() << ", " << pointToCheck.Y() << std::endl;
+	std::cout << "PointInPolygon2=" << jk::Geo::PointInPolygon2(pointToCheck, &vts[0], vts.size(), true) << std::endl;
+	std::cout << "PointTouchPolygon2=" << jk::Geo::PointTouchPolygon2(pointToCheck, &vts[0], vts.size(), true) << std::endl;
 
 	{
 		// ３次元ベクトルでライン同士の最近点パラメータを求める
