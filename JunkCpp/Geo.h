@@ -89,7 +89,7 @@ namespace Geo {
 		const E2T& e2 //!< [in] 線分２の終了点
 	) {
 		auto v = s1 - e1;
-		auto ox = s2(1) - s1.;
+		auto ox = s2(1) - s1(1);
 		auto oy = s1(0) - s2(0);
 		if (decltype(v)(0) <= (v(0) * ox + v(1) * oy) * (v(0) * (e2(1) - s1(1)) + v(1) * (s1(0) - e2(0))))
 			return false;
