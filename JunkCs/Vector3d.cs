@@ -74,7 +74,7 @@ namespace Jk {
 		}
 
 		public override int GetHashCode() {
-			return (int)(X + Y + Z);
+			return X.GetHashCode() ^ Y.GetHashCode() << 2 ^ Z.GetHashCode() >> 2;
 		}
 
 		public override string ToString() {

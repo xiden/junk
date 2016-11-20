@@ -63,8 +63,8 @@ namespace Jk {
 				return false;
 		}
 
-		public override int GetHashCode() {
-			return (int)(X + Y);
+		public unsafe override int GetHashCode() {
+			return X ^ (Y.GetHashCode() * 32749);
 		}
 
 		public override string ToString() {
