@@ -49,7 +49,7 @@ namespace Geo {
 	}
 
 	//! ２次元線分同士の交点パラメータを計算する、その際に線分範囲外が判明し次第計算を打ち切る
-	//! @return 計算できたら0以外が返る
+	//! @return 交差するなら0以外が返る
 	template<
 		class P1T, //!< VectorN 形式のクラス
 		class V1T, //!< VectorN 形式のクラス
@@ -62,13 +62,14 @@ namespace Geo {
 		const P2T& p2, //!< [in] 線分２の開始点
 		const V2T& v2, //!< [in] 線分２の方向ベクトル
 		CT tolerance, //!< [in] 線分パラメータ範囲内判定用許容誤差値、許容誤差内なら0～1の範囲を超えていても交差していることにする
-		CT& t1 //!< [out] 線分１のパラメータが返る
+		CT& t1, //!< [out] 線分１のパラメータが返る
+		CT& t2 //!< [out] 線分２のパラメータが返る
 	) {
 		auto d = v1(0) * v2(1) - v1(1) * v2(0);
 		if (d == decltype(d)(0))
 			return false;
 		auto pv = p2 - p1;
-		auto t2 = (pv(0) * v1(1) - pv(1) * v1(0)) / d;
+		t2 = (pv(0) * v1(1) - pv(1) * v1(0)) / d;
 		if (t2 < -tolerance || tolerance < t2 - decltype(t2)(1))
 			return false;
 		t1 = (pv(0) * v2(1) - pv(1) * v2(0)) / d;

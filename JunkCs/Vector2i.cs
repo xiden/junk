@@ -6,6 +6,7 @@ using System.Xml.Serialization;
 using System.Runtime.InteropServices;
 
 using element = System.Int32;
+using thisclass = Jk.Vector2i;
 
 namespace Jk {
 	[XmlType("Jk.Vector2i")]
@@ -57,8 +58,8 @@ namespace Jk {
 		}
 
 		public override bool Equals(object obj) {
-			if (obj is Vector2i)
-				return (Vector2i)obj == this;
+			if (obj is thisclass)
+				return (thisclass)obj == this;
 			else
 				return false;
 		}
@@ -90,8 +91,8 @@ namespace Jk {
 			Y /= l;
 		}
 
-		public Vector2i Normalize() {
-			Vector2i v = this;
+		public thisclass Normalize() {
+			thisclass v = this;
 			v.NormalizeSelf();
 			return v;
 		}
@@ -107,13 +108,13 @@ namespace Jk {
 				Y = max;
 		}
 
-		public Vector2i Saturate(element min, element max) {
-			Vector2i v = this;
+		public thisclass Saturate(element min, element max) {
+			thisclass v = this;
 			v.SaturateSelf(min, max);
 			return v;
 		}
 
-		public void SaturateSelf(Vector2i min, Vector2i max) {
+		public void SaturateSelf(thisclass min, thisclass max) {
 			if (X < min.X)
 				X = min.X;
 			else if (max.X < X)
@@ -124,8 +125,8 @@ namespace Jk {
 				Y = max.Y;
 		}
 
-		public Vector2i Saturate(Vector2i min, Vector2i max) {
-			Vector2i v = this;
+		public thisclass Saturate(thisclass min, thisclass max) {
+			thisclass v = this;
 			v.SaturateSelf(min, max);
 			return v;
 		}
@@ -135,10 +136,24 @@ namespace Jk {
 			Y = Math.Abs(Y);
 		}
 
-		public Vector2i Abs() {
+		public thisclass Abs() {
 			var v = this;
 			v.AbsSelf();
 			return v;
+		}
+
+		public void VerticalSelf() {
+			var t = X;
+			X = -Y;
+			Y = t;
+		}
+
+		public thisclass Vertical() {
+			return new thisclass(-Y, X);
+		}
+
+		public element Sum() {
+			return X + Y;
 		}
 
 		public element Max {
@@ -153,44 +168,77 @@ namespace Jk {
 			}
 		}
 
-		static public bool operator ==(Vector2i v1, Vector2i v2) {
+		public element Dot(thisclass v) {
+			return X * v.X + Y * v.Y;
+		}
+
+		static public bool operator ==(thisclass v1, thisclass v2) {
 			return v1.X == v2.X && v1.Y == v2.Y;
 		}
 
-		static public bool operator !=(Vector2i v1, Vector2i v2) {
+		static public bool operator !=(thisclass v1, thisclass v2) {
 			return v1.X != v2.X || v1.Y != v2.Y;
 		}
 
-		static public Vector2i operator +(Vector2i v) {
+		static public thisclass operator +(thisclass v) {
 			return v;
 		}
 
-		static public Vector2i operator -(Vector2i v) {
+		static public thisclass operator -(thisclass v) {
 			return -v;
 		}
 
-		static public Vector2i operator +(Vector2i v1, Vector2i v2) {
-			return new Vector2i(v1.X + v2.X, v1.Y + v2.Y);
+		static public thisclass operator +(thisclass v1, thisclass v2) {
+			return new thisclass(v1.X + v2.X, v1.Y + v2.Y);
 		}
 
-		static public Vector2i operator -(Vector2i v1, Vector2i v2) {
-			return new Vector2i(v1.X - v2.X, v1.Y - v2.Y);
+		static public thisclass operator -(thisclass v1, thisclass v2) {
+			return new thisclass(v1.X - v2.X, v1.Y - v2.Y);
 		}
 
-		static public Vector2i operator *(Vector2i v, element s) {
-			return new Vector2i(v.X * s, v.Y * s);
+		static public thisclass operator +(thisclass v, element s) {
+			return new thisclass(v.X + s, v.Y + s);
 		}
 
-		static public Vector2i operator /(Vector2i v, element s) {
-			return new Vector2i(v.X / s, v.Y / s);
+		static public thisclass operator +(element s, thisclass v) {
+			return new thisclass(s + v.X, s + v.Y);
 		}
 
-		static public Vector2i operator *(Vector2i v1, Vector2i v2) {
-			return new Vector2i(v1.X * v2.X, v1.Y * v2.Y);
+		static public thisclass operator -(thisclass v, element s) {
+			return new thisclass(v.X - s, v.Y - s);
 		}
 
-		static public Vector2i operator /(Vector2i v1, Vector2i v2) {
-			return new Vector2i(v1.X / v2.X, v1.Y / v2.Y);
+		static public thisclass operator -(element s, thisclass v) {
+			return new thisclass(s - v.X, s - v.Y);
+		}
+
+
+		static public thisclass operator *(thisclass v, element s) {
+			return new thisclass(v.X * s, v.Y * s);
+		}
+
+		static public thisclass operator /(thisclass v, element s) {
+			return new thisclass(v.X / s, v.Y / s);
+		}
+
+		static public thisclass operator *(thisclass v1, thisclass v2) {
+			return new thisclass(v1.X * v2.X, v1.Y * v2.Y);
+		}
+
+		static public thisclass operator /(thisclass v1, thisclass v2) {
+			return new thisclass(v1.X / v2.X, v1.Y / v2.Y);
+		}
+
+		static public thisclass ElementWiseMin(thisclass v1, thisclass v2) {
+			if (v2.X < v1.X) v1.X = v2.X;
+			if (v2.Y < v1.Y) v1.Y = v2.Y;
+			return v1;
+		}
+
+		static public thisclass ElementWiseMax(thisclass v1, thisclass v2) {
+			if (v2.X < v1.X) v2.X = v1.X;
+			if (v2.Y < v1.Y) v2.Y = v1.Y;
+			return v2;
 		}
 	}
 }

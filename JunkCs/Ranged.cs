@@ -113,7 +113,7 @@ namespace Jk {
 		/// V1＜V2になるように修正された範囲を取得する
 		/// </summary>
 		/// <returns>V1＜V2となった範囲</returns>
-		public Ranged GetNormalizee() {
+		public Ranged GetNormalized() {
 			if (V1 <= V2)
 				return new Ranged(V1, V2);
 			else
