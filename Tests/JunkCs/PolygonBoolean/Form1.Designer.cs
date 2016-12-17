@@ -31,6 +31,9 @@
 			this.radSub = new System.Windows.Forms.RadioButton();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.radAnd = new System.Windows.Forms.RadioButton();
+			this.radXor = new System.Windows.Forms.RadioButton();
+			this.cmbPolygonIndex = new System.Windows.Forms.ComboBox();
+			this.radExtract = new System.Windows.Forms.RadioButton();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -93,16 +96,18 @@
 			// radSub
 			// 
 			this.radSub.AutoSize = true;
-			this.radSub.Location = new System.Drawing.Point(99, 18);
+			this.radSub.Location = new System.Drawing.Point(142, 18);
 			this.radSub.Name = "radSub";
 			this.radSub.Size = new System.Drawing.Size(42, 16);
-			this.radSub.TabIndex = 2;
+			this.radSub.TabIndex = 3;
 			this.radSub.Text = "Sub";
 			this.radSub.UseVisualStyleBackColor = true;
 			this.radSub.CheckedChanged += new System.EventHandler(this.radSub_CheckedChanged);
 			// 
 			// groupBox1
 			// 
+			this.groupBox1.Controls.Add(this.radExtract);
+			this.groupBox1.Controls.Add(this.radXor);
 			this.groupBox1.Controls.Add(this.radAnd);
 			this.groupBox1.Controls.Add(this.radOr);
 			this.groupBox1.Controls.Add(this.radSub);
@@ -116,19 +121,52 @@
 			// radAnd
 			// 
 			this.radAnd.AutoSize = true;
-			this.radAnd.Location = new System.Drawing.Point(51, 18);
+			this.radAnd.Location = new System.Drawing.Point(93, 18);
 			this.radAnd.Name = "radAnd";
 			this.radAnd.Size = new System.Drawing.Size(43, 16);
-			this.radAnd.TabIndex = 1;
+			this.radAnd.TabIndex = 2;
 			this.radAnd.Text = "And";
 			this.radAnd.UseVisualStyleBackColor = true;
 			this.radAnd.CheckedChanged += new System.EventHandler(this.radAnd_CheckedChanged);
+			// 
+			// radXor
+			// 
+			this.radXor.AutoSize = true;
+			this.radXor.Location = new System.Drawing.Point(47, 18);
+			this.radXor.Name = "radXor";
+			this.radXor.Size = new System.Drawing.Size(40, 16);
+			this.radXor.TabIndex = 1;
+			this.radXor.Text = "Xor";
+			this.radXor.UseVisualStyleBackColor = true;
+			this.radXor.CheckedChanged += new System.EventHandler(this.radXor_CheckedChanged);
+			// 
+			// cmbPolygonIndex
+			// 
+			this.cmbPolygonIndex.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cmbPolygonIndex.FormattingEnabled = true;
+			this.cmbPolygonIndex.Location = new System.Drawing.Point(356, 54);
+			this.cmbPolygonIndex.Name = "cmbPolygonIndex";
+			this.cmbPolygonIndex.Size = new System.Drawing.Size(121, 20);
+			this.cmbPolygonIndex.TabIndex = 10;
+			this.cmbPolygonIndex.SelectedIndexChanged += new System.EventHandler(this.cmbPolygonIndex_SelectedIndexChanged);
+			// 
+			// radExtract
+			// 
+			this.radExtract.AutoSize = true;
+			this.radExtract.Location = new System.Drawing.Point(190, 18);
+			this.radExtract.Name = "radExtract";
+			this.radExtract.Size = new System.Drawing.Size(60, 16);
+			this.radExtract.TabIndex = 4;
+			this.radExtract.Text = "Extract";
+			this.radExtract.UseVisualStyleBackColor = true;
+			this.radExtract.CheckedChanged += new System.EventHandler(this.radExtract_CheckedChanged);
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(885, 614);
+			this.Controls.Add(this.cmbPolygonIndex);
 			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.lblResult);
@@ -152,6 +190,9 @@
 		private System.Windows.Forms.RadioButton radSub;
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.RadioButton radAnd;
+		private System.Windows.Forms.RadioButton radXor;
+		private System.Windows.Forms.ComboBox cmbPolygonIndex;
+		private System.Windows.Forms.RadioButton radExtract;
 	}
 }
 

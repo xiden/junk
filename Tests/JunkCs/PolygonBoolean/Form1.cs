@@ -21,6 +21,10 @@ namespace PolygonBoolean {
 
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
+
+			this.cmbPolygonIndex.Items.Add(0);
+			this.cmbPolygonIndex.Items.Add(1);
+			this.cmbPolygonIndex.SelectedIndex = 0;
 		}
 
 		protected override void OnMouseDown(MouseEventArgs e) {
@@ -45,7 +49,9 @@ namespace PolygonBoolean {
 
 			var pb = new Jk.PolygonBooleanf(1f);
 
+			using (var penArc = new Pen(Color.FromArgb(255, 127, 0), 5))
 			using (var brsPolygon = new SolidBrush(Color.Blue))
+			using (var penPolygon = new Pen(Color.Green, 3))
 			using (var penEdgeLeft = new Pen(Color.Blue, 5))
 			using (var penEdgeRight = new Pen(Color.Green, 5))
 			using (var penEdgeBoth = new Pen(Color.Black, 5))
@@ -111,21 +117,65 @@ namespace PolygonBoolean {
 					g.Transform = orgTf;
 
 					// 演算結果のポリゴンを描画
-					List<Jk.PolygonBooleanf.Polygon> result = null;
+					List<List<Jk.PolygonBooleanf.EdgeAndSide>> result = null;
 					if (radOr.Checked)
 						result = pb.Or();
+					else if (radXor.Checked)
+						result = pb.Xor();
 					else if (radAnd.Checked)
 						result = pb.And();
 					else if (radSub.Checked)
-						result = pb.Sub();
-					sb.AppendLine("結果ポリゴン数: " + result.Count);
+						result = pb.Sub(this.cmbPolygonIndex.SelectedIndex);
+					else if (radExtract.Checked)
+						result = pb.Extract(this.cmbPolygonIndex.SelectedIndex);
+					sb.AppendLine("演算結果ポリゴン数: " + result.Count);
 
 					g.TranslateTransform(0, 500);
-					foreach (var p in result) {
-						var pts = (from r in p.Vertices select new PointF(r.Position.X, r.Position.Y)).ToArray();
-						g.FillPolygon(brsPolygon, pts);
-						g.DrawPolygon(penLine, pts);
+					var polygons = new List<PointF[]>(
+						from edges
+						in result
+						select (
+							from node
+							in Jk.PolygonBooleanf.NodesFromEdges(edges)
+							select new PointF(node.Position.X, node.Position.Y)
+						).ToArray()
+					);
+					foreach (var p in polygons) {
+						g.FillPolygon(brsPolygon, p);
 					}
+					foreach (var p in polygons) {
+						g.DrawPolygon(penPolygon, p);
+					}
+
+					// 他の多角形との共有エッジを描画
+					var matcher = new Func<Jk.PolygonBooleanf.Edge, bool, bool>(
+						(Jk.PolygonBooleanf.Edge edge, bool right) => {
+							List<int> r, l;
+							if (right) {
+								r = edge.Right;
+								l = edge.Left;
+							} else {
+								l = edge.Right;
+								r = edge.Left;
+							}
+							if (!(r.Count != 1 || r[0] != this.cmbPolygonIndex.SelectedIndex || l.Count != 0))
+								return false;
+							return true;
+						}
+					);
+
+					foreach(var edges in result) {
+						var n = edges.Count;
+						foreach(var indexRange in Jk.PolygonBooleanf.MatchArcs(edges, matcher)) {
+							for(int i = 0; i < indexRange.Count; i++) {
+								var edge = edges[(indexRange.Start + i) % n];
+								var n1 = edge.Edge.From;
+								var n2 = edge.Edge.To;
+								g.DrawLine(penArc, n1.Position.X, n1.Position.Y, n2.Position.X, n2.Position.Y);
+							}
+						}
+					}
+
 					g.Transform = orgTf;
 
 					this.label1.Text = sb.ToString();
@@ -152,6 +202,18 @@ namespace PolygonBoolean {
 		}
 
 		private void radAnd_CheckedChanged(object sender, EventArgs e) {
+			this.Invalidate();
+		}
+
+		private void radXor_CheckedChanged(object sender, EventArgs e) {
+			this.Invalidate();
+		}
+
+		private void cmbPolygonIndex_SelectedIndexChanged(object sender, EventArgs e) {
+			this.Invalidate();
+		}
+
+		private void radExtract_CheckedChanged(object sender, EventArgs e) {
 			this.Invalidate();
 		}
 	}

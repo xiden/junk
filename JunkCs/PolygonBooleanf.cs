@@ -179,26 +179,6 @@ namespace Jk {
 		}
 
 		/// <summary>
-		/// エッジに対してポリゴンが左右どちらにあるかの情報
-		/// </summary>
-		public struct PolygonSide {
-			/// <summary>
-			/// ポリゴンが右側にあるかどうか
-			/// </summary>
-			public bool IsRight;
-
-			/// <summary>
-			/// ポリゴン
-			/// </summary>
-			public TopologicalPolygon Polygon;
-
-			public PolygonSide(bool isRight, TopologicalPolygon polygon) {
-				this.IsRight = isRight;
-				this.Polygon = polygon;
-			}
-		}
-
-		/// <summary>
 		/// エッジへのノード挿入情報
 		/// </summary>
 		public struct NodeInsertion {
@@ -235,7 +215,7 @@ namespace Jk {
 			/// <summary>
 			/// ユーザーデータ
 			/// </summary>
-			public Dictionary<TopologicalPolygon, object> UserData;
+			public Dictionary<int, object> UserData;
 
 			/// <summary>
 			/// このノードに接続されているエッジ一覧
@@ -268,22 +248,22 @@ namespace Jk {
 			/// <summary>
 			/// 指定ポリゴン用のユーザーデータを設定する
 			/// </summary>
-			/// <param name="polygon">ポリゴン</param>
+			/// <param name="polygonIndex">ポリゴンインデックス</param>
 			/// <param name="userData">ユーザーデータ</param>
-			public void SetUserData(TopologicalPolygon polygon, object userData) {
+			public void SetUserData(int polygonIndex, object userData) {
 				if (this.UserData == null)
-					this.UserData = new Dictionary<TopologicalPolygon, object>();
-				this.UserData[polygon] = userData;
+					this.UserData = new Dictionary<int, object>();
+				this.UserData[polygonIndex] = userData;
 			}
 
 			/// <summary>
 			/// 指定されたポリゴンがリンクされているかどうか調べる
 			/// </summary>
-			/// <param name="polygon">ポリゴン</param>
+			/// <param name="polygonIndex">ポリゴンインデックス</param>
 			/// <returns>リンクされているなら true</returns>
-			public bool IsLinked(TopologicalPolygon polygon) {
+			public bool IsLinked(int polygonIndex) {
 				foreach(var edge in this.Edges) {
-					if (edge.IsLinked(polygon))
+					if (edge.IsLinked(polygonIndex))
 						return true;
 				}
 				return false;
@@ -333,14 +313,14 @@ namespace Jk {
 			public Node To;
 
 			/// <summary>
-			/// 進行方向From→Toの右側のポリゴン一覧
+			/// 進行方向From→Toの右側のポリゴンインデックス一覧
 			/// </summary>
-			public List<TopologicalPolygon> Right = new List<TopologicalPolygon>();
+			public List<int> Right = new List<int>();
 
 			/// <summary>
-			/// 進行方向From→Toの左側のポリゴン一覧
+			/// 進行方向From→Toの左側のポリゴンインデックス一覧
 			/// </summary>
-			public List<TopologicalPolygon> Left = new List<TopologicalPolygon>();
+			public List<int> Left = new List<int>();
 
 			/// <summary>
 			/// null でない場合にはエッジ上にノードを挿入する予定であることを示す
@@ -353,18 +333,6 @@ namespace Jk {
 			public EdgeID ID {
 				get {
 					return new EdgeID(this.From, this.To);
-				}
-			}
-
-			/// <summary>
-			/// 方向情報とポリゴン一覧の取得
-			/// </summary>
-			public IEnumerable<PolygonSide> LinkedPolygons {
-				get {
-					foreach(var p in this.Right)
-						yield return new PolygonSide(true, p);
-					foreach (var p in this.Left)
-						yield return new PolygonSide(false, p);
 				}
 			}
 
@@ -409,21 +377,21 @@ namespace Jk {
 			/// ポリゴンへリンクする
 			/// </summary>
 			/// <param name="right">右側へリンクするなら true、左側なら false</param>
-			/// <param name="polygon">ポリゴン</param>
-			public void LinkPolygon(bool right, TopologicalPolygon polygon) {
+			/// <param name="polygonIndex">ポリゴンインデックス</param>
+			public void LinkPolygon(bool right, int polygonIndex) {
 				var list = right ? this.Right : this.Left;
-				if (list.Contains(polygon))
+				if (list.Contains(polygonIndex))
 					return;
-				list.Add(polygon);
+				list.Add(polygonIndex);
 			}
 
 			/// <summary>
 			/// ポリゴンへリンクする
 			/// </summary>
 			/// <param name="from">ポリゴン内でのエッジの開始ノード</param>
-			/// <param name="polygon">ポリゴン</param>
-			public void LinkPolygon(Node from, TopologicalPolygon polygon) {
-				LinkPolygon(from == this.From, polygon);
+			/// <param name="polygonIndex">ポリゴンインデックス</param>
+			public void LinkPolygon(Node from, int polygonIndex) {
+				LinkPolygon(from == this.From, polygonIndex);
 			}
 
 			/// <summary>
@@ -432,7 +400,7 @@ namespace Jk {
 			/// <param name="edge">エッジ</param>
 			/// <param name="sameDir">指定エッジが同じ方向かどうか</param>
 			public void LinkPolygon(Edge edge, bool sameDir) {
-				List<TopologicalPolygon> r, l;
+				List<int> r, l;
 				if (sameDir) {
 					r = this.Right;
 					l = this.Left;
@@ -453,10 +421,10 @@ namespace Jk {
 			/// <summary>
 			/// 指定されたポリゴンがリンクされているかどうか調べる
 			/// </summary>
-			/// <param name="polygon">ポリゴン</param>
+			/// <param name="polygonIndex">ポリゴンインデックス</param>
 			/// <returns>リンクされているなら true</returns>
-			public bool IsLinked(TopologicalPolygon polygon) {
-				return this.Right.Contains(polygon) || this.Left.Contains(polygon);
+			public bool IsLinked(int polygonIndex) {
+				return this.Right.Contains(polygonIndex) || this.Left.Contains(polygonIndex);
 			}
 
 			/// <summary>
@@ -499,8 +467,8 @@ namespace Jk {
 
 				// ポリゴンは自己交差しない前提なので
 				// リンクしているポリゴンが両方とも同じなら交差しない
-				var set1 = new List<TopologicalPolygon>();
-				var set2 = new List<TopologicalPolygon>();
+				var set1 = new List<int>();
+				var set2 = new List<int>();
 
 				foreach (var p in this.Right)
 					set1.Add(p);
@@ -530,6 +498,9 @@ namespace Jk {
 			}
 		}
 
+		/// <summary>
+		/// 構造が同一のエッジを識別するための構造体
+		/// </summary>
 		public struct EdgeID {
 			/// <summary>
 			/// 開始ノード
@@ -864,6 +835,31 @@ namespace Jk {
 				}
 			}
 		}
+
+		/// <summary>
+		/// 配列のインデックス番号範囲を示す
+		/// </summary>
+		public struct IndexRange {
+			/// <summary>
+			/// インデックス開始値
+			/// </summary>
+			public int Start;
+
+			/// <summary>
+			/// 要素数
+			/// </summary>
+			public int Count;
+
+			/// <summary>
+			/// コンストラクタ、インデックス開始値と要素数を指定して初期化する
+			/// </summary>
+			/// <param name="start">インデックス開始値</param>
+			/// <param name="count">要素数</param>
+			public IndexRange(int start, int count) {
+				this.Start = start;
+				this.Count = count;
+			}
+		}
 		#endregion
 
 		#region フィールド
@@ -872,6 +868,7 @@ namespace Jk {
 		List<Polygon> _Polygons = new List<Polygon>();
 		List<TopologicalPolygon> _TopologicalPolygons = new List<TopologicalPolygon>();
 		element _Epsilon;
+		bool _RemoveFlagsIsSet;
 		#endregion
 
 		#region プロパティ
@@ -909,21 +906,26 @@ namespace Jk {
 		/// ポリゴンを登録する
 		/// </summary>
 		/// <param name="vertices">ポリゴンの頂点列</param>
-		public void AddPolygon(IEnumerable<Vertex> vertices) {
-			AddPolygon(new Polygon(new List<Vertex>(vertices)));
+		/// <returns>追加されたポリゴンのインデックス</returns>
+		public int AddPolygon(IEnumerable<Vertex> vertices) {
+			return AddPolygon(new Polygon(new List<Vertex>(vertices)));
 		}
 
 		/// <summary>
 		/// ポリゴンを登録する
 		/// </summary>
 		/// <param name="polygon">ポリゴン</param>
-		public void AddPolygon(Polygon polygon) {
+		/// <returns>追加されたポリゴンのインデックス</returns>
+		public int AddPolygon(Polygon polygon) {
+			var result = _Polygons.Count;
 			_Polygons.Add(polygon);
+			return result;
 		}
 
 		/// <summary>
 		/// ポリゴンをノードとエッジに分解する、ポリゴン同士の交点にはノードが追加される
 		/// </summary>
+		/// <returns>全てのポリゴンを構成するエッジと方向の一覧</returns>
 		public List<List<EdgeAndSide>> CreateTopology() {
 			// ポリゴンが使用可能か調べる
 			var epsilon = _Epsilon;
@@ -946,12 +948,80 @@ namespace Jk {
 		}
 
 		/// <summary>
+		/// ポリゴンを構成するエッジと方向の一覧からポリゴンを生成する
+		/// </summary>
+		/// <param name="edges">エッジと方向の一覧</param>
+		/// <returns>ポリゴン</returns>
+		public static Polygon PolygonFromEdges(IEnumerable<EdgeAndSide> edges) {
+			return new Polygon(from r in edges let node = r.From select new Vertex(node.Position, node.UserData));
+		}
+
+		/// <summary>
+		/// ポリゴンを構成するエッジと方向の一覧からノード一覧を生成する
+		/// </summary>
+		/// <param name="edges">エッジと方向の一覧</param>
+		/// <returns>ノード一覧</returns>
+		public static List<Node> NodesFromEdges(IEnumerable<EdgeAndSide> edges) {
+			return new List<Node>(from r in edges select r.From);
+		}
+
+		/// <summary>
+		/// 指定フィルタにマッチする弧線リストを取得する
+		/// </summary>
+		/// <param name="edges">方向付きのエッジリスト</param>
+		/// <param name="matcher">マッチ判定デリゲート</param>
+		/// <returns>弧線リスト</returns>
+		public static List<IndexRange> MatchArcs(List<EdgeAndSide> edges, Func<Edge, bool, bool> matcher) {
+			var list = new List<IndexRange>();
+			var n = edges.Count;
+
+			// まずマッチしないエッジを探す
+			int start = -1;
+			for(int i = 0; i < n; i++) {
+				var e = edges[i];
+				if(!matcher(e.Edge, e.Right)) {
+					start = i;
+					break;
+				}
+			}
+			if (start == -1)
+				return list; // 見つからなかったら終了
+
+			// マッチしないエッジとマッチするエッジの境目を探していく
+			var lastMatched = false;
+			var indexRange = new IndexRange(0, 0);
+			for (int i = 1; i <= n; i++) {
+				var index = (start + i) % n;
+				var e = edges[index];
+				var match = matcher(e.Edge, e.Right);
+				if(match) {
+					if (!lastMatched) {
+						indexRange.Start = index;
+						indexRange.Count = 1;
+					} else {
+						indexRange.Count++;
+					}
+				} else {
+					if (lastMatched) {
+						list.Add(indexRange);
+						indexRange = new IndexRange(0, 0);
+					}
+				}
+				lastMatched = match;
+			}
+
+			return list;
+		}
+
+		/// <summary>
 		/// AddPolygon() で登録されたポリゴン同士のORポリゴンを作成する
 		/// </summary>
-		/// <returns>結果のポリゴン一覧</returns>
+		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<Polygon> Or() {
-			var polygons = new List<Polygon>();
+		public List<List<EdgeAndSide>> Or() {
+			BeginSetRemoveFlags();
+
+			var polygons = new List<List<EdgeAndSide>>();
 
 			// エッジの両側にポリゴンが存在するなら無視するフィルタ
 			var edgeFilter = new Func<Edge, bool, bool>(
@@ -980,7 +1050,52 @@ namespace Jk {
 				}
 
 				// 結果のポリゴン一覧に追加
-				polygons.Add(new Polygon(from r in edges let node = r.From select new Vertex(node.Position, node.UserData)));
+				polygons.Add(edges);
+			}
+
+			return polygons;
+		}
+
+		/// <summary>
+		/// AddPolygon() で登録されたポリゴン同士のXORポリゴンを作成する
+		/// </summary>
+		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
+		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
+		public List<List<EdgeAndSide>> Xor() {
+			BeginSetRemoveFlags();
+
+			var polygons = new List<List<EdgeAndSide>>();
+
+			// エッジの指定方向に複数ポリゴンが存在するなら無視するフィルタ
+			var edgeFilter = new Func<Edge, bool, bool>(
+				(Edge e, bool right) => {
+					return (right ? e.Right : e.Left).Count != 1;
+				}
+			);
+
+			// 予め無視することがわかっているエッジを処理
+			foreach (var edge in this.Edges) {
+				if (edgeFilter(edge, true))
+					edge.Flags |= EdgeFlags.RightRemoved;
+				if (edgeFilter(edge, false))
+					edge.Flags |= EdgeFlags.LeftRemoved;
+			}
+
+			// 右側にまだポリゴンが存在するエッジのみ処理する
+			foreach (var edge in this.Edges) {
+				if ((edge.Flags & EdgeFlags.RightRemoved) != 0)
+					continue;
+
+				// ポリゴンを構成するエッジと方向一覧を取得
+				var edges = RightPolygon(edge, edgeFilter);
+
+				// エッジの指定方向を処理済みとする
+				foreach (var eas in edges) {
+					eas.Edge.Flags |= eas.Right ? EdgeFlags.RightRemoved : EdgeFlags.LeftRemoved;
+				}
+
+				// 結果のポリゴン一覧に追加
+				polygons.Add(edges);
 			}
 
 			return polygons;
@@ -989,11 +1104,16 @@ namespace Jk {
 		/// <summary>
 		/// AddPolygon() で登録されたポリゴン同士のANDポリゴンを作成する
 		/// </summary>
-		/// <returns>結果のポリゴン一覧</returns>
+		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<Polygon> And() {
-			var polygons = new List<Polygon>();
-			var allpols = _TopologicalPolygons;
+		public List<List<EdgeAndSide>> And() {
+			BeginSetRemoveFlags();
+
+			var polygons = new List<List<EdgeAndSide>>();
+			var allpols = new int[_TopologicalPolygons.Count];
+
+			for (int i = 0, n = allpols.Length; i < n; i++)
+				allpols[i] = i;
 
 			// エッジの指定方向に登録ポリゴンの内一つでも存在しないなら無視するフィルタ
 			var edgeFilter = new Func<Edge, bool, bool>(
@@ -1029,25 +1149,27 @@ namespace Jk {
 				}
 
 				// 結果のポリゴン一覧に追加
-				polygons.Add(new Polygon(from r in edges let node = r.From select new Vertex(node.Position, node.UserData)));
+				polygons.Add(edges);
 			}
 
 			return polygons;
 		}
 
 		/// <summary>
-		/// AddPolygon() で最後に登録されたポリゴンを減算したポリゴンを作成する
+		/// 指定されたインデックスのポリゴンを減算したポリゴンを作成する
 		/// </summary>
-		/// <returns>結果のポリゴン一覧</returns>
+		/// <param name="polygonIndex">減算するポリゴンのインデックス</param>
+		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<Polygon> Sub() {
-			var polygons = new List<Polygon>();
-			var subpol = 2 <= _TopologicalPolygons.Count ? _TopologicalPolygons[_TopologicalPolygons.Count - 1] : null;
+		public List<List<EdgeAndSide>> Sub(int polygonIndex) {
+			BeginSetRemoveFlags();
+
+			var polygons = new List<List<EdgeAndSide>>();
 
 			// エッジの指定方向に減算ポリゴンが存在するなら無視するフィルタ
 			var edgeFilter = new Func<Edge, bool, bool>(
 				(Edge e, bool right) => {
-					return (right ? e.Right : e.Left).Contains(subpol);
+					return (right ? e.Right : e.Left).Contains(polygonIndex);
 				}
 			);
 
@@ -1073,7 +1195,67 @@ namespace Jk {
 				}
 
 				// 結果のポリゴン一覧に追加
-				polygons.Add(new Polygon(from r in edges let node = r.From select new Vertex(node.Position, node.UserData)));
+				polygons.Add(edges);
+			}
+
+			return polygons;
+		}
+
+		/// <summary>
+		/// 指定されたインデックスのポリゴンのみを抽出したポリゴンを作成する
+		/// </summary>
+		/// <param name="polygonIndex">抽出するポリゴンのインデックス</param>
+		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
+		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
+		public List<List<EdgeAndSide>> Extract(int polygonIndex) {
+			BeginSetRemoveFlags();
+
+			var polygons = new List<List<EdgeAndSide>>();
+
+			// エッジの指定方向に指定ポリゴンが存在しないなら無視するフィルタ
+			var edgeFilter = new Func<Edge, bool, bool>(
+				(Edge e, bool right) => {
+					List<int> r, l;
+					if (right) {
+						r = e.Right;
+						l = e.Left;
+					} else {
+						l = e.Right;
+						r = e.Left;
+					}
+					var rc = r.Contains(polygonIndex);
+					var lc = l.Contains(polygonIndex);
+					if (!rc)
+						return true;
+					if (lc)
+						return true;
+					return false;
+				}
+			);
+
+			// 予め無視することがわかっているエッジを処理
+			foreach (var edge in this.Edges) {
+				if (edgeFilter(edge, true))
+					edge.Flags |= EdgeFlags.RightRemoved;
+				if (edgeFilter(edge, false))
+					edge.Flags |= EdgeFlags.LeftRemoved;
+			}
+
+			// 右側にまだポリゴンが存在するエッジのみ処理する
+			foreach (var edge in this.Edges) {
+				if ((edge.Flags & EdgeFlags.RightRemoved) != 0)
+					continue;
+
+				// ポリゴンを構成するエッジと方向一覧を取得
+				var edges = RightPolygon(edge, edgeFilter, true);
+
+				// エッジの指定方向を処理済みとする
+				foreach (var eas in edges) {
+					eas.Edge.Flags |= eas.Right ? EdgeFlags.RightRemoved : EdgeFlags.LeftRemoved;
+				}
+
+				// 結果のポリゴン一覧に追加
+				polygons.Add(edges);
 			}
 
 			return polygons;
@@ -1081,6 +1263,18 @@ namespace Jk {
 		#endregion
 
 		#region 非公開メソッド
+		/// <summary>
+		/// 摘出フラグ設定の開始
+		/// </summary>
+		private void BeginSetRemoveFlags() {
+			if(_RemoveFlagsIsSet) {
+				foreach(var edge in this.Edges) {
+					edge.Flags &= ~(EdgeFlags.RightRemoved | EdgeFlags.LeftRemoved);
+				}
+			}
+			_RemoveFlagsIsSet = true;
+		}
+
 		/// <summary>
 		/// 全エッジのうちポリゴンを構成できるところを全て構成する
 		/// </summary>
@@ -1101,8 +1295,9 @@ namespace Jk {
 		/// </summary>
 		/// <param name="edge">開始エッジ、このポリゴンの右側を辿る</param>
 		/// <param name="edgeFilter">無視するエッジ判定用フィルタ、エッジと方向を受取無視するなら true を返す</param>
+		/// <param name="mostOuter">true なら最も外側となるエッジを辿る、false なら最も内側となるエッジを辿る</param>
 		/// <returns>ポリゴンを構成するエッジと方向の一覧</returns>
-		private static List<EdgeAndSide> RightPolygon(Edge edge, Func<Edge, bool, bool> edgeFilter) {
+		private static List<EdgeAndSide> RightPolygon(Edge edge, Func<Edge, bool, bool> edgeFilter, bool mostOuter = false) {
 			var list = new List<EdgeAndSide>();
 			var startNode = edge.From; // ポリゴンの開始ノード
 			var curNode = startNode;
@@ -1113,11 +1308,14 @@ namespace Jk {
 				// エッジのベクトルを計算
 				var nextNodePos = nextNode.Position;
 				var vec1 = curNode.Position - nextNodePos;
-				var vec1v = vec1.Vertical();
+				var vec1v = vec1.VerticalCw();
 				var vecLen1 = vec1.Length;
 
+				if (mostOuter)
+					vec1v = -vec1v;
+
 				// 次のエッジを探す
-				// 指定方向のノードに接続されたエッジで且つエッジ同士のなす右回りの角度が最も小さいものを選ぶ
+				// 指定方向のノードに接続されたエッジで且つエッジ同士のなす右回りの角度が最も小さい又は大きいものを選ぶ
 				var nextEdges = nextNode.Edges;
 				var nextEdgesLen = nextEdges.Count;
 				Edge nextEdge = null;
@@ -1177,7 +1375,7 @@ namespace Jk {
 		/// <returns>ポリゴンを構成するエッジと方向の一覧</returns>
 		private static List<EdgeAndSide> PolygonizeRight(Edge edge) {
 			var list = RightPolygon(edge, (e, right) => false);
-			var polygons = new HashSet<TopologicalPolygon>();
+			var polygons = new HashSet<int>();
 
 			// エッジの内側にあるポリゴン一覧を作成
 			foreach (var eas in list) {
@@ -1201,12 +1399,14 @@ namespace Jk {
 		/// AddPolygon() で追加されたポリゴンをノードとエッジに分解する
 		/// </summary>
 		private void MakeNodesAndEdges() {
-			foreach (var pol in _Polygons) {
+			for(int polygonIndex = 0, n = _Polygons.Count; polygonIndex < n; polygonIndex++) {
+				var pol = _Polygons[polygonIndex];
+
 				// 頂点をノードに変換する、半径 _Epsilon を使いノードの接触を調べ、接触しているなら既存のノードを使用する
 				var tpol = new TopologicalPolygon();
 				foreach (var v in pol.Vertices) {
 					var node = _NodeMgr.NewNode(v.Position);
-					node.SetUserData(tpol, v.UserData);
+					node.SetUserData(polygonIndex, v.UserData);
 					tpol.Nodes.Add(node);
 				}
 
@@ -1217,7 +1417,7 @@ namespace Jk {
 				for (int i = 1; i <= nnodes; i++) {
 					var node2 = nodes[i % nnodes];
 					var edge = _EdgeMgr.NewEdge(node1, node2);
-					edge.LinkPolygon(node1, tpol);
+					edge.LinkPolygon(node1, polygonIndex);
 					tpol.Edges.Add(edge);
 					node1 = node2;
 				}
@@ -1230,12 +1430,9 @@ namespace Jk {
 		/// エッジとノードの接触、エッジ同士の交点部分にノードを挿入する
 		/// </summary>
 		private void MakeIntersectionNodes() {
-			var tpols = _TopologicalPolygons;
-			var ntpols = tpols.Count;
-
 			// 頂点とエッジの接触を調べ、ノード挿入情報を作成する
-			for (int i = 0; i < ntpols; i++) {
-				InsertNodeToEdge(tpols[i]);
+			for (int i = 0, n = _TopologicalPolygons.Count; i < n; i++) {
+				InsertNodeToEdge(i);
 			}
 
 			// エッジ同士の交点を調べ、ノード挿入情報を作成する
@@ -1248,8 +1445,9 @@ namespace Jk {
 		/// <summary>
 		/// 指定ポリゴンのエッジに接触しているノードがあればエッジへ挿入予約する
 		/// </summary>
-		/// <param name="polygon">エッジをチェックするポリゴン</param>
-		private void InsertNodeToEdge(TopologicalPolygon polygon) {
+		/// <param name="polygonIndex">エッジをチェックするポリゴンのインデックス</param>
+		private void InsertNodeToEdge(int polygonIndex) {
+			var polygon = _TopologicalPolygons[polygonIndex];
 			var nodes = polygon.Nodes;
 			var edges = polygon.Edges;
 			var nedges = edges.Count;
@@ -1267,7 +1465,7 @@ namespace Jk {
 					// ノードが未使用だったり指定されたポリゴンの一部ならスキップ
 					if ((node.Flags & NodeFlags.Used) == 0)
 						continue;
-					if (node.IsLinked(polygon))
+					if (node.IsLinked(polygonIndex))
 						continue;
 
 					// ノードとの線分最近点のパラメータを計算
@@ -1378,7 +1576,6 @@ namespace Jk {
 				_EdgeMgr.RemoveEdge(edge);
 			}
 		}
-		#endregion
 
 		/// <summary>
 		/// 多角形の面積と回り方向を計算する
@@ -1477,5 +1674,6 @@ namespace Jk {
 			t1 = (pv.X * v2.Y - pv.Y * v2.X) / d;
 			return -tolerance <= t1 && t1 - 1 <= tolerance;
 		}
+		#endregion
 	}
 }

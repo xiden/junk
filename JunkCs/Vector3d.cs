@@ -195,7 +195,7 @@ namespace Jk {
 		}
 
 		static public thisclass operator -(thisclass v) {
-			return -v;
+			return new thisclass(-v.X, -v.Y, -v.Z);
 		}
 
 		static public thisclass operator +(thisclass v1, thisclass v2) {

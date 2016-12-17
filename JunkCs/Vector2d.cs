@@ -146,13 +146,13 @@ namespace Jk {
 			return v;
 		}
 
-		public void VerticalSelf() {
+		public void VerticalCwSelf() {
 			var t = X;
 			X = -Y;
 			Y = t;
 		}
 
-		public thisclass Vertical() {
+		public thisclass VerticalCw() {
 			return new thisclass(-Y, X);
 		}
 
@@ -189,7 +189,7 @@ namespace Jk {
 		}
 
 		static public thisclass operator -(thisclass v) {
-			return -v;
+			return new thisclass(-v.X, -v.Y);
 		}
 
 		static public thisclass operator +(thisclass v1, thisclass v2) {
