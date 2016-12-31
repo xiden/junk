@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 using System.Runtime.InteropServices;
 
@@ -12,6 +9,8 @@ namespace Jk {
 	[XmlType("Jk.Vector2i")]
 	[StructLayout(LayoutKind.Explicit, Pack = 4, Size = 8)]
 	public struct Vector2i {
+		public static readonly thisclass Zero = new thisclass();
+
 		[FieldOffset(0)]
 		public element X;
 		[FieldOffset(4)]
@@ -54,6 +53,12 @@ namespace Jk {
 				default:
 					throw new IndexOutOfRangeException();
 				}
+			}
+		}
+
+		public bool IsZero {
+			get {
+				return X == 0 && Y == 0;
 			}
 		}
 
@@ -178,6 +183,22 @@ namespace Jk {
 
 		static public bool operator !=(thisclass v1, thisclass v2) {
 			return v1.X != v2.X || v1.Y != v2.Y;
+		}
+
+		static public bool operator <(thisclass v1, thisclass v2) {
+			if (v1.X < v2.X) return true;
+			if (v1.X > v2.X) return false;
+			if (v1.Y < v2.Y) return true;
+			if (v1.Y > v2.Y) return false;
+			return false;
+		}
+
+		static public bool operator >(thisclass v1, thisclass v2) {
+			if (v1.X > v2.X) return true;
+			if (v1.X < v2.X) return false;
+			if (v1.Y > v2.Y) return true;
+			if (v1.Y < v2.Y) return false;
+			return false;
 		}
 
 		static public thisclass operator +(thisclass v) {

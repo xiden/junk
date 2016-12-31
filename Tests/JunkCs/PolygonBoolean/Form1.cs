@@ -166,7 +166,7 @@ namespace PolygonBoolean {
 
 					foreach(var edges in result) {
 						var n = edges.Count;
-						foreach(var indexRange in Jk.PolygonBooleanf.MatchArcs(edges, matcher)) {
+						foreach(var indexRange in Jk.PolygonBooleanf.MatchSegments(edges, matcher)) {
 							for(int i = 0; i < indexRange.Count; i++) {
 								var edge = edges[(indexRange.Start + i) % n];
 								var n1 = edge.Edge.From;

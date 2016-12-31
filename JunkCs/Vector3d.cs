@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 using System.Runtime.InteropServices;
 
@@ -12,6 +9,8 @@ namespace Jk {
 	[XmlType("Jk.Vector3d")]
 	[StructLayout(LayoutKind.Explicit, Pack = 8, Size = 24)]
 	public struct Vector3d {
+		public static readonly thisclass Zero = new thisclass();
+
 		[FieldOffset(0)]
 		public element X;
 		[FieldOffset(8)]
@@ -64,6 +63,12 @@ namespace Jk {
 				default:
 					throw new IndexOutOfRangeException();
 				}
+			}
+		}
+
+		public bool IsZero {
+			get {
+				return X == 0 && Y == 0 && Z == 0;
 			}
 		}
 
@@ -188,6 +193,26 @@ namespace Jk {
 
 		static public bool operator !=(thisclass v1, thisclass v2) {
 			return v1.X != v2.X || v1.Y != v2.Y || v1.Z != v2.Z;
+		}
+
+		static public bool operator <(thisclass v1, thisclass v2) {
+			if (v1.X < v2.X) return true;
+			if (v1.X > v2.X) return false;
+			if (v1.Y < v2.Y) return true;
+			if (v1.Y > v2.Y) return false;
+			if (v1.Z < v2.Z) return true;
+			if (v1.Z > v2.Z) return false;
+			return false;
+		}
+
+		static public bool operator >(thisclass v1, thisclass v2) {
+			if (v1.X > v2.X) return true;
+			if (v1.X < v2.X) return false;
+			if (v1.Y > v2.Y) return true;
+			if (v1.Y < v2.Y) return false;
+			if (v1.Z > v2.Z) return true;
+			if (v1.Z < v2.Z) return false;
+			return false;
 		}
 
 		static public thisclass operator +(thisclass v) {

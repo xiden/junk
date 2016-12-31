@@ -257,6 +257,21 @@ namespace Jk {
 			}
 
 			/// <summary>
+			/// 指定ポリゴン用のユーザーデータを取得する
+			/// </summary>
+			/// <param name="polygonIndex">ポリゴンインデックス</param>
+			/// <returns>ユーザーデータ又は null</returns>
+			public object GetUserData(int polygonIndex) {
+				if (this.UserData == null)
+					return null;
+				object obj;
+				if (this.UserData.TryGetValue(polygonIndex, out obj))
+					return obj;
+				else
+					return null;
+			}
+
+			/// <summary>
 			/// 指定されたポリゴンがリンクされているかどうか調べる
 			/// </summary>
 			/// <param name="polygonIndex">ポリゴンインデックス</param>
@@ -971,7 +986,7 @@ namespace Jk {
 		/// <param name="edges">方向付きのエッジリスト</param>
 		/// <param name="matcher">マッチ判定デリゲート</param>
 		/// <returns>弧線リスト</returns>
-		public static List<IndexRange> MatchArcs(List<EdgeAndSide> edges, Func<Edge, bool, bool> matcher) {
+		public static List<IndexRange> MatchSegments(List<EdgeAndSide> edges, Func<Edge, bool, bool> matcher) {
 			var list = new List<IndexRange>();
 			var n = edges.Count;
 
