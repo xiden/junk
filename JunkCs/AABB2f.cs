@@ -48,6 +48,23 @@ namespace Jk {
 			this.Max = max;
 		}
 
+		public AABB2f(IEnumerable<vector> positions) {
+			bool first = true;
+			vector min = new vector(), max = new vector();
+			foreach(var p in positions) {
+				if (first) {
+					first = false;
+					min = p;
+					max = p;
+				} else {
+					min.ElementWiseMinSelf(p);
+					max.ElementWiseMaxSelf(p);
+				}
+			}
+			this.Min = min;
+			this.Max = max;
+		}
+
 		public override bool Equals(object obj) {
 			if (obj is thisclass)
 				return (thisclass)obj == this;
@@ -113,8 +130,22 @@ namespace Jk {
 			return true;
 		}
 
+		public thisclass Merge(vector v) {
+			return new thisclass(vector.ElementWiseMin(this.Min, v), vector.ElementWiseMax(this.Max, v));
+		}
+
 		public thisclass Merge(thisclass aabb) {
 			return new thisclass(vector.ElementWiseMin(this.Min, aabb.Min), vector.ElementWiseMax(this.Max, aabb.Max));
+		}
+
+		public void MergeSelf(vector v) {
+			this.Min.ElementWiseMinSelf(v);
+			this.Max.ElementWiseMaxSelf(v);
+		}
+
+		public void MergeSelf(thisclass aabb) {
+			this.Min.ElementWiseMinSelf(aabb.Min);
+			this.Max.ElementWiseMaxSelf(aabb.Max);
 		}
 
 		public thisclass Expand(element s) {

@@ -87,9 +87,7 @@ namespace Jk {
 
 		public void NormalizeSelf() {
 			element l = LengthSquare;
-			if (l == 0)
-				return;
-			else if (l == 1)
+			if (l == 0 || l == 1)
 				return;
 			l = (element)Math.Sqrt(l);
 			X /= l;
@@ -97,9 +95,11 @@ namespace Jk {
 		}
 
 		public thisclass Normalize() {
-			thisclass v = this;
-			v.NormalizeSelf();
-			return v;
+			element l = LengthSquare;
+			if (l == 0 || l == 1)
+				return this;
+			l = (element)Math.Sqrt(l);
+			return new thisclass(X / l, Y / l);
 		}
 
 		public void SaturateSelf(element min, element max) {
@@ -173,6 +173,16 @@ namespace Jk {
 			}
 		}
 
+		public void ElementWiseMinSelf(thisclass v) {
+			if (v.X < this.X) this.X = v.X;
+			if (v.Y < this.Y) this.Y = v.Y;
+		}
+
+		public void ElementWiseMaxSelf(thisclass v) {
+			if (this.X < v.X) this.X = v.X;
+			if (this.Y < v.Y) this.Y = v.Y;
+		}
+
 		public element Dot(thisclass v) {
 			return X * v.X + Y * v.Y;
 		}
@@ -235,6 +245,10 @@ namespace Jk {
 
 
 		static public thisclass operator *(thisclass v, element s) {
+			return new thisclass(v.X * s, v.Y * s);
+		}
+
+		static public thisclass operator *(element s, thisclass v) {
 			return new thisclass(v.X * s, v.Y * s);
 		}
 

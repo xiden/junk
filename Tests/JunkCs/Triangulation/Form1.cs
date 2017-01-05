@@ -6,67 +6,128 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using Jk;
 
 namespace Triangulation {
 	public partial class Form1 : Form {
-		List<PointF> _Lines = new List<PointF>();
-		List<PointF> _Polygon = null;
-		List<int> _Triangles = null;
+		List<PointF> _Points = new List<PointF>();
+		List<List<PointF>> _Holes = new List<List<PointF>>();
 
 		public Form1() {
 			InitializeComponent();
 		}
 
 		protected override void OnMouseDown(MouseEventArgs e) {
+			base.OnMouseDown(e);
+
+			var p = new PointF(e.X, e.Y);
+
 			if (e.Button == MouseButtons.Left) {
-				_Polygon = null;
-				_Triangles = null;
-				this._Lines.Add(new PointF((float)e.X, (float)e.Y));
-				Invalidate();
+				_Points.Add(p);
+				this.Invalidate();
+			} else if(e.Button == MouseButtons.Right) {
+				if (_Holes.Count == 0)
+					_Holes.Add(new List<PointF>());
+				var hole = _Holes[_Holes.Count - 1];
+				hole.Add(p);
+				this.Invalidate();
 			}
 		}
 
 		protected override void OnPaint(PaintEventArgs e) {
-			Graphics g = e.Graphics;
-			using (Pen pen1 = new Pen(Color.FromArgb(0, 0, 0), 1f))
-			using (Pen pen2 = new Pen(Color.FromArgb(255, 0, 0), 1f))
-			using (Pen penTri = new Pen(Color.FromArgb(0, 0, 255), 1f))
-			using (var brsTri = new SolidBrush(Color.FromArgb(127, 127, 255))) {
-				if (this._Polygon != null) {
-					PointF[] a = this._Polygon.ToArray();
-					g.DrawPolygon(pen1, a);
-					for (int i = 0; i < this._Triangles.Count; i += 3) {
-						PointF[] tri = new PointF[] {
-							a[this._Triangles[i]],
-							a[this._Triangles[i + 1]],
-							a[this._Triangles[i + 2]]
-						};
-						g.FillPolygon(brsTri, tri);
-						g.DrawPolygon(penTri, tri);
+			base.OnPaint(e);
+
+			var g = e.Graphics;
+
+			using (var brsTri = new SolidBrush(Color.Green))
+			using (var penPoint = new Pen(Color.Red))
+			using (var penHole = new Pen(Color.DarkGray))
+			using (var penLine = new Pen(Color.Black)) {
+				if(3 <= _Points.Count) {
+					g.DrawPolygon(penLine, _Points.ToArray());
+				} else if (2 <= _Points.Count) {
+					g.DrawLines(penLine, _Points.ToArray());
+				}
+				foreach(var p in _Points) {
+					g.DrawRectangle(penPoint, p.X - 2, p.Y - 2, 5, 5);
+				}
+
+				foreach (var hole in _Holes) {
+					if (3 <= hole.Count) {
+						g.DrawPolygon(penHole, hole.ToArray());
+					} else if (2 <= hole.Count) {
+						g.DrawLines(penHole, hole.ToArray());
 					}
-					foreach(var p in _Polygon) { 
-						g.DrawRectangle(pen2, new Rectangle((int)((double)p.X - 2.0), (int)((double)p.Y - 2.0), 4, 4));
+					foreach (var p in hole) {
+						g.DrawRectangle(penHole, p.X - 2, p.Y - 2, 5, 5);
 					}
-				} else {
-					if (2 <= this._Lines.Count) {
-						g.DrawLines(pen1, _Lines.ToArray());
+				}
+
+				lblError.Text = "";
+				try {
+					if (3 <= _Points.Count) {
+						var validAllHoles = true;
+						foreach(var hole in _Holes) {
+							if(hole.Count < 3) {
+								validAllHoles = false;
+								break;
+							}
+						}
+
+						var points = _Points;
+						if (validAllHoles) {
+							points = Jk.TriangulationF.incorporateHolesIntoPolygon<PointF>(
+								(p) => new Jk.Vector2f(p.X, p.Y),
+								_Points,
+								_Holes);
+						}
+
+						var result = new List<Jk.TriangulationF.TriIdx>();
+						Jk.TriangulationF.triangulate<PointF>(
+							(p) => new Jk.Vector2f(p.X, p.Y),
+							points,
+							result);
+
+						var orgtf = g.Transform;
+						g.TranslateTransform(0, 500);
+						foreach (var tri in result) {
+							var tripts = new PointF[] {
+								points[tri.A],
+								points[tri.B],
+								points[tri.C],
+							};
+							g.FillPolygon(brsTri, tripts);
+						}
+						foreach (var tri in result) {
+							var tripts = new PointF[] {
+								points[tri.A],
+								points[tri.B],
+								points[tri.C],
+							};
+							g.DrawPolygon(penLine, tripts);
+						}
+						g.Transform = orgtf;
 					}
-					foreach(var p in _Lines) { 
-						g.DrawRectangle(pen2, new Rectangle((int)((double)p.X - 2.0), (int)((double)p.Y - 2.0), 4, 4));
-					}
+				} catch(Exception ex) {
+					lblError.Text = ex.Message;
 				}
 			}
 		}
 
-		private void button1_Click(object sender, EventArgs e) {
-			if (_Lines.Count < 3)
-				return;
+		private void btnClear_Click(object sender, EventArgs e) {
+			_Points.Clear();
+			_Holes.Clear();
+			this.Invalidate();
+		}
 
-			_Triangles = TriangulationF.Do((from p in _Lines select new Vector2f(p.X, p.Y)).ToArray());
-			_Polygon = _Lines;
-			_Lines = new List<PointF>();
-			Invalidate();
+		private void btnAddHole_Click(object sender, EventArgs e) {
+			_Holes.Add(new List<PointF>());
+		}
+
+		private void btnDelHole_Click(object sender, EventArgs e) {
+			if (_Holes.Count == 0)
+				return;
+			_Holes.RemoveAt(_Holes.Count - 1);
+			this.Invalidate();
 		}
 	}
 }
