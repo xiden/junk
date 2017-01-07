@@ -279,5 +279,26 @@ namespace Jk {
 			if (v2.Y < v1.Y) v2.Y = v1.Y;
 			return v2;
 		}
+
+
+#if UNITY_5
+		public Vector2f(UnityEngine.Vector2 v) {
+			X = (element)v.x;
+			Y = (element)v.y;
+		}
+
+		public static implicit operator thisclass(UnityEngine.Vector2 v) {
+			return new thisclass(v.x, v.y);
+		}
+		public static implicit operator thisclass(UnityEngine.Vector3 v) {
+			return new thisclass(v.x, v.y);
+		}
+		public static implicit operator UnityEngine.Vector2(thisclass v) {
+			return new UnityEngine.Vector2(v.X, v.Y);
+		}
+		public static implicit operator UnityEngine.Vector3(thisclass v) {
+			return new UnityEngine.Vector3(v.X, v.Y, 0);
+		}
+#endif
 	}
 }

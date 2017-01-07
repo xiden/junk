@@ -286,36 +286,36 @@ namespace PolygonBoolean {
 						}
 					}
 
-					// 他の多角形との共有エッジを描画
-					var matcher = new Func<Jk.PolygonBooleanf.Edge, bool, bool>(
-						(Jk.PolygonBooleanf.Edge edge, bool right) => {
-							List<int> r, l;
-							if (right) {
-								r = edge.Right;
-								l = edge.Left;
-							} else {
-								l = edge.Right;
-								r = edge.Left;
-							}
-							if (!(r.Count != 1 || r[0] != this.cmbPolygonIndex.SelectedIndex || l.Count != 0))
-								return false;
-							return true;
-						}
-					);
+					//// 他の多角形との共有エッジを描画
+					//var matcher = new Func<Jk.PolygonBooleanf.Edge, bool, bool>(
+					//	(Jk.PolygonBooleanf.Edge edge, bool right) => {
+					//		List<int> r, l;
+					//		if (right) {
+					//			r = edge.Right;
+					//			l = edge.Left;
+					//		} else {
+					//			l = edge.Right;
+					//			r = edge.Left;
+					//		}
+					//		if (!(r.Count != 1 || r[0] != this.cmbPolygonIndex.SelectedIndex || l.Count != 0))
+					//			return false;
+					//		return true;
+					//	}
+					//);
 
-					foreach (var polList in result) {
-						foreach (var edges in polList) {
-							var n = edges.Count;
-							foreach (var indexRange in Jk.PolygonBooleanf.MatchSegments(edges, matcher)) {
-								for (int i = 0; i < indexRange.Count; i++) {
-									var edge = edges[(indexRange.Start + i) % n];
-									var n1 = edge.Edge.From;
-									var n2 = edge.Edge.To;
-									g.DrawLine(penArc, n1.Position.X, n1.Position.Y, n2.Position.X, n2.Position.Y);
-								}
-							}
-						}
-					}
+					//foreach (var polList in result) {
+					//	foreach (var edges in polList) {
+					//		var n = edges.Count;
+					//		foreach (var indexRange in Jk.PolygonBooleanf.MatchSegments(edges, matcher)) {
+					//			for (int i = 0; i < indexRange.Count; i++) {
+					//				var edge = edges[(indexRange.Start + i) % n];
+					//				var n1 = edge.Edge.From;
+					//				var n2 = edge.Edge.To;
+					//				g.DrawLine(penArc, n1.Position.X, n1.Position.Y, n2.Position.X, n2.Position.Y);
+					//			}
+					//		}
+					//	}
+					//}
 
 					g.Transform = orgTf;
 

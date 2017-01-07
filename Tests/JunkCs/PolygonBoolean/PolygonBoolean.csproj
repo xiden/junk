@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;_POLYGONBOOLEAN_DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -60,6 +60,12 @@
     </Compile>
     <Compile Include="..\..\..\JunkCs\Vector2i.cs">
       <Link>Vector2i.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\JunkCs\Vector3d.cs">
+      <Link>Vector3d.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\JunkCs\Vector3i.cs">
+      <Link>Vector3i.cs</Link>
     </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

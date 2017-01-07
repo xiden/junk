@@ -259,8 +259,11 @@ namespace Jk {
 			return new thisclass(s - v.X, s - v.Y, s - v.Z);
 		}
 
-
 		static public thisclass operator *(thisclass v, element s) {
+			return new thisclass(v.X * s, v.Y * s, v.Z * s);
+		}
+
+		static public thisclass operator *(element s, thisclass v) {
 			return new thisclass(v.X * s, v.Y * s, v.Z * s);
 		}
 
