@@ -40,6 +40,8 @@
 			this.lblPos = new System.Windows.Forms.Label();
 			this.cmbPol = new System.Windows.Forms.ComboBox();
 			this.cmbHole = new System.Windows.Forms.ComboBox();
+			this.btnDelPol = new System.Windows.Forms.Button();
+			this.btnAddPol = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -74,9 +76,9 @@
 			this.lblResult.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.lblResult.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.lblResult.Location = new System.Drawing.Point(383, 17);
+			this.lblResult.Location = new System.Drawing.Point(562, 17);
 			this.lblResult.Name = "lblResult";
-			this.lblResult.Size = new System.Drawing.Size(490, 14);
+			this.lblResult.Size = new System.Drawing.Size(311, 14);
 			this.lblResult.TabIndex = 4;
 			this.lblResult.Text = "label3";
 			// 
@@ -182,9 +184,9 @@
 			// 
 			// btnAddHole
 			// 
-			this.btnAddHole.Location = new System.Drawing.Point(221, 12);
+			this.btnAddHole.Location = new System.Drawing.Point(345, 12);
 			this.btnAddHole.Name = "btnAddHole";
-			this.btnAddHole.Size = new System.Drawing.Size(75, 23);
+			this.btnAddHole.Size = new System.Drawing.Size(56, 23);
 			this.btnAddHole.TabIndex = 12;
 			this.btnAddHole.Text = "穴追加";
 			this.btnAddHole.UseVisualStyleBackColor = true;
@@ -192,9 +194,9 @@
 			// 
 			// btnDelHole
 			// 
-			this.btnDelHole.Location = new System.Drawing.Point(302, 12);
+			this.btnDelHole.Location = new System.Drawing.Point(407, 12);
 			this.btnDelHole.Name = "btnDelHole";
-			this.btnDelHole.Size = new System.Drawing.Size(75, 23);
+			this.btnDelHole.Size = new System.Drawing.Size(56, 23);
 			this.btnDelHole.TabIndex = 13;
 			this.btnDelHole.Text = "穴削除";
 			this.btnDelHole.UseVisualStyleBackColor = true;
@@ -230,11 +232,33 @@
 			this.cmbHole.TabIndex = 16;
 			this.cmbHole.SelectedIndexChanged += new System.EventHandler(this.cmbHole_SelectedIndexChanged);
 			// 
+			// btnDelPol
+			// 
+			this.btnDelPol.Location = new System.Drawing.Point(283, 12);
+			this.btnDelPol.Name = "btnDelPol";
+			this.btnDelPol.Size = new System.Drawing.Size(56, 23);
+			this.btnDelPol.TabIndex = 18;
+			this.btnDelPol.Text = "ポリ削除削除";
+			this.btnDelPol.UseVisualStyleBackColor = true;
+			this.btnDelPol.Click += new System.EventHandler(this.btnDelPol_Click);
+			// 
+			// btnAddPol
+			// 
+			this.btnAddPol.Location = new System.Drawing.Point(221, 12);
+			this.btnAddPol.Name = "btnAddPol";
+			this.btnAddPol.Size = new System.Drawing.Size(56, 23);
+			this.btnAddPol.TabIndex = 17;
+			this.btnAddPol.Text = "ポリ追加";
+			this.btnAddPol.UseVisualStyleBackColor = true;
+			this.btnAddPol.Click += new System.EventHandler(this.btnAddPol_Click);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(885, 614);
+			this.Controls.Add(this.btnDelPol);
+			this.Controls.Add(this.btnAddPol);
 			this.Controls.Add(this.cmbHole);
 			this.Controls.Add(this.cmbPol);
 			this.Controls.Add(this.lblPos);
@@ -274,6 +298,8 @@
 		private System.Windows.Forms.Label lblPos;
 		private System.Windows.Forms.ComboBox cmbPol;
 		private System.Windows.Forms.ComboBox cmbHole;
+		private System.Windows.Forms.Button btnDelPol;
+		private System.Windows.Forms.Button btnAddPol;
 	}
 }
 

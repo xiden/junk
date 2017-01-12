@@ -10,7 +10,7 @@ namespace Jk {
 	/// <summary>
 	/// ポリゴンのブーリアン演算を行うクラス
 	/// </summary>
-	public class PolygonBooleanf {
+	public class PolBoolF {
 		#region クラス
 		/// <summary>
 		/// ポリゴンの頂点
@@ -336,24 +336,24 @@ namespace Jk {
 			/// <summary>
 			/// 指定ポリゴン用のユーザーデータを設定する
 			/// </summary>
-			/// <param name="polygonIndex">ポリゴンインデックス</param>
+			/// <param name="groupIndex">グループインデックス</param>
 			/// <param name="userData">ユーザーデータ</param>
-			public void SetUserData(int polygonIndex, object userData) {
+			public void SetUserData(int groupIndex, object userData) {
 				if (this.UserData == null)
 					this.UserData = new Dictionary<int, object>();
-				this.UserData[polygonIndex] = userData;
+				this.UserData[groupIndex] = userData;
 			}
 
 			/// <summary>
 			/// 指定ポリゴン用のユーザーデータを取得する
 			/// </summary>
-			/// <param name="polygonIndex">ポリゴンインデックス</param>
+			/// <param name="groupIndex">グループインデックス</param>
 			/// <returns>ユーザーデータ又は null</returns>
-			public object GetUserData(int polygonIndex) {
+			public object GetUserData(int groupIndex) {
 				if (this.UserData == null)
 					return null;
 				object obj;
-				if (this.UserData.TryGetValue(polygonIndex, out obj))
+				if (this.UserData.TryGetValue(groupIndex, out obj))
 					return obj;
 				else
 					return null;
@@ -362,13 +362,13 @@ namespace Jk {
 			/// <summary>
 			/// 指定されたポリゴンがリンクされているかどうか調べる
 			/// </summary>
-			/// <param name="polygonIndex">ポリゴンインデックス</param>
+			/// <param name="groupIndex">グループインデックス</param>
 			/// <returns>リンクされているなら true</returns>
-			public bool IsPolygonLinked(int polygonIndex) {
+			public bool IsPolygonLinked(int groupIndex) {
 				var edges = this.Edges;
 				for (int i = edges.Count - 1; i != -1; i--) {
 					var edge = edges[i];
-					if (edge.IsPolygonLinked(polygonIndex))
+					if (edge.IsPolygonLinked(groupIndex))
 						return true;
 				}
 				return false;
@@ -377,14 +377,14 @@ namespace Jk {
 			/// <summary>
 			/// 指定されたポリゴンがリンクされているかどうか調べる
 			/// </summary>
-			/// <param name="polygonIndex">ポリゴンインデックス</param>
+			/// <param name="groupIndex">グループインデックス</param>
 			/// <param name="excludeEdge">チェックから除外するエッジ</param>
 			/// <returns>リンクされているなら true</returns>
-			public bool IsPolygonLinked(int polygonIndex, Edge excludeEdge) {
+			public bool IsPolygonLinked(int groupIndex, Edge excludeEdge) {
 				var edges = this.Edges;
 				for (int i = edges.Count - 1; i != -1; i--) {
 					var edge = edges[i];
-					if (edge != excludeEdge && edge.IsPolygonLinked(polygonIndex))
+					if (edge != excludeEdge && edge.IsPolygonLinked(groupIndex))
 						return true;
 				}
 				return false;
@@ -514,21 +514,21 @@ namespace Jk {
 			/// ポリゴンへリンクする
 			/// </summary>
 			/// <param name="right">右側へリンクするなら true、左側なら false</param>
-			/// <param name="polygonIndex">ポリゴンインデックス</param>
-			public void LinkPolygon(bool right, int polygonIndex) {
+			/// <param name="groupIndex">グループインデックス</param>
+			public void LinkPolygon(bool right, int groupIndex) {
 				var list = right ? this.Right : this.Left;
-				if (list.Contains(polygonIndex))
+				if (list.Contains(groupIndex))
 					return;
-				list.Add(polygonIndex);
+				list.Add(groupIndex);
 			}
 
 			/// <summary>
 			/// ポリゴンへリンクする
 			/// </summary>
 			/// <param name="from">ポリゴン内でのエッジの開始ノード</param>
-			/// <param name="polygonIndex">ポリゴンインデックス</param>
-			public void LinkPolygon(Node from, int polygonIndex) {
-				LinkPolygon(from == this.From, polygonIndex);
+			/// <param name="groupIndex">グループインデックス</param>
+			public void LinkPolygon(Node from, int groupIndex) {
+				LinkPolygon(from == this.From, groupIndex);
 			}
 
 			/// <summary>
@@ -568,10 +568,10 @@ namespace Jk {
 			/// <summary>
 			/// 指定されたポリゴンがリンクされているかどうか調べる
 			/// </summary>
-			/// <param name="polygonIndex">ポリゴンインデックス</param>
+			/// <param name="groupIndex">グループインデックス</param>
 			/// <returns>リンクされているなら true</returns>
-			public bool IsPolygonLinked(int polygonIndex) {
-				return this.Right.Contains(polygonIndex) || this.Left.Contains(polygonIndex);
+			public bool IsPolygonLinked(int groupIndex) {
+				return this.Right.Contains(groupIndex) || this.Left.Contains(groupIndex);
 			}
 
 			/// <summary>
@@ -606,9 +606,9 @@ namespace Jk {
 			/// 指定ポリゴン用のユーザーデータを設定する
 			/// </summary>
 			/// <param name="right">true なら右側に false なら左側に設定する</param>
-			/// <param name="polygonIndex">ポリゴンインデックス</param>
+			/// <param name="groupIndex">グループインデックス</param>
 			/// <param name="userData">ユーザーデータ</param>
-			public void SetUserData(bool right, int polygonIndex, object userData) {
+			public void SetUserData(bool right, int groupIndex, object userData) {
 				Dictionary<int, object> dic;
 				if (right) {
 					if (this.RightUserData == null)
@@ -619,22 +619,22 @@ namespace Jk {
 						this.LeftUserData = new Dictionary<int, object>();
 					dic = this.LeftUserData;
 				}
-				dic[polygonIndex] = userData;
+				dic[groupIndex] = userData;
 			}
 
 			/// <summary>
 			/// 指定ポリゴン用のユーザーデータを取得する
 			/// </summary>
 			/// <param name="right">true なら右側に false なら左側から取得する</param>
-			/// <param name="polygonIndex">ポリゴンインデックス</param>
+			/// <param name="groupIndex">グループインデックス</param>
 			/// <returns>ユーザーデータ又は null</returns>
-			public object GetUserData(bool right, int polygonIndex) {
+			public object GetUserData(bool right, int groupIndex) {
 				var dic = right ? this.RightUserData : this.LeftUserData;
 				if (dic == null)
 					return null;
 
 				object obj;
-				if (dic.TryGetValue(polygonIndex, out obj))
+				if (dic.TryGetValue(groupIndex, out obj))
 					return obj;
 				else
 					return null;
@@ -1034,20 +1034,20 @@ namespace Jk {
 			/// エッジが指定ポリゴンに包含されているなら指定ポリゴンインデックスをリンクする
 			/// </summary>
 			/// <param name="polygon">包含元ポリゴン</param>
-			/// <param name="polygonIndex">包含元ポリゴンインデックス</param>
-			public void LinkPolygonIfContained(TopologicalPolygon polygon, int polygonIndex) {
-				if (polygon.Contains(polygonIndex, this)) {
+			/// <param name="groupIndex">包含元グループインデックス</param>
+			public void LinkPolygonIfContained(TopologicalPolygon polygon, int groupIndex) {
+				if (polygon.Contains(groupIndex, this)) {
 					var edges = this.Edges;
 					for (int i = edges.Count - 1; i != -1; i--) {
 						var edge = edges[i];
-						edge.Edge.LinkPolygon(true, polygonIndex);
-						edge.Edge.LinkPolygon(false, polygonIndex);
+						edge.Edge.LinkPolygon(true, groupIndex);
+						edge.Edge.LinkPolygon(false, groupIndex);
 					}
 				}
 				var holes = this.Holes;
 				if (holes != null) {
 					for (int holeIndex = holes.Count - 1; holeIndex != -1; holeIndex--) {
-						holes[holeIndex].LinkPolygonIfContained(polygon, polygonIndex);
+						holes[holeIndex].LinkPolygonIfContained(polygon, groupIndex);
 					}
 				}
 			}
@@ -1312,8 +1312,8 @@ namespace Jk {
 		#region フィールド
 		NodeManager _NodeMgr;
 		EdgeManager _EdgeMgr;
-		List<Polygon> _Polygons = new List<Polygon>();
-		List<List<TopologicalPolygon>> _TopologicalPolygons = new List<List<TopologicalPolygon>>();
+		List<List<Polygon>> _Groups = new List<List<Polygon>>();
+		List<List<TopologicalPolygon>> _TopoGroups = new List<List<TopologicalPolygon>>();
 		element _Epsilon;
 		bool _RemoveFlagsIsSet;
 		IntersectionNodeProc _IntersectionNodeGenerator;
@@ -1360,7 +1360,7 @@ namespace Jk {
 		/// コンストラクタ
 		/// </summary>
 		/// <param name="epsilon">頂点同士、エッジと頂点の距離の最小値、これより距離が近い場合には距離０として扱い同じノードになる</param>
-		public PolygonBooleanf(element epsilon) {
+		public PolBoolF(element epsilon) {
 			_NodeMgr = new NodeManager(epsilon);
 			_EdgeMgr = new EdgeManager(epsilon);
 			_Epsilon = epsilon;
@@ -1369,26 +1369,32 @@ namespace Jk {
 		/// <summary>
 		/// ポリゴンを登録する
 		/// </summary>
-		/// <param name="polygon">ポリゴン</param>
+		/// <param name="polygons">ポリゴン</param>
 		/// <returns>追加されたポリゴンのインデックス</returns>
-		public int AddPolygon(Polygon polygon) {
-			var result = _Polygons.Count;
-			_Polygons.Add(polygon);
+		public int AddPolygon(IEnumerable<Polygon> polygons) {
+			var result = _Groups.Count;
+			_Groups.Add(new List<Polygon>(polygons));
 			return result;
 		}
 
 		/// <summary>
 		/// ポリゴンをノードとエッジに分解する、ポリゴン同士の交点にはノードが追加される
 		/// </summary>
+		/// <param name="validation">入力ポリゴンからトポロジー作成可能か調べるならtrue</param>
 		/// <returns>全てのポリゴンを構成するエッジと方向の一覧</returns>
-		public void CreateTopology() {
+		public void CreateTopology(bool validation) {
 			// ポリゴンが使用可能か調べる
-			var epsilon = _Epsilon;
-			for (int i = 0, n = _Polygons.Count; i < n; i++) {
-				var pol = _Polygons[i];
-				var result = pol.Validation(epsilon);
-				if (!result.IsValid) {
-					throw new ApplicationException("ポリゴン" + (i + 1) + ": " + result.Message);
+			if (validation) {
+				var epsilon = _Epsilon;
+				for (int groupIndex = 0, ngroups = _Groups.Count; groupIndex < ngroups; groupIndex++) {
+					var group = _Groups[groupIndex];
+					for (int polygonIndex = 0, npolygons = group.Count; polygonIndex < npolygons; polygonIndex++) {
+						var pol = group[polygonIndex];
+						var result = pol.Validation(epsilon);
+						if (!result.IsValid) {
+							throw new ApplicationException("ポリゴン" + (groupIndex + 1) + ": " + result.Message);
+						}
+					}
 				}
 			}
 
@@ -1528,7 +1534,7 @@ namespace Jk {
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
 		public List<List<List<EdgeAndSide>>> And() {
-			var allpols = new int[_TopologicalPolygons.Count];
+			var allpols = new int[_TopoGroups.Count];
 			for (int i = 0, n = allpols.Length; i < n; i++)
 				allpols[i] = i;
 
@@ -1550,14 +1556,14 @@ namespace Jk {
 		/// <summary>
 		/// 指定されたインデックスのポリゴンを減算したポリゴンを作成する
 		/// </summary>
-		/// <param name="polygonIndex">減算するポリゴンのインデックス</param>
+		/// <param name="groupIndex">減算するグループのインデックス</param>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<List<EdgeAndSide>>> Sub(int polygonIndex) {
+		public List<List<List<EdgeAndSide>>> Sub(int groupIndex) {
 			// エッジの指定方向に減算ポリゴンが存在するなら無視するフィルタ
 			var edgeFilter = new Func<Edge, bool, bool>(
 				(Edge e, bool right) => {
-					return (right ? e.Right : e.Left).Contains(polygonIndex);
+					return (right ? e.Right : e.Left).Contains(groupIndex);
 				}
 			);
 			return Distinguish(GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved));
@@ -1566,12 +1572,12 @@ namespace Jk {
 		/// <summary>
 		/// 指定されたインデックスのポリゴンのみを抽出したポリゴンを作成する
 		/// </summary>
-		/// <param name="polygonIndex">抽出するポリゴンのインデックス</param>
+		/// <param name="groupIndex">抽出するグループのインデックス</param>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<List<EdgeAndSide>>> Extract(int polygonIndex) {
+		public List<List<List<EdgeAndSide>>> Extract(int groupIndex) {
 			var list = new List<List<List<EdgeAndSide>>>();
-			var tpols = _TopologicalPolygons[polygonIndex];
+			var tpols = _TopoGroups[groupIndex];
 
 			for(int i = 0, m = tpols.Count; i < m; i++) {
 				var tpol = tpols[i];
@@ -1839,77 +1845,80 @@ namespace Jk {
 		/// AddPolygon() で追加されたポリゴンをノードとエッジに分解する
 		/// </summary>
 		private void MakeNodesAndEdges() {
-			for (int polygonIndex = 0, npolygons = _Polygons.Count; polygonIndex < npolygons; polygonIndex++) {
-				var pol = _Polygons[polygonIndex];
-				var tpol = new TopologicalPolygon();
+			for (int groupIndex = 0, ngroups = _Groups.Count; groupIndex < ngroups; groupIndex++) {
+				var group = _Groups[groupIndex];
+				for (int polygonIndex = 0, npolygons = group.Count; polygonIndex < npolygons; polygonIndex++) {
+					var pol = group[polygonIndex];
+					var tpol = new TopologicalPolygon();
 
-				{
-					// 頂点をノードに変換する、半径 _Epsilon を使いノードの接触を調べ、接触しているなら既存のノードを使用する
-					var vertices = pol.Vertices;
-					var nnodes = vertices.Count;
-					var nodes = new Node[nnodes];
-					for (int i = 0, nvts = vertices.Count; i < nvts; i++) {
-						var v = vertices[i];
-						var node = _NodeMgr.NewNode(v.Position);
-						node.SetUserData(polygonIndex, v.UserData);
-						nodes[i] = node;
-					}
-
-					// ラインをエッジに変換する、既存エッジに同じノード組み合わせのものが存在したらそちらを使用する
-					var edges = tpol.Edges = new List<EdgeAndSide>(nnodes);
-					var node1 = nodes[0];
-					for (int i = 1; i <= nnodes; i++) {
-						var node2 = nodes[i % nnodes];
-						var edge = _EdgeMgr.NewEdge(node1, node2);
-						var right = node1 == edge.From;
-						edge.LinkPolygon(right, polygonIndex);
-						if (pol.EdgesUserData != null)
-							edge.SetUserData(true, polygonIndex, pol.EdgesUserData[i - 1]);
-						edges.Add(new EdgeAndSide(edge, right));
-						node1 = node2;
-					}
-				}
-
-				// 穴を処理
-				var holes = pol.Holes;
-				if (holes != null) {
-					tpol.Holes = new List<TopologicalPolygon>(holes.Count);
-
-					for (int holeIndex = 0, nholes = holes.Count; holeIndex < nholes; holeIndex++) {
-						var hole = holes[holeIndex];
-						var holetpol = new TopologicalPolygon();
-
+					{
 						// 頂点をノードに変換する、半径 _Epsilon を使いノードの接触を調べ、接触しているなら既存のノードを使用する
-						var vertices = hole.Vertices;
+						var vertices = pol.Vertices;
 						var nnodes = vertices.Count;
 						var nodes = new Node[nnodes];
 						for (int i = 0, nvts = vertices.Count; i < nvts; i++) {
 							var v = vertices[i];
 							var node = _NodeMgr.NewNode(v.Position);
-							node.SetUserData(polygonIndex, v.UserData);
+							node.SetUserData(groupIndex, v.UserData);
 							nodes[i] = node;
 						}
 
 						// ラインをエッジに変換する、既存エッジに同じノード組み合わせのものが存在したらそちらを使用する
-						var edges = holetpol.Edges = new List<EdgeAndSide>(nnodes);
+						var edges = tpol.Edges = new List<EdgeAndSide>(nnodes);
 						var node1 = nodes[0];
 						for (int i = 1; i <= nnodes; i++) {
 							var node2 = nodes[i % nnodes];
 							var edge = _EdgeMgr.NewEdge(node1, node2);
 							var right = node1 == edge.From;
-							edge.LinkPolygon(right, polygonIndex);
-							if (hole.EdgesUserData != null)
-								edge.SetUserData(true, polygonIndex, hole.EdgesUserData[i - 1]);
+							edge.LinkPolygon(right, groupIndex);
+							if (pol.EdgesUserData != null)
+								edge.SetUserData(true, groupIndex, pol.EdgesUserData[i - 1]);
 							edges.Add(new EdgeAndSide(edge, right));
 							node1 = node2;
 						}
-
-						tpol.Holes.Add(holetpol);
 					}
+
+					// 穴を処理
+					var holes = pol.Holes;
+					if (holes != null) {
+						tpol.Holes = new List<TopologicalPolygon>(holes.Count);
+
+						for (int holeIndex = 0, nholes = holes.Count; holeIndex < nholes; holeIndex++) {
+							var hole = holes[holeIndex];
+							var holetpol = new TopologicalPolygon();
+
+							// 頂点をノードに変換する、半径 _Epsilon を使いノードの接触を調べ、接触しているなら既存のノードを使用する
+							var vertices = hole.Vertices;
+							var nnodes = vertices.Count;
+							var nodes = new Node[nnodes];
+							for (int i = 0, nvts = vertices.Count; i < nvts; i++) {
+								var v = vertices[i];
+								var node = _NodeMgr.NewNode(v.Position);
+								node.SetUserData(groupIndex, v.UserData);
+								nodes[i] = node;
+							}
+
+							// ラインをエッジに変換する、既存エッジに同じノード組み合わせのものが存在したらそちらを使用する
+							var edges = holetpol.Edges = new List<EdgeAndSide>(nnodes);
+							var node1 = nodes[0];
+							for (int i = 1; i <= nnodes; i++) {
+								var node2 = nodes[i % nnodes];
+								var edge = _EdgeMgr.NewEdge(node1, node2);
+								var right = node1 == edge.From;
+								edge.LinkPolygon(right, groupIndex);
+								if (hole.EdgesUserData != null)
+									edge.SetUserData(true, groupIndex, hole.EdgesUserData[i - 1]);
+								edges.Add(new EdgeAndSide(edge, right));
+								node1 = node2;
+							}
+
+							tpol.Holes.Add(holetpol);
+						}
+					}
+					var tpols = new List<TopologicalPolygon>();
+					tpols.Add(tpol);
+					_TopoGroups.Add(tpols);
 				}
-				var tpols = new List<TopologicalPolygon>();
-				tpols.Add(tpol);
-				_TopologicalPolygons.Add(tpols);
 			}
 		}
 
@@ -1918,9 +1927,7 @@ namespace Jk {
 		/// </summary>
 		private void MakeIntersectionNodes() {
 			// 頂点とエッジの接触を調べ、ノード挿入情報を作成する
-			for (int i = 0, n = _TopologicalPolygons.Count; i < n; i++) {
-				InsertNodeToEdge(i);
-			}
+			InsertNodeToEdge();
 
 			// エッジ同士の交点を調べ、ノード挿入情報を作成する
 			InsertIntersectionNodeToEdge();
@@ -1930,10 +1937,9 @@ namespace Jk {
 		}
 
 		/// <summary>
-		/// 指定ポリゴンのエッジに接触しているノードがあればエッジへ挿入予約する
+		/// エッジに接触しているノードがあればエッジへ挿入予約する
 		/// </summary>
-		/// <param name="polygonIndex">エッジをチェックするポリゴンのインデックス</param>
-		private void InsertNodeToEdge(int polygonIndex) {
+		private void InsertNodeToEdge() {
 			var epsilon2 = _Epsilon * _Epsilon;
 			var edges = this.Edges;
 
@@ -2074,8 +2080,8 @@ namespace Jk {
 #if POLYGONBOOLEAN_DEBUG
 			_Logging = true;
 #endif
-			for (int i = 0, n = _TopologicalPolygons.Count; i < n; i++) {
-				var polygonIndex = i;
+			for (int i = 0, n = _TopoGroups.Count; i < n; i++) {
+				var groupIndex = i;
 
 				// エッジの指定方向に指定ポリゴンが存在しないなら無視するフィルタ
 				var edgeFilter = new Func<Edge, bool, bool>(
@@ -2088,8 +2094,8 @@ namespace Jk {
 							l = e.Right;
 							r = e.Left;
 						}
-						var rc = r.Contains(polygonIndex);
-						var lc = l.Contains(polygonIndex);
+						var rc = r.Contains(groupIndex);
+						var lc = l.Contains(groupIndex);
 						if (!rc)
 							return true;
 						if (lc)
@@ -2099,7 +2105,7 @@ namespace Jk {
 				);
 
 				var polygons = Distinguish(GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, true));
-				var tpols = _TopologicalPolygons[polygonIndex];
+				var tpols = _TopoGroups[groupIndex];
 
 				tpols.Clear();
 
@@ -2129,12 +2135,12 @@ namespace Jk {
 		/// ノードとエッジに分解後のデータを使い _TopologicalPolygons 内ポリゴンエッジが他ポリゴンエッジに包含されているなら情報を付与する
 		/// </summary>
 		private void TpolsInclusionCheck() {
-			var alltpols = _TopologicalPolygons;
+			var alltpols = _TopoGroups;
 			var nalltpols = alltpols.Count;
 
 			// まず境界ボリュームと面積を計算する
-			for (int polygonIndex = nalltpols - 1; polygonIndex != -1; polygonIndex--) {
-				var tpols = alltpols[polygonIndex];
+			for (int groupIndex = nalltpols - 1; groupIndex != -1; groupIndex--) {
+				var tpols = alltpols[groupIndex];
 				for (int i = tpols.Count - 1; i != -1; i--) {
 					var tpol = tpols[i];
 					tpol.Volume = new volume(from e in tpol.Edges select e.From.Position);

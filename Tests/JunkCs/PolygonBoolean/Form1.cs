@@ -6,16 +6,13 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Jk;
 
 namespace PolygonBoolean {
 	public partial class Form1 : Form {
-		List<Point>[] _Points = new List<Point>[] {
-			new List<Point>(),
-			new List<Point>(),
-		};
-		List<List<Point>>[] _Holes = new List<List<Point>>[] {
-			new List<List<Point>>(),
-			new List<List<Point>>(),
+		List<PolBoolF.Polygon>[] _Groups = new List<PolBoolF.Polygon>[] {
+			new List<PolBoolF.Polygon>(),
+			new List<PolBoolF.Polygon>(),
 		};
 		int _Current = 0;
 
@@ -51,22 +48,22 @@ namespace PolygonBoolean {
 			var r3 = new Jk.Vector2i(200, 200);
 
 
-			_Points[0].Add(ToPt(c + r1));
-			_Points[0].Add(ToPt(c + r2));
-			_Points[0].Add(ToPt(c + r3));
-			_Points[1].Add(ToPt(c + 2 * r1 / 3));
-			_Points[1].Add(ToPt(c + 2 * r2 / 3));
-			_Points[1].Add(ToPt(c + 2 * r3 / 3));
+			//_Points[0].Add(ToPt(c + r1));
+			//_Points[0].Add(ToPt(c + r2));
+			//_Points[0].Add(ToPt(c + r3));
+			//_Points[1].Add(ToPt(c + 2 * r1 / 3));
+			//_Points[1].Add(ToPt(c + 2 * r2 / 3));
+			//_Points[1].Add(ToPt(c + 2 * r3 / 3));
 
-			_Holes[0].Add(new List<Point>());
-			_Holes[0][0].Add(ToPt(c + r1 / 3));
-			_Holes[0][0].Add(ToPt(c + r3 / 3));
-			_Holes[0][0].Add(ToPt(c + r2 / 3));
+			//_Holes[0].Add(new List<Point>());
+			//_Holes[0][0].Add(ToPt(c + r1 / 3));
+			//_Holes[0][0].Add(ToPt(c + r3 / 3));
+			//_Holes[0][0].Add(ToPt(c + r2 / 3));
 
-			_Holes[1].Add(new List<Point>());
-			_Holes[1][0].Add(ToPt(c + r1 / 6));
-			_Holes[1][0].Add(ToPt(c + r3 / 3));
-			_Holes[1][0].Add(ToPt(c + r2 / 6));
+			//_Holes[1].Add(new List<Point>());
+			//_Holes[1][0].Add(ToPt(c + r1 / 6));
+			//_Holes[1][0].Add(ToPt(c + r3 / 3));
+			//_Holes[1][0].Add(ToPt(c + r2 / 6));
 
 			//_Points[0].Add(new Point(50, 200));
 			//_Points[0].Add(new Point(50, 300));
@@ -79,18 +76,33 @@ namespace PolygonBoolean {
 		protected override void OnMouseDown(MouseEventArgs e) {
 			base.OnMouseDown(e);
 
-			var pt = new Point((int)Math.Round(e.X / 10.0, MidpointRounding.AwayFromZero) * 10, (int)Math.Round(e.Y / 10.0, MidpointRounding.AwayFromZero) * 10);
+			var pt = new Vector2f((int)Math.Round(e.X / 10.0, MidpointRounding.AwayFromZero) * 10, (int)Math.Round(e.Y / 10.0, MidpointRounding.AwayFromZero) * 10);
+			var group = _Groups[_Current];
 
 			if (e.Button == MouseButtons.Left) {
-				_Points[_Current].Add(pt);
+				PolBoolF.Polygon pol;
+				if (group.Count == 0)
+					group.Add(pol = new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, null));
+				else
+					pol = group[group.Count - 1];
+				pol.Vertices.Add(new PolBoolF.Vertex(pt));
 				this.Invalidate();
 			}
 			if (e.Button == MouseButtons.Right) {
-				var holes = _Holes[_Current];
+				PolBoolF.Polygon pol;
+				if (group.Count == 0)
+					group.Add(pol = new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, null));
+				else
+					pol = group[group.Count - 1];
+
+				List<PolBoolF.Hole> holes = pol.Holes;
+				if (holes == null)
+					pol.Holes = holes = new List<PolBoolF.Hole>();
+
 				if (holes.Count == 0)
-					holes.Add(new List<Point>());
+					holes.Add(new PolBoolF.Hole(new List<PolBoolF.Vertex>(), null));
 				var hole = holes[holes.Count - 1];
-				hole.Add(pt);
+				hole.Vertices.Add(new PolBoolF.Vertex(pt));
 				this.Invalidate();
 			}
 		}
@@ -104,7 +116,7 @@ namespace PolygonBoolean {
 			var g = e.Graphics;
 			var cl = this.ClientRectangle;
 
-			var pb = new Jk.PolygonBooleanf(1f);
+			var pb = new Jk.PolBoolF(1f);
 
 			using (var brsFontNode = new SolidBrush(Color.FromArgb(64, 64, 255)))
 			using (var brsFontEdge = new SolidBrush(Color.FromArgb(255, 64, 64)))
@@ -125,49 +137,40 @@ namespace PolygonBoolean {
 			using (var penNodeInsideOutside = new Pen(Color.Orange))
 			using (var penVolume = new Pen(Color.Blue)) {
 				// 演算対象ポリゴンを登録
-				for (int i = 0; i < _Points.Length; i++) {
-					var points = _Points[i];
-					var holes = _Holes[i];
-					var vertexList = new List<Jk.PolygonBooleanf.Vertex>(
-						from p
-						in points
-						select new Jk.PolygonBooleanf.Vertex(new Jk.Vector2f(p.X, p.Y)));
-					var holeList = new List<Jk.PolygonBooleanf.Hole>(
-						from hole
-						in holes
-						select
-							new Jk.PolygonBooleanf.Hole(
-								new List<Jk.PolygonBooleanf.Vertex>(
-									from p
-									in hole
-									select new Jk.PolygonBooleanf.Vertex(new Jk.Vector2f(p.X, p.Y))),
-								null));
-					var pol = new Jk.PolygonBooleanf.Polygon(vertexList, null, holeList);
+				for (int i = 0; i < _Groups.Length; i++) {
+					var group = _Groups[i];
 
-					pb.AddPolygon(pol);
+					pb.AddPolygon(group);
 
-					if (2 <= points.Count && points.Count < 3)
-						g.DrawLines(penLine, points.ToArray());
-					else if (3 <= points.Count)
-						g.DrawPolygon(penLine, points.ToArray());
-					foreach (var p in points) {
-						g.DrawRectangle(penRect, p.X - 2, p.Y - 2, 4, 4);
-					}
+					foreach (var polygon in group) {
+						var vertices = polygon.Vertices;
 
-					foreach (var hole in holes) {
-						if (2 <= hole.Count && hole.Count < 3)
-							g.DrawLines(penHoleLine, hole.ToArray());
-						else if (3 <= hole.Count)
-							g.DrawPolygon(penHoleLine, hole.ToArray());
-						foreach (var p in hole) {
-							g.DrawRectangle(penHoleNode, p.X - 2, p.Y - 2, 4, 4);
+						if (2 <= vertices.Count && vertices.Count < 3)
+							g.DrawLines(penLine, (from v in vertices select ToPt(v.Position)).ToArray());
+						else if (3 <= vertices.Count)
+							g.DrawPolygon(penLine, (from v in vertices select ToPt(v.Position)).ToArray());
+						foreach (var v in vertices) {
+							g.DrawRectangle(penRect, v.Position.X - 2, v.Position.Y - 2, 4, 4);
+						}
+
+						if (polygon.Holes != null) {
+							foreach (var hole in polygon.Holes) {
+								vertices = hole.Vertices;
+								if (2 <= vertices.Count && vertices.Count < 3)
+									g.DrawLines(penHoleLine, (from v in vertices select ToPt(v.Position)).ToArray());
+								else if (3 <= vertices.Count)
+									g.DrawPolygon(penHoleLine, (from v in vertices select ToPt(v.Position)).ToArray());
+								foreach (var v in vertices) {
+									g.DrawRectangle(penHoleNode, v.Position.X - 2, v.Position.Y - 2, 4, 4);
+								}
+							}
 						}
 					}
 				}
 
 				try {
 					// トポロジー化
-					pb.CreateTopology();
+					pb.CreateTopology(true);
 
 					var sb = new StringBuilder();
 
@@ -193,7 +196,7 @@ namespace PolygonBoolean {
 					var orgTf = g.Transform;
 
 					// ポリゴン同士の演算を行う
-					List<List<List<Jk.PolygonBooleanf.EdgeAndSide>>> result = null;
+					List<List<List<Jk.PolBoolF.EdgeAndSide>>> result = null;
 					if (radOr.Checked)
 						result = pb.Or();
 					else if (radXor.Checked)
@@ -218,10 +221,10 @@ namespace PolygonBoolean {
 
 						v *= 2;
 						g.DrawLine(
-							(edge.Flags & Jk.PolygonBooleanf.EdgeFlags.RightRemoved) != 0 ? penEdgeRightRemoved : penEdgeRight,
+							(edge.Flags & Jk.PolBoolF.EdgeFlags.RightRemoved) != 0 ? penEdgeRightRemoved : penEdgeRight,
 							ToPt(p1 - v), ToPt(p2 - v));
 						g.DrawLine(
-							(edge.Flags & Jk.PolygonBooleanf.EdgeFlags.LeftRemoved) != 0 ? penEdgeLeftRemoved : penEdgeLeft,
+							(edge.Flags & Jk.PolBoolF.EdgeFlags.LeftRemoved) != 0 ? penEdgeLeftRemoved : penEdgeLeft,
 							ToPt(p1 + v), ToPt(p2 + v));
 					}
 					foreach (var edge in pb.Edges) {
@@ -244,7 +247,7 @@ namespace PolygonBoolean {
 					}
 					foreach (var node in pb.Nodes) {
 						var p = node.Position;
-						var pen = (node.Flags & Jk.PolygonBooleanf.NodeFlags.InsideOutside) != 0 ? penNodeInsideOutside : penNode;
+						var pen = (node.Flags & Jk.PolBoolF.NodeFlags.InsideOutside) != 0 ? penNodeInsideOutside : penNode;
 						g.DrawRectangle(pen, p.X - 2, p.Y - 2, 4, 4);
 						g.DrawString(node.Edges.Count.ToString(), this.Font, brsFontNode, p.X, p.Y);
 					}
@@ -260,7 +263,7 @@ namespace PolygonBoolean {
 							in pols
 							select (
 								from node
-								in Jk.PolygonBooleanf.NodesFromEdges(edges)
+								in Jk.PolBoolF.NodesFromEdges(edges)
 								select new PointF(node.Position.X, node.Position.Y)
 							).ToArray()
 						).ToArray()
@@ -359,21 +362,54 @@ namespace PolygonBoolean {
 		}
 
 		private void btnClear_Click(object sender, EventArgs e) {
-			_Points[_Current].Clear();
-			_Holes[_Current].Clear();
+			_Groups[_Current].Clear();
+			this.Invalidate();
+		}
+
+		private void btnAddPol_Click(object sender, EventArgs e) {
+			_Groups[_Current].Add(new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, null));
+			this.Invalidate();
+		}
+
+		private void btnDelPol_Click(object sender, EventArgs e) {
+			var group = _Groups[_Current];
+			if (group.Count != 0)
+				group.RemoveAt(group.Count - 1);
 			this.Invalidate();
 		}
 
 		private void btnAddHole_Click(object sender, EventArgs e) {
-			_Holes[_Current].Add(new List<Point>());
+			var group = _Groups[_Current];
+			if (group.Count == 0)
+				group.Add(new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, null));
+
+			var polygon = group[group.Count - 1];
+
+			var holes = polygon.Holes;
+			if (holes == null)
+				polygon.Holes = holes = new List<PolBoolF.Hole>();
+
+			holes.Add(new PolBoolF.Hole(new List<PolBoolF.Vertex>(), null));
+
 			this.Invalidate();
 		}
 
 		private void btnDelHole_Click(object sender, EventArgs e) {
-			var holes = _Holes[_Current];
-			if (holes.Count == 0)
+			var group = _Groups[_Current];
+			if (group.Count == 0)
 				return;
-			holes.RemoveAt(holes.Count - 1);
+
+			var polygon = group[group.Count - 1];
+
+			var holes = polygon.Holes;
+			if (holes == null)
+				return;
+
+			polygon.Holes.RemoveAt(polygon.Holes.Count - 1);
+
+			if (polygon.Holes.Count == 0)
+				polygon.Holes = null;
+
 			this.Invalidate();
 		}
 
