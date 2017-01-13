@@ -355,6 +355,15 @@ namespace Jk {
 		#endregion
 
 		#region 公開メソッド
+		public static List<T> incorporateHolesIntoPolygon<T>(Project<T> project, List<List<T>> loops) {
+			if (loops.Count <= 1)
+				return loops[0];
+			var holes = new List<List<T>>(loops);
+			holes.RemoveAt(0);
+			return incorporateHolesIntoPolygon(project, loops[0], holes);
+		}
+
+
 		/** 
 		 * \brief Merge a set of holes into a polygon. (templated)
 		 *

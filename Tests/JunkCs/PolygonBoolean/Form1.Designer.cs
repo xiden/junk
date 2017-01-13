@@ -23,8 +23,6 @@
 		/// コード エディターで変更しないでください。
 		/// </summary>
 		private void InitializeComponent() {
-			this.radioButton1 = new System.Windows.Forms.RadioButton();
-			this.radioButton2 = new System.Windows.Forms.RadioButton();
 			this.lblResult = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.radOr = new System.Windows.Forms.RadioButton();
@@ -42,43 +40,23 @@
 			this.cmbHole = new System.Windows.Forms.ComboBox();
 			this.btnDelPol = new System.Windows.Forms.Button();
 			this.btnAddPol = new System.Windows.Forms.Button();
+			this.cmbCurGroup = new System.Windows.Forms.ComboBox();
+			this.cmbCurPolygon = new System.Windows.Forms.ComboBox();
+			this.cmbCurHole = new System.Windows.Forms.ComboBox();
+			this.pictureBox1 = new System.Windows.Forms.PictureBox();
+			this.radFilter = new System.Windows.Forms.RadioButton();
 			this.groupBox1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			this.SuspendLayout();
-			// 
-			// radioButton1
-			// 
-			this.radioButton1.Appearance = System.Windows.Forms.Appearance.Button;
-			this.radioButton1.AutoSize = true;
-			this.radioButton1.Checked = true;
-			this.radioButton1.Location = new System.Drawing.Point(12, 12);
-			this.radioButton1.Name = "radioButton1";
-			this.radioButton1.Size = new System.Drawing.Size(58, 22);
-			this.radioButton1.TabIndex = 1;
-			this.radioButton1.TabStop = true;
-			this.radioButton1.Text = "ポリゴン１";
-			this.radioButton1.UseVisualStyleBackColor = true;
-			this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
-			// 
-			// radioButton2
-			// 
-			this.radioButton2.Appearance = System.Windows.Forms.Appearance.Button;
-			this.radioButton2.AutoSize = true;
-			this.radioButton2.Location = new System.Drawing.Point(76, 12);
-			this.radioButton2.Name = "radioButton2";
-			this.radioButton2.Size = new System.Drawing.Size(58, 22);
-			this.radioButton2.TabIndex = 2;
-			this.radioButton2.Text = "ポリゴン２";
-			this.radioButton2.UseVisualStyleBackColor = true;
-			this.radioButton2.CheckedChanged += new System.EventHandler(this.radioButton2_CheckedChanged);
 			// 
 			// lblResult
 			// 
 			this.lblResult.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.lblResult.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.lblResult.Location = new System.Drawing.Point(562, 17);
+			this.lblResult.Location = new System.Drawing.Point(530, 14);
 			this.lblResult.Name = "lblResult";
-			this.lblResult.Size = new System.Drawing.Size(311, 14);
+			this.lblResult.Size = new System.Drawing.Size(343, 14);
 			this.lblResult.TabIndex = 4;
 			this.lblResult.Text = "label3";
 			// 
@@ -117,6 +95,7 @@
 			// 
 			// groupBox1
 			// 
+			this.groupBox1.Controls.Add(this.radFilter);
 			this.groupBox1.Controls.Add(this.radExtract);
 			this.groupBox1.Controls.Add(this.radXor);
 			this.groupBox1.Controls.Add(this.radAnd);
@@ -174,9 +153,9 @@
 			// 
 			// btnClear
 			// 
-			this.btnClear.Location = new System.Drawing.Point(140, 12);
+			this.btnClear.Location = new System.Drawing.Point(63, 10);
 			this.btnClear.Name = "btnClear";
-			this.btnClear.Size = new System.Drawing.Size(75, 23);
+			this.btnClear.Size = new System.Drawing.Size(56, 23);
 			this.btnClear.TabIndex = 11;
 			this.btnClear.Text = "クリア";
 			this.btnClear.UseVisualStyleBackColor = true;
@@ -184,7 +163,7 @@
 			// 
 			// btnAddHole
 			// 
-			this.btnAddHole.Location = new System.Drawing.Point(345, 12);
+			this.btnAddHole.Location = new System.Drawing.Point(351, 10);
 			this.btnAddHole.Name = "btnAddHole";
 			this.btnAddHole.Size = new System.Drawing.Size(56, 23);
 			this.btnAddHole.TabIndex = 12;
@@ -194,7 +173,7 @@
 			// 
 			// btnDelHole
 			// 
-			this.btnDelHole.Location = new System.Drawing.Point(407, 12);
+			this.btnDelHole.Location = new System.Drawing.Point(413, 10);
 			this.btnDelHole.Name = "btnDelHole";
 			this.btnDelHole.Size = new System.Drawing.Size(56, 23);
 			this.btnDelHole.TabIndex = 13;
@@ -234,7 +213,7 @@
 			// 
 			// btnDelPol
 			// 
-			this.btnDelPol.Location = new System.Drawing.Point(283, 12);
+			this.btnDelPol.Location = new System.Drawing.Point(238, 10);
 			this.btnDelPol.Name = "btnDelPol";
 			this.btnDelPol.Size = new System.Drawing.Size(56, 23);
 			this.btnDelPol.TabIndex = 18;
@@ -244,7 +223,7 @@
 			// 
 			// btnAddPol
 			// 
-			this.btnAddPol.Location = new System.Drawing.Point(221, 12);
+			this.btnAddPol.Location = new System.Drawing.Point(176, 10);
 			this.btnAddPol.Name = "btnAddPol";
 			this.btnAddPol.Size = new System.Drawing.Size(56, 23);
 			this.btnAddPol.TabIndex = 17;
@@ -252,11 +231,64 @@
 			this.btnAddPol.UseVisualStyleBackColor = true;
 			this.btnAddPol.Click += new System.EventHandler(this.btnAddPol_Click);
 			// 
+			// cmbCurGroup
+			// 
+			this.cmbCurGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cmbCurGroup.FormattingEnabled = true;
+			this.cmbCurGroup.Location = new System.Drawing.Point(12, 11);
+			this.cmbCurGroup.Name = "cmbCurGroup";
+			this.cmbCurGroup.Size = new System.Drawing.Size(45, 20);
+			this.cmbCurGroup.TabIndex = 19;
+			this.cmbCurGroup.SelectedIndexChanged += new System.EventHandler(this.cmbCurGroup_SelectedIndexChanged);
+			// 
+			// cmbCurPolygon
+			// 
+			this.cmbCurPolygon.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cmbCurPolygon.FormattingEnabled = true;
+			this.cmbCurPolygon.Location = new System.Drawing.Point(125, 11);
+			this.cmbCurPolygon.Name = "cmbCurPolygon";
+			this.cmbCurPolygon.Size = new System.Drawing.Size(45, 20);
+			this.cmbCurPolygon.TabIndex = 20;
+			this.cmbCurPolygon.SelectedIndexChanged += new System.EventHandler(this.cmbCurPolygon_SelectedIndexChanged);
+			// 
+			// cmbCurHole
+			// 
+			this.cmbCurHole.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cmbCurHole.FormattingEnabled = true;
+			this.cmbCurHole.Location = new System.Drawing.Point(300, 11);
+			this.cmbCurHole.Name = "cmbCurHole";
+			this.cmbCurHole.Size = new System.Drawing.Size(45, 20);
+			this.cmbCurHole.TabIndex = 21;
+			// 
+			// pictureBox1
+			// 
+			this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.pictureBox1.Location = new System.Drawing.Point(475, 11);
+			this.pictureBox1.Name = "pictureBox1";
+			this.pictureBox1.Size = new System.Drawing.Size(49, 22);
+			this.pictureBox1.TabIndex = 22;
+			this.pictureBox1.TabStop = false;
+			this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+			// 
+			// radFilter
+			// 
+			this.radFilter.AutoSize = true;
+			this.radFilter.Location = new System.Drawing.Point(256, 18);
+			this.radFilter.Name = "radFilter";
+			this.radFilter.Size = new System.Drawing.Size(50, 16);
+			this.radFilter.TabIndex = 5;
+			this.radFilter.Text = "Filter";
+			this.radFilter.UseVisualStyleBackColor = true;
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(885, 614);
+			this.Controls.Add(this.pictureBox1);
+			this.Controls.Add(this.cmbCurHole);
+			this.Controls.Add(this.cmbCurPolygon);
+			this.Controls.Add(this.cmbCurGroup);
 			this.Controls.Add(this.btnDelPol);
 			this.Controls.Add(this.btnAddPol);
 			this.Controls.Add(this.cmbHole);
@@ -269,20 +301,17 @@
 			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.lblResult);
-			this.Controls.Add(this.radioButton2);
-			this.Controls.Add(this.radioButton1);
 			this.Name = "Form1";
 			this.Text = "Form1";
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
 		}
 
 		#endregion
-		private System.Windows.Forms.RadioButton radioButton1;
-		private System.Windows.Forms.RadioButton radioButton2;
 		private System.Windows.Forms.Label lblResult;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.RadioButton radOr;
@@ -300,6 +329,11 @@
 		private System.Windows.Forms.ComboBox cmbHole;
 		private System.Windows.Forms.Button btnDelPol;
 		private System.Windows.Forms.Button btnAddPol;
+		private System.Windows.Forms.ComboBox cmbCurGroup;
+		private System.Windows.Forms.ComboBox cmbCurPolygon;
+		private System.Windows.Forms.ComboBox cmbCurHole;
+		private System.Windows.Forms.PictureBox pictureBox1;
+		private System.Windows.Forms.RadioButton radFilter;
 	}
 }
 

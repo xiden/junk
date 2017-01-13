@@ -14,7 +14,27 @@ namespace PolygonBoolean {
 			new List<PolBoolF.Polygon>(),
 			new List<PolBoolF.Polygon>(),
 		};
-		int _Current = 0;
+
+		List<PolBoolF.Polygon> CurGroup {
+			get {
+				return _Groups[this.cmbCurGroup.SelectedIndex];
+			}
+		}
+
+		PolBoolF.Polygon CurPolygon {
+			get {
+				var index = this.cmbCurPolygon.SelectedIndex;
+				return 0 <= index ? this.CurGroup[index] : null;
+			}
+		}
+
+		PolBoolF.Hole CurHole {
+			get {
+				var index = this.cmbCurHole.SelectedIndex;
+				return 0 <= index ? this.CurPolygon.Holes[index] : null;
+			}
+		}
+
 
 		public Form1() {
 			InitializeComponent();
@@ -30,9 +50,17 @@ namespace PolygonBoolean {
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
 
+			this.cmbCurGroup.Items.Add("A");
+			this.cmbCurGroup.Items.Add("B");
+			this.cmbCurGroup.SelectedIndex = 0;
+
+			cmbCurGroup_SelectedIndexChanged(this, EventArgs.Empty);
+
 			this.cmbPolygonIndex.Items.Add(0);
 			this.cmbPolygonIndex.Items.Add(1);
 			this.cmbPolygonIndex.SelectedIndex = 0;
+
+			UpdatePolygonCmb(true);
 
 			this.cmbPol.Items.Add("All pols");
 			for (int i = 1; i <= 10; i++)
@@ -46,7 +74,6 @@ namespace PolygonBoolean {
 			var r1 = new Jk.Vector2i(0, -200);
 			var r2 = new Jk.Vector2i(-200, 200);
 			var r3 = new Jk.Vector2i(200, 200);
-
 
 			//_Points[0].Add(ToPt(c + r1));
 			//_Points[0].Add(ToPt(c + r2));
@@ -77,31 +104,27 @@ namespace PolygonBoolean {
 			base.OnMouseDown(e);
 
 			var pt = new Vector2f((int)Math.Round(e.X / 10.0, MidpointRounding.AwayFromZero) * 10, (int)Math.Round(e.Y / 10.0, MidpointRounding.AwayFromZero) * 10);
-			var group = _Groups[_Current];
+			var group = this.CurGroup;
 
 			if (e.Button == MouseButtons.Left) {
-				PolBoolF.Polygon pol;
 				if (group.Count == 0)
-					group.Add(pol = new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, null));
-				else
-					pol = group[group.Count - 1];
+					btnAddPol_Click(this, EventArgs.Empty);
+
+				var pol = this.CurPolygon;
+
 				pol.Vertices.Add(new PolBoolF.Vertex(pt));
 				this.Invalidate();
 			}
 			if (e.Button == MouseButtons.Right) {
-				PolBoolF.Polygon pol;
 				if (group.Count == 0)
-					group.Add(pol = new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, null));
-				else
-					pol = group[group.Count - 1];
+					btnAddPol_Click(this, EventArgs.Empty);
 
-				List<PolBoolF.Hole> holes = pol.Holes;
-				if (holes == null)
-					pol.Holes = holes = new List<PolBoolF.Hole>();
+				var pol = this.CurPolygon;
 
-				if (holes.Count == 0)
-					holes.Add(new PolBoolF.Hole(new List<PolBoolF.Vertex>(), null));
-				var hole = holes[holes.Count - 1];
+				if(pol.Holes == null || pol.Holes.Count == 0)
+					btnAddHole_Click(this, EventArgs.Empty);
+
+				var hole = this.CurHole;
 				hole.Vertices.Add(new PolBoolF.Vertex(pt));
 				this.Invalidate();
 			}
@@ -207,6 +230,61 @@ namespace PolygonBoolean {
 						result = pb.Sub(this.cmbPolygonIndex.SelectedIndex);
 					else if (radExtract.Checked)
 						result = pb.Extract(this.cmbPolygonIndex.SelectedIndex);
+					else if (radFilter.Checked) {
+						var edgeFilter = new Func<PolBoolF.Edge, bool, bool>(
+							(PolBoolF.Edge edge, bool right) => {
+								List<int> rg, lg;
+								int[] rp, lp;
+
+								if (right) {
+									rg = edge.RightGroups;
+									lg = edge.LeftGroups;
+									rp = edge.RightPolygons;
+									lp = edge.LeftPolygons;
+								} else {
+									lg = edge.RightGroups;
+									rg = edge.LeftGroups;
+									lp = edge.RightPolygons;
+									rp = edge.LeftPolygons;
+								}
+								var nr = rg.Count;
+								var nl = lg.Count;
+
+								// 進行方向右側にポリゴンが無ければ無視
+								if (nr == 0)
+									return true;
+
+								// ポリゴン外との境界だったら無視はできない
+								if (nl == 0)
+									return false;
+
+
+
+								// 左右のポリゴンの色を取得
+								Color rc = Color.Empty, lc = Color.Empty;
+
+								for (int i = 1; i != -1; i--) {
+									if (rg.Contains(i)) {
+										rc = (Color)_Groups[i][rp[i]].UserData;
+										break;
+									}
+								}
+								for (int i = 1; i != -1; i--) {
+									if (lg.Contains(i)) {
+										lc = (Color)_Groups[i][lp[i]].UserData;
+										break;
+									}
+								}
+
+								// 左右の色が違うなら無視できない
+								if (rc != lc)
+									return false;
+
+								return true;
+							}
+						);
+						result = pb.Filtering(edgeFilter);
+					}
 					sb.AppendLine("演算結果ポリゴン数: " + result.Count);
 					foreach (var r in result) {
 						sb.AppendLine((r.Count - 1).ToString());
@@ -237,13 +315,13 @@ namespace PolygonBoolean {
 						var sf = new StringFormat(StringFormat.GenericTypographic);
 						sf.FormatFlags = sf.FormatFlags & ~StringFormatFlags.LineLimit | StringFormatFlags.NoWrap; // StringFormatFlagsLineLimit があると計算誤差の関係で文字が非表示になるので消す
 
-						var size = g.MeasureString(edge.Left.Count.ToString(), this.Font, 1000, sf);
+						var size = g.MeasureString(edge.LeftGroups.Count.ToString(), this.Font, 1000, sf);
 
-						g.DrawString(edge.Left.Count.ToString(), this.Font, brsFontEdge, pl.X - size.Width / 2, pl.Y - size.Height / 2, sf);
+						g.DrawString(edge.LeftGroups.Count.ToString(), this.Font, brsFontEdge, pl.X - size.Width / 2, pl.Y - size.Height / 2, sf);
 
 
-						size = g.MeasureString(edge.Right.Count.ToString(), this.Font, 1000, sf);
-						g.DrawString(edge.Right.Count.ToString(), this.Font, brsFontEdge, pr.X - size.Width / 2, pr.Y - size.Height / 2, sf);
+						size = g.MeasureString(edge.RightGroups.Count.ToString(), this.Font, 1000, sf);
+						g.DrawString(edge.RightGroups.Count.ToString(), this.Font, brsFontEdge, pr.X - size.Width / 2, pr.Y - size.Height / 2, sf);
 					}
 					foreach (var node in pb.Nodes) {
 						var p = node.Position;
@@ -255,37 +333,57 @@ namespace PolygonBoolean {
 
 					// 結果のポリゴンを描画
 					g.TranslateTransform(0, 500);
-					var polygonLists = (
-						from pols
-						in result
-						select (
-							from edges
-							in pols
-							select (
-								from node
-								in Jk.PolBoolF.NodesFromEdges(edges)
-								select new PointF(node.Position.X, node.Position.Y)
-							).ToArray()
-						).ToArray()
-					).ToArray();
-					for (int j = 0; j < polygonLists.Length; j++) {
+					for (int j = 0; j < result.Count; j++) {
 						if (1 <= cmbPol.SelectedIndex && cmbPol.SelectedIndex != (j + 1))
 							continue;
-						var pl = polygonLists[j];
-						for (int i = 0, n = pl.Length; i < n; i++) {
+						var loops = result[j];
+						for (int i = 0, n = loops.Count; i < n; i++) {
 							if (1 <= cmbHole.SelectedIndex && cmbHole.SelectedIndex != (i + 1))
 								continue;
-							g.FillPolygon(i == 0 ? brsPolygon : brsHole, pl[i]);
+
+							var loop = loops[i];
+							Brush brs = i == 0 ? brsPolygon : brsHole;
+
+							if (i == 0) {
+								int group = -1, polygon = -1;
+
+								foreach (var edge in loop) {
+									List<int> rg;
+									int[] rp;
+
+									if (edge.TraceRight) {
+										rg = edge.Edge.RightGroups;
+										rp = edge.Edge.RightPolygons;
+									} else {
+										rg = edge.Edge.LeftGroups;
+										rp = edge.Edge.LeftPolygons;
+									}
+
+									for (int ig = 1; ig != -1; ig--) {
+										if (rg.Contains(ig)) {
+											if (group < ig) {
+												group = ig;
+												polygon = rp[ig];
+											}
+										}
+									}
+								}
+
+								brs = new SolidBrush((Color)_Groups[group][polygon].UserData);
+							}
+
+							g.FillPolygon(brs, (from edge in loop select ToPt(edge.From.Position)).ToArray());
 						}
 					}
-					for (int j = 0; j < polygonLists.Length; j++) {
+					for (int j = 0; j < result.Count; j++) {
 						if (1 <= cmbPol.SelectedIndex && cmbPol.SelectedIndex != (j + 1))
 							continue;
-						var pl = polygonLists[j];
-						for (int i = 0, n = pl.Length; i < n; i++) {
+						var loops = result[j];
+						for (int i = 0, n = loops.Count; i < n; i++) {
 							if (1 <= cmbHole.SelectedIndex && cmbHole.SelectedIndex != (i + 1))
 								continue;
-							g.DrawPolygon(penPolygon, pl[i]);
+							var loop = loops[i];
+							g.DrawPolygon(penPolygon, (from edge in loop select ToPt(edge.From.Position)).ToArray());
 						}
 					}
 
@@ -329,14 +427,6 @@ namespace PolygonBoolean {
 			}
 		}
 
-		private void radioButton1_CheckedChanged(object sender, EventArgs e) {
-			_Current = 0;
-		}
-
-		private void radioButton2_CheckedChanged(object sender, EventArgs e) {
-			_Current = 1;
-		}
-
 		private void radOr_CheckedChanged(object sender, EventArgs e) {
 			this.Invalidate();
 		}
@@ -362,24 +452,29 @@ namespace PolygonBoolean {
 		}
 
 		private void btnClear_Click(object sender, EventArgs e) {
-			_Groups[_Current].Clear();
+			this.CurGroup.Clear();
 			this.Invalidate();
 		}
 
 		private void btnAddPol_Click(object sender, EventArgs e) {
-			_Groups[_Current].Add(new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, null));
+			var pol = new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, null);
+			pol.UserData = Color.FromArgb(0, 127, 255);
+			this.CurGroup.Add(pol);
+			UpdatePolygonCmb(true);
 			this.Invalidate();
 		}
 
 		private void btnDelPol_Click(object sender, EventArgs e) {
-			var group = _Groups[_Current];
-			if (group.Count != 0)
-				group.RemoveAt(group.Count - 1);
+			var group = this.CurGroup;
+			var index = this.cmbCurPolygon.SelectedIndex;
+			if (0 <= index && index < group.Count)
+				group.RemoveAt(index);
+			UpdatePolygonCmb(false);
 			this.Invalidate();
 		}
 
 		private void btnAddHole_Click(object sender, EventArgs e) {
-			var group = _Groups[_Current];
+			var group = this.CurGroup;
 			if (group.Count == 0)
 				group.Add(new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, null));
 
@@ -391,11 +486,13 @@ namespace PolygonBoolean {
 
 			holes.Add(new PolBoolF.Hole(new List<PolBoolF.Vertex>(), null));
 
+			UpdateHoleCmb(true);
+
 			this.Invalidate();
 		}
 
 		private void btnDelHole_Click(object sender, EventArgs e) {
-			var group = _Groups[_Current];
+			var group = this.CurGroup;
 			if (group.Count == 0)
 				return;
 
@@ -405,10 +502,14 @@ namespace PolygonBoolean {
 			if (holes == null)
 				return;
 
-			polygon.Holes.RemoveAt(polygon.Holes.Count - 1);
+			var index = this.cmbCurHole.SelectedIndex;
+			if (0 <= index && index < holes.Count)
+				polygon.Holes.RemoveAt(index);
 
 			if (polygon.Holes.Count == 0)
 				polygon.Holes = null;
+
+			UpdateHoleCmb(false);
 
 			this.Invalidate();
 		}
@@ -418,6 +519,74 @@ namespace PolygonBoolean {
 		}
 
 		private void cmbHole_SelectedIndexChanged(object sender, EventArgs e) {
+			this.Invalidate();
+		}
+
+		private void cmbCurGroup_SelectedIndexChanged(object sender, EventArgs e) {
+			UpdatePolygonCmb(true);
+		}
+
+		private void cmbCurPolygon_SelectedIndexChanged(object sender, EventArgs e) {
+			UpdateHoleCmb(true);
+			var pol = this.CurPolygon;
+			if (pol != null) {
+				this.pictureBox1.BackColor = (Color)pol.UserData;
+			}
+		}
+
+		void UpdatePolygonCmb(bool selectLast) {
+			var group = this.CurGroup;
+			var index = this.cmbCurPolygon.SelectedIndex;
+			this.cmbCurPolygon.BeginUpdate();
+			this.cmbCurPolygon.Items.Clear();
+			for (int i = 1; i <= group.Count; i++) {
+				this.cmbCurPolygon.Items.Add(i);
+			}
+			if (this.cmbCurPolygon.Items.Count != 0) {
+				if (selectLast || index < 0 || this.cmbCurPolygon.Items.Count <= index)
+					this.cmbCurPolygon.SelectedIndex = this.cmbCurPolygon.Items.Count - 1;
+			}
+			this.cmbCurPolygon.EndUpdate();
+
+			if (this.cmbCurPolygon.SelectedIndex != index)
+				UpdateHoleCmb(true);
+		}
+
+		void UpdateHoleCmb(bool selectLast) {
+			var polygon = this.CurPolygon;
+			if (polygon == null)
+				return;
+
+			var index = this.cmbCurHole.SelectedIndex;
+			this.cmbCurHole.BeginUpdate();
+			this.cmbCurHole.Items.Clear();
+			if (polygon.Holes != null) {
+				for (int i = 1; i <= polygon.Holes.Count; i++) {
+					this.cmbCurHole.Items.Add(i);
+				}
+				if (this.cmbCurHole.Items.Count != 0) {
+					if (selectLast || index < 0 || this.cmbCurHole.Items.Count <= index)
+						this.cmbCurHole.SelectedIndex = this.cmbCurHole.Items.Count - 1;
+				}
+			}
+			this.cmbCurHole.EndUpdate();
+		}
+
+		private void pictureBox1_Click(object sender, EventArgs e) {
+			var pol = this.CurPolygon;
+			if (pol == null)
+				return;
+
+			var cd = new ColorDialog();
+			cd.Color = this.pictureBox1.BackColor;
+
+			var r = cd.ShowDialog(this);
+			if (r != DialogResult.OK)
+				return;
+
+			this.pictureBox1.BackColor = cd.Color;
+			pol.UserData = cd.Color;
+
 			this.Invalidate();
 		}
 	}

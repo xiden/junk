@@ -49,8 +49,8 @@
     <Compile Include="..\..\..\JunkCs\DynamicAABB2fTree.cs">
       <Link>DynamicAABB2fTree.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\JunkCs\PolygonBooleanf.cs">
-      <Link>PolygonBooleanf.cs</Link>
+    <Compile Include="..\..\..\JunkCs\PolBoolF.cs">
+      <Link>PolBoolF.cs</Link>
     </Compile>
     <Compile Include="..\..\..\JunkCs\Vector2d.cs">
       <Link>Vector2d.cs</Link>
