@@ -46,8 +46,17 @@
     <Compile Include="..\..\..\JunkCs\AABB2f.cs">
       <Link>AABB2f.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\JunkCs\Csv.cs">
+      <Link>Csv.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\JunkCs\CsvReader.cs">
+      <Link>CsvReader.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\JunkCs\DynamicAABB2fTree.cs">
       <Link>DynamicAABB2fTree.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\JunkCs\MouseWheelHandler.cs">
+      <Link>MouseWheelHandler.cs</Link>
     </Compile>
     <Compile Include="..\..\..\JunkCs\PolBoolF.cs">
       <Link>PolBoolF.cs</Link>
@@ -75,6 +84,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rangef.cs" />
+    <Compile Include="Tf.cs" />
+    <Compile Include="TransformLinearf.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

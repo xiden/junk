@@ -28,6 +28,7 @@
 			this.radOr = new System.Windows.Forms.RadioButton();
 			this.radSub = new System.Windows.Forms.RadioButton();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.radFilter = new System.Windows.Forms.RadioButton();
 			this.radExtract = new System.Windows.Forms.RadioButton();
 			this.radXor = new System.Windows.Forms.RadioButton();
 			this.radAnd = new System.Windows.Forms.RadioButton();
@@ -44,9 +45,11 @@
 			this.cmbCurPolygon = new System.Windows.Forms.ComboBox();
 			this.cmbCurHole = new System.Windows.Forms.ComboBox();
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
-			this.radFilter = new System.Windows.Forms.RadioButton();
+			this.btnOpen = new System.Windows.Forms.Button();
+			this.panel1 = new System.Windows.Forms.Panel();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// lblResult
@@ -54,16 +57,16 @@
 			this.lblResult.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.lblResult.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.lblResult.Location = new System.Drawing.Point(530, 14);
+			this.lblResult.Location = new System.Drawing.Point(521, 6);
 			this.lblResult.Name = "lblResult";
-			this.lblResult.Size = new System.Drawing.Size(343, 14);
+			this.lblResult.Size = new System.Drawing.Size(361, 14);
 			this.lblResult.TabIndex = 4;
 			this.lblResult.Text = "label3";
 			// 
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(10, 85);
+			this.label1.Location = new System.Drawing.Point(1, 105);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(35, 12);
 			this.label1.TabIndex = 6;
@@ -101,12 +104,22 @@
 			this.groupBox1.Controls.Add(this.radAnd);
 			this.groupBox1.Controls.Add(this.radOr);
 			this.groupBox1.Controls.Add(this.radSub);
-			this.groupBox1.Location = new System.Drawing.Point(12, 40);
+			this.groupBox1.Location = new System.Drawing.Point(3, 60);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(338, 42);
 			this.groupBox1.TabIndex = 9;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "演算方法";
+			// 
+			// radFilter
+			// 
+			this.radFilter.AutoSize = true;
+			this.radFilter.Location = new System.Drawing.Point(256, 18);
+			this.radFilter.Name = "radFilter";
+			this.radFilter.Size = new System.Drawing.Size(50, 16);
+			this.radFilter.TabIndex = 5;
+			this.radFilter.Text = "Filter";
+			this.radFilter.UseVisualStyleBackColor = true;
 			// 
 			// radExtract
 			// 
@@ -145,7 +158,7 @@
 			// 
 			this.cmbPolygonIndex.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbPolygonIndex.FormattingEnabled = true;
-			this.cmbPolygonIndex.Location = new System.Drawing.Point(356, 54);
+			this.cmbPolygonIndex.Location = new System.Drawing.Point(347, 74);
 			this.cmbPolygonIndex.Name = "cmbPolygonIndex";
 			this.cmbPolygonIndex.Size = new System.Drawing.Size(121, 20);
 			this.cmbPolygonIndex.TabIndex = 10;
@@ -153,7 +166,7 @@
 			// 
 			// btnClear
 			// 
-			this.btnClear.Location = new System.Drawing.Point(63, 10);
+			this.btnClear.Location = new System.Drawing.Point(54, 2);
 			this.btnClear.Name = "btnClear";
 			this.btnClear.Size = new System.Drawing.Size(56, 23);
 			this.btnClear.TabIndex = 11;
@@ -163,7 +176,7 @@
 			// 
 			// btnAddHole
 			// 
-			this.btnAddHole.Location = new System.Drawing.Point(351, 10);
+			this.btnAddHole.Location = new System.Drawing.Point(342, 2);
 			this.btnAddHole.Name = "btnAddHole";
 			this.btnAddHole.Size = new System.Drawing.Size(56, 23);
 			this.btnAddHole.TabIndex = 12;
@@ -173,7 +186,7 @@
 			// 
 			// btnDelHole
 			// 
-			this.btnDelHole.Location = new System.Drawing.Point(413, 10);
+			this.btnDelHole.Location = new System.Drawing.Point(404, 2);
 			this.btnDelHole.Name = "btnDelHole";
 			this.btnDelHole.Size = new System.Drawing.Size(56, 23);
 			this.btnDelHole.TabIndex = 13;
@@ -184,7 +197,7 @@
 			// lblPos
 			// 
 			this.lblPos.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.lblPos.Location = new System.Drawing.Point(483, 54);
+			this.lblPos.Location = new System.Drawing.Point(474, 74);
 			this.lblPos.Name = "lblPos";
 			this.lblPos.Size = new System.Drawing.Size(115, 20);
 			this.lblPos.TabIndex = 14;
@@ -195,7 +208,7 @@
 			// 
 			this.cmbPol.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbPol.FormattingEnabled = true;
-			this.cmbPol.Location = new System.Drawing.Point(604, 54);
+			this.cmbPol.Location = new System.Drawing.Point(595, 74);
 			this.cmbPol.Name = "cmbPol";
 			this.cmbPol.Size = new System.Drawing.Size(59, 20);
 			this.cmbPol.TabIndex = 15;
@@ -205,7 +218,7 @@
 			// 
 			this.cmbHole.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbHole.FormattingEnabled = true;
-			this.cmbHole.Location = new System.Drawing.Point(669, 54);
+			this.cmbHole.Location = new System.Drawing.Point(660, 74);
 			this.cmbHole.Name = "cmbHole";
 			this.cmbHole.Size = new System.Drawing.Size(59, 20);
 			this.cmbHole.TabIndex = 16;
@@ -213,7 +226,7 @@
 			// 
 			// btnDelPol
 			// 
-			this.btnDelPol.Location = new System.Drawing.Point(238, 10);
+			this.btnDelPol.Location = new System.Drawing.Point(229, 2);
 			this.btnDelPol.Name = "btnDelPol";
 			this.btnDelPol.Size = new System.Drawing.Size(56, 23);
 			this.btnDelPol.TabIndex = 18;
@@ -223,7 +236,7 @@
 			// 
 			// btnAddPol
 			// 
-			this.btnAddPol.Location = new System.Drawing.Point(176, 10);
+			this.btnAddPol.Location = new System.Drawing.Point(167, 2);
 			this.btnAddPol.Name = "btnAddPol";
 			this.btnAddPol.Size = new System.Drawing.Size(56, 23);
 			this.btnAddPol.TabIndex = 17;
@@ -235,7 +248,7 @@
 			// 
 			this.cmbCurGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbCurGroup.FormattingEnabled = true;
-			this.cmbCurGroup.Location = new System.Drawing.Point(12, 11);
+			this.cmbCurGroup.Location = new System.Drawing.Point(3, 3);
 			this.cmbCurGroup.Name = "cmbCurGroup";
 			this.cmbCurGroup.Size = new System.Drawing.Size(45, 20);
 			this.cmbCurGroup.TabIndex = 19;
@@ -245,7 +258,7 @@
 			// 
 			this.cmbCurPolygon.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbCurPolygon.FormattingEnabled = true;
-			this.cmbCurPolygon.Location = new System.Drawing.Point(125, 11);
+			this.cmbCurPolygon.Location = new System.Drawing.Point(116, 3);
 			this.cmbCurPolygon.Name = "cmbCurPolygon";
 			this.cmbCurPolygon.Size = new System.Drawing.Size(45, 20);
 			this.cmbCurPolygon.TabIndex = 20;
@@ -255,7 +268,7 @@
 			// 
 			this.cmbCurHole.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbCurHole.FormattingEnabled = true;
-			this.cmbCurHole.Location = new System.Drawing.Point(300, 11);
+			this.cmbCurHole.Location = new System.Drawing.Point(291, 3);
 			this.cmbCurHole.Name = "cmbCurHole";
 			this.cmbCurHole.Size = new System.Drawing.Size(45, 20);
 			this.cmbCurHole.TabIndex = 21;
@@ -263,51 +276,62 @@
 			// pictureBox1
 			// 
 			this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.pictureBox1.Location = new System.Drawing.Point(475, 11);
+			this.pictureBox1.Location = new System.Drawing.Point(466, 3);
 			this.pictureBox1.Name = "pictureBox1";
 			this.pictureBox1.Size = new System.Drawing.Size(49, 22);
 			this.pictureBox1.TabIndex = 22;
 			this.pictureBox1.TabStop = false;
 			this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
 			// 
-			// radFilter
+			// btnOpen
 			// 
-			this.radFilter.AutoSize = true;
-			this.radFilter.Location = new System.Drawing.Point(256, 18);
-			this.radFilter.Name = "radFilter";
-			this.radFilter.Size = new System.Drawing.Size(50, 16);
-			this.radFilter.TabIndex = 5;
-			this.radFilter.Text = "Filter";
-			this.radFilter.UseVisualStyleBackColor = true;
+			this.btnOpen.Location = new System.Drawing.Point(3, 31);
+			this.btnOpen.Name = "btnOpen";
+			this.btnOpen.Size = new System.Drawing.Size(75, 23);
+			this.btnOpen.TabIndex = 23;
+			this.btnOpen.Text = "開く";
+			this.btnOpen.UseVisualStyleBackColor = true;
+			this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
+			// 
+			// panel1
+			// 
+			this.panel1.Controls.Add(this.cmbCurGroup);
+			this.panel1.Controls.Add(this.btnOpen);
+			this.panel1.Controls.Add(this.lblResult);
+			this.panel1.Controls.Add(this.pictureBox1);
+			this.panel1.Controls.Add(this.label1);
+			this.panel1.Controls.Add(this.cmbCurHole);
+			this.panel1.Controls.Add(this.groupBox1);
+			this.panel1.Controls.Add(this.cmbCurPolygon);
+			this.panel1.Controls.Add(this.cmbPolygonIndex);
+			this.panel1.Controls.Add(this.btnClear);
+			this.panel1.Controls.Add(this.btnDelPol);
+			this.panel1.Controls.Add(this.btnAddHole);
+			this.panel1.Controls.Add(this.btnAddPol);
+			this.panel1.Controls.Add(this.btnDelHole);
+			this.panel1.Controls.Add(this.cmbHole);
+			this.panel1.Controls.Add(this.lblPos);
+			this.panel1.Controls.Add(this.cmbPol);
+			this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
+			this.panel1.Location = new System.Drawing.Point(0, 0);
+			this.panel1.Name = "panel1";
+			this.panel1.Size = new System.Drawing.Size(885, 166);
+			this.panel1.TabIndex = 24;
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(885, 614);
-			this.Controls.Add(this.pictureBox1);
-			this.Controls.Add(this.cmbCurHole);
-			this.Controls.Add(this.cmbCurPolygon);
-			this.Controls.Add(this.cmbCurGroup);
-			this.Controls.Add(this.btnDelPol);
-			this.Controls.Add(this.btnAddPol);
-			this.Controls.Add(this.cmbHole);
-			this.Controls.Add(this.cmbPol);
-			this.Controls.Add(this.lblPos);
-			this.Controls.Add(this.btnDelHole);
-			this.Controls.Add(this.btnAddHole);
-			this.Controls.Add(this.btnClear);
-			this.Controls.Add(this.cmbPolygonIndex);
-			this.Controls.Add(this.groupBox1);
-			this.Controls.Add(this.label1);
-			this.Controls.Add(this.lblResult);
+			this.Controls.Add(this.panel1);
 			this.Name = "Form1";
 			this.Text = "Form1";
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+			this.panel1.ResumeLayout(false);
+			this.panel1.PerformLayout();
 			this.ResumeLayout(false);
-			this.PerformLayout();
 
 		}
 
@@ -334,6 +358,8 @@
 		private System.Windows.Forms.ComboBox cmbCurHole;
 		private System.Windows.Forms.PictureBox pictureBox1;
 		private System.Windows.Forms.RadioButton radFilter;
+		private System.Windows.Forms.Button btnOpen;
+		private System.Windows.Forms.Panel panel1;
 	}
 }
 

@@ -65,7 +65,29 @@ namespace Jk {
 			/// </summary>
 			public List<Hole> Holes;
 
+			/// <summary>
+			/// このポリゴンに紐づくユーザーデータ
+			/// </summary>
 			public object UserData;
+
+			/// <summary>
+			/// ポリゴンの境界ボリューム
+			/// </summary>
+			public volume Volume;
+
+			/// <summary>
+			/// ポリゴンの面積
+			/// </summary>
+			public element Area;
+
+			/// <summary>
+			/// 時計回りかどうか
+			/// </summary>
+			public bool CW;
+
+			public PolBoolF Owner;
+			public int GroupIndex;
+			public int PolygonIndex;
 
 			/// <summary>
 			/// コンストラクタ、頂点座標配列、エッジユーザーデータ配列、穴配列を渡して初期化する
@@ -120,7 +142,6 @@ namespace Jk {
 						area = Area(hole.Vertices);
 						if (area <= 0)
 							return new ValidationResult(false, "穴は反時計回りでなければなりません。");
-						hole.Area = Math.Abs(area);
 					}
 				}
 
@@ -210,6 +231,51 @@ namespace Jk {
 
 				return new ValidationResult(true, "有効なポリゴンです。ブーリアン処理に使用できます。");
 			}
+
+			/// <summary>
+			/// 複製を作成
+			/// </summary>
+			/// <returns>複製</returns>
+			public Polygon Clone() {
+				var p = this.MemberwiseClone() as Polygon;
+				if (p.Vertices != null)
+					p.Vertices = new List<Vertex>(p.Vertices);
+				if (p.EdgesUserData != null)
+					p.EdgesUserData = new List<object>(p.EdgesUserData);
+				var holes2 = p.Holes;
+				if (holes2 != null) {
+					var holes1 = this.Holes;
+					p.Holes = holes2 = new List<Hole>(holes1);
+					for (int i = holes2.Count - 1; i != -1; i--) {
+						holes2[i] = holes1[i].Clone();
+					}
+				}
+				return p;
+			}
+
+			/// <summary>
+			/// ポリゴンを平行移動する
+			/// </summary>
+			/// <param name="offset">移動量</param>
+			public void Offset(vector offset) {
+				var vertices = this.Vertices;
+				for (int i = vertices.Count - 1; i != -1; i--) {
+					var v = vertices[i];
+					v.Position += offset;
+					vertices[i] = v;
+				}
+				var holes = this.Holes;
+				if (holes != null) {
+					for (int ihole = holes.Count - 1; ihole != -1; ihole--) {
+						vertices = holes[ihole].Vertices;
+						for (int i = vertices.Count - 1; i != -1; i--) {
+							var v = vertices[i];
+							v.Position += offset;
+							vertices[i] = v;
+						}
+					}
+				}
+			}
 		}
 
 		/// <summary>
@@ -227,22 +293,25 @@ namespace Jk {
 			public List<object> EdgesUserData;
 
 			/// <summary>
-			/// 穴の面積
-			/// </summary>
-			public element Area;
-
-			/// <summary>
-			/// 穴の境界ボリューム
-			/// </summary>
-			public volume Volume;
-
-			/// <summary>
 			/// コンストラクタ、頂点座標配列、エッジユーザーデータ配列を渡して初期化する
 			/// </summary>
 			/// <param name="vertices">頂点配列</param>
 			public Hole(List<Vertex> vertices, List<object> edgesUserData) {
 				this.Vertices = vertices;
 				this.EdgesUserData = edgesUserData;
+			}
+
+			/// <summary>
+			/// 複製を作成
+			/// </summary>
+			/// <returns>複製</returns>
+			public Hole Clone() {
+				var p = this.MemberwiseClone() as Hole;
+				if (p.Vertices != null)
+					p.Vertices = new List<Vertex>(p.Vertices);
+				if (p.EdgesUserData != null)
+					p.EdgesUserData = new List<object>(p.EdgesUserData);
+				return p;
 			}
 		}
 
@@ -318,6 +387,11 @@ namespace Jk {
 			public NodeFlags Flags;
 
 			/// <summary>
+			/// ユニークなエッジインデックス、 NodeManager 内で同じ値があってはならない
+			/// </summary>
+			public uint UniqueIndex;
+
+			/// <summary>
 			/// 座標
 			/// </summary>
 			public vector Position;
@@ -331,6 +405,16 @@ namespace Jk {
 			/// このノードに接続されているエッジ一覧
 			/// </summary>
 			public List<Edge> Edges = new List<Edge>();
+
+			/// <summary>
+			/// コンストラクタ、インデックスと位置を指定して初期化する
+			/// </summary>
+			/// <param name="uniqueIndex">ユニークなインデックス</param>
+			/// <param name="position">位置</param>
+			public Node(uint uniqueIndex, vector position) {
+				this.UniqueIndex = uniqueIndex;
+				this.Position = position;
+			}
 
 			/// <summary>
 			/// 指定のエッジへのリンクを追加する
@@ -409,23 +493,27 @@ namespace Jk {
 				return false;
 			}
 
-			public static bool operator <(Node a, Node b) {
-				if (a.Position.X < b.Position.X)
-					return true;
-				if (a.Position.X == b.Position.X)
-					return a.Position.Y < b.Position.Y;
-				else
-					return false;
+			public override string ToString() {
+				return "node" + this.UniqueIndex;
 			}
 
-			public static bool operator >(Node a, Node b) {
-				if (a.Position.X > b.Position.X)
-					return true;
-				if (a.Position.X == b.Position.X)
-					return a.Position.Y > b.Position.Y;
-				else
-					return false;
-			}
+			//public static bool operator <(Node a, Node b) {
+			//	if (a.Position.X < b.Position.X)
+			//		return true;
+			//	if (a.Position.X == b.Position.X)
+			//		return a.Position.Y < b.Position.Y;
+			//	else
+			//		return false;
+			//}
+
+			//public static bool operator >(Node a, Node b) {
+			//	if (a.Position.X > b.Position.X)
+			//		return true;
+			//	if (a.Position.X == b.Position.X)
+			//		return a.Position.Y > b.Position.Y;
+			//	else
+			//		return false;
+			//}
 		}
 
 		/// <summary>
@@ -493,21 +581,31 @@ namespace Jk {
 			public List<NodeInsertion> NodeInsertions;
 
 			/// <summary>
-			/// エッジ識別子の取得
-			/// </summary>
-			public EdgeID ID {
-				get {
-					return new EdgeID(this.From, this.To);
-				}
-			}
-
-			/// <summary>
 			/// エッジの境界ボリュームの取得
 			/// </summary>
 			public volume Volume {
 				get {
 					return new volume(this.From.Position, this.To.Position, true);
 				}
+			}
+
+			/// <summary>
+			/// ノードの組み合わせからユニークなエッジIDを取得する
+			/// </summary>
+			public static ulong GetID(Node n1, Node n2) {
+				var nid1 = n1.UniqueIndex;
+				var nid2 = n2.UniqueIndex;
+				return nid2 <= nid1 ? (ulong)nid1 << 32 | nid2 : (ulong)nid2 << 32 | nid1;
+			}
+
+			/// <summary>
+			/// エッジの組み合わせからユニークな組み合わせIDを取得する
+			/// ※エッジ同士の交差判定でテスト済みの組み合わせを再度テストしないために使う
+			/// </summary>
+			public static ulong GetCombID(Edge e1, Edge e2) {
+				var nid1 = e1.UniqueIndex;
+				var nid2 = e2.UniqueIndex;
+				return nid2 <= nid1 ? (ulong)nid1 << 32 | nid2 : (ulong)nid2 << 32 | nid1;
 			}
 
 			/// <summary>
@@ -719,72 +817,9 @@ namespace Jk {
 					this.NodeInsertions = new List<NodeInsertion>();
 				this.NodeInsertions.Add(new NodeInsertion(t, node));
 			}
-		}
 
-		/// <summary>
-		/// 構造が同一のエッジを識別するための構造体
-		/// </summary>
-		public struct EdgeID {
-			/// <summary>
-			/// 開始ノード
-			/// </summary>
-			public Node From;
-
-			/// <summary>
-			/// 終了ノード
-			/// </summary>
-			public Node To;
-
-			public EdgeID(Node from, Node to) {
-				this.From = from;
-				this.To = to;
-			}
-
-			public override int GetHashCode() {
-				return (this.From != null ? this.From.GetHashCode() : 0) ^ (this.To != null ? this.To.GetHashCode() : 0);
-			}
-
-			public override bool Equals(object obj) {
-				if (obj is EdgeID)
-					return this == (EdgeID)obj;
-				else
-					return false;
-			}
-
-			public static bool operator ==(EdgeID e1, EdgeID e2) {
-				var f1 = e1.From;
-				var t1 = e1.To;
-				var f2 = e2.From;
-				var t2 = e2.To;
-				if (t1 < f1) {
-					var n = f1;
-					f1 = t1;
-					t1 = n;
-				}
-				if (t2 < f2) {
-					var n = f2;
-					f2 = t2;
-					t2 = n;
-				}
-				return f1 == f2 && t1 == t2;
-			}
-
-			public static bool operator !=(EdgeID e1, EdgeID e2) {
-				var f1 = e1.From;
-				var t1 = e1.To;
-				var f2 = e2.From;
-				var t2 = e2.To;
-				if (t1 < f1) {
-					var n = f1;
-					f1 = t1;
-					t1 = n;
-				}
-				if (t2 < f2) {
-					var n = f2;
-					f2 = t2;
-					t2 = n;
-				}
-				return f1 != f2 || t1 != t2;
+			public override string ToString() {
+				return "edge" + this.UniqueIndex + "(" + this.From.UniqueIndex + ", " + this.To.UniqueIndex + ")";
 			}
 		}
 
@@ -928,7 +963,7 @@ namespace Jk {
 		/// <summary>
 		/// ノードとエッジで構成されるポリゴン
 		/// </summary>
-		class TopologicalPolygon {
+		public class TopologicalPolygon {
 			/// <summary>
 			/// エッジ配列
 			/// </summary>
@@ -948,6 +983,11 @@ namespace Jk {
 			/// ポリゴンの面積
 			/// </summary>
 			public element Area;
+
+			/// <summary>
+			/// 時計回りかどうか
+			/// </summary>
+			public bool CW;
 
 			/// <summary>
 			/// 指定座標を包含しているか調べる
@@ -1051,16 +1091,17 @@ namespace Jk {
 		/// ノード管理クラス
 		/// </summary>
 		class NodeManager {
-			List<Node> _Nodes = new List<Node>();
+			uint _UniqueIndex;
+			HashSet<Node> _Nodes = new HashSet<Node>();
 			DynamicAABB2fTree<Node> _Tree = new DynamicAABB2fTree<Node>();
 			element _Epsilon;
 
 			/// <summary>
 			/// 全ノード一覧の取得
 			/// </summary>
-			public ICollection<Node> AllNodes {
+			public ICollection<Node> Items {
 				get {
-					return _Nodes.AsReadOnly();
+					return _Nodes;
 				}
 			}
 
@@ -1077,34 +1118,45 @@ namespace Jk {
 			/// </summary>
 			/// <param name="position">ノード位置</param>
 			/// <returns>ノード</returns>
-			public Node NewNode(vector position) {
+			public Node New(vector position) {
 				// ノードの境界ボリューム計算
 				var volume = new AABB2f(position).Expand(_Epsilon);
 
 				// 境界ボリューム同士が接触するノード一覧取得
-				var list = new List<Node>(_Tree.Query(volume));
-
 				// ノード一覧内で最も距離が近いものを探す
 				Node node = null;
-				var mindist2 = element.MaxValue;
-				var epsilon2 = _Epsilon * _Epsilon;
-				for (int i = 0, n = list.Count; i < n; i++) {
-					var nd = list[i];
+				var mindist2 = _Epsilon * _Epsilon;
+				foreach(var nd in _Tree.Query(volume)) {
 					var dist2 = (position - nd.Position).LengthSquare;
-					if (dist2 <= epsilon2 && dist2 < mindist2) {
-						node = list[i];
+					if (dist2 < mindist2) {
+						node = nd;
 						mindist2 = dist2;
 					}
 				}
 
 				// 接触しているノードが無かった場合のみ新規作成
 				if (node == null) {
-					node = new Node { Position = position };
+					node = new Node(++_UniqueIndex, position);
 					_Nodes.Add(node);
 					_Tree.Add(volume, node);
 				}
 
 				return node;
+			}
+
+			/// <summary>
+			/// 指定されたノードを取り除く
+			/// </summary>
+			/// <param name="node">ノード</param>
+			public void Remove(Node node) {
+				if (!_Nodes.Contains(node))
+					return;
+				_Nodes.Remove(node);
+
+				var volume = new AABB2f(node.Position);
+				var leaf = (from r in _Tree.QueryLeaves(volume) where r.Value == node select r).FirstOrDefault();
+				if (leaf != null)
+					_Tree.Remove(leaf);
 			}
 
 			/// <summary>
@@ -1115,6 +1167,13 @@ namespace Jk {
 			public IEnumerable<Node> Query(volume volume) {
 				return _Tree.Query(volume);
 			}
+
+			/// <summary>
+			/// 座標による検索用ツリーを最適化する
+			/// </summary>
+			public void Optimize() {
+				_Tree.OptimizeTopDown();
+			}
 		}
 
 		/// <summary>
@@ -1122,14 +1181,14 @@ namespace Jk {
 		/// </summary>
 		class EdgeManager {
 			uint _UniqueIndex;
-			Dictionary<EdgeID, Edge> _Edges = new Dictionary<EdgeID, Edge>();
+			Dictionary<ulong, Edge> _Edges = new Dictionary<ulong, Edge>();
 			DynamicAABB2fTree<Edge> _Tree = new DynamicAABB2fTree<Edge>();
 			element _Epsilon;
 
 			/// <summary>
 			/// 全エッジ一覧の取得
 			/// </summary>
-			public ICollection<Edge> AllEdges {
+			public ICollection<Edge> Items {
 				get {
 					return _Edges.Values;
 				}
@@ -1149,8 +1208,8 @@ namespace Jk {
 			/// <param name="from"></param>
 			/// <param name="to"></param>
 			/// <returns>エッジ</returns>
-			public Edge NewEdge(Node from, Node to) {
-				var id = new EdgeID(from, to);
+			public Edge New(Node from, Node to) {
+				var id = Edge.GetID(from, to);
 				Edge edge;
 				if (_Edges.TryGetValue(id, out edge)) {
 					return edge;
@@ -1166,13 +1225,14 @@ namespace Jk {
 			/// 指定されたエッジを取り除く
 			/// </summary>
 			/// <param name="edge">エッジ</param>
-			public void RemoveEdge(Edge edge) {
-				if (!_Edges.ContainsKey(edge.ID))
+			public void Remove(Edge edge) {
+				var id = Edge.GetID(edge.From, edge.To);
+				if (!_Edges.ContainsKey(id))
 					return;
-				_Edges.Remove(edge.ID);
+				_Edges.Remove(id);
 
 				var volume = edge.Volume.Expand(_Epsilon);
-				var leaf = (from r in _Tree.QueryLeaves(volume) where r.Data == edge select r).FirstOrDefault();
+				var leaf = (from r in _Tree.QueryLeaves(volume) where r.Value == edge select r).FirstOrDefault();
 				if (leaf != null)
 					_Tree.Remove(leaf);
 
@@ -1186,6 +1246,13 @@ namespace Jk {
 			/// <returns>エッジ一覧</returns>
 			public IEnumerable<Edge> Query(volume volume) {
 				return _Tree.Query(volume);
+			}
+
+			/// <summary>
+			/// 座標による検索用ツリーを最適化する
+			/// </summary>
+			public void Optimize() {
+				_Tree.OptimizeTopDown();
 			}
 		}
 
@@ -1246,13 +1313,38 @@ namespace Jk {
 			}
 		}
 
-		class AreaEdges {
+		/// <summary>
+		/// 結果のループデータ
+		/// </summary>
+		public class Loop {
+			/// <summary>
+			/// 面積
+			/// </summary>
 			public element Area;
+
+			/// <summary>
+			/// 時計回りかどうか
+			/// </summary>
 			public bool CW;
+
+			/// <summary>
+			/// ループを構成するエッジ配列
+			/// </summary>
 			public List<EdgeAndSide> Edges;
+
+			/// <summary>
+			/// 境界ボリューム
+			/// </summary>
 			public volume Volume;
 
-			public AreaEdges(element area, List<EdgeAndSide> edges) {
+			public Loop(TopologicalPolygon tpol) {
+				this.Area = tpol.Area;
+				this.CW = tpol.CW;
+				this.Edges = tpol.Edges;
+				this.Volume = tpol.Volume;
+			}
+
+			public Loop(element area, List<EdgeAndSide> edges) {
 				this.Area = Math.Abs(area);
 				this.CW = area <= 0;
 				this.Edges = edges;
@@ -1283,7 +1375,6 @@ namespace Jk {
 		List<List<Polygon>> _Groups = new List<List<Polygon>>();
 		List<List<TopologicalPolygon>> _TopoGroups = new List<List<TopologicalPolygon>>();
 		element _Epsilon;
-		bool _RemoveFlagsIsSet;
 		IntersectionNodeProc _IntersectionNodeGenerator;
 #if POLYGONBOOLEAN_DEBUG
 		static bool _Logging;
@@ -1296,7 +1387,7 @@ namespace Jk {
 		/// </summary>
 		public ICollection<Node> Nodes {
 			get {
-				return _NodeMgr.AllNodes;
+				return _NodeMgr.Items;
 			}
 		}
 
@@ -1305,7 +1396,7 @@ namespace Jk {
 		/// </summary>
 		public ICollection<Edge> Edges {
 			get {
-				return _EdgeMgr.AllEdges;
+				return _EdgeMgr.Items;
 			}
 		}
 
@@ -1319,6 +1410,15 @@ namespace Jk {
 
 			set {
 				_IntersectionNodeGenerator = value;
+			}
+		}
+
+		/// <summary>
+		/// 処理対象のポリゴングループ一覧
+		/// </summary>
+		public List<List<Polygon>> Groups {
+			get {
+				return _Groups;
 			}
 		}
 		#endregion
@@ -1385,6 +1485,9 @@ namespace Jk {
 			// 交点にノードを挿入する
 			MakeIntersectionNodes();
 
+			// ヒゲを取り除く
+			RemoveBeard();
+
 			// _TopologicalPolygons を再構成する
 			RebuildTpols();
 
@@ -1393,6 +1496,47 @@ namespace Jk {
 
 			// ポリゴンを構成する
 			PolygonizeAll();
+		}
+
+		/// <summary>
+		/// エッジを共有しているグループインデックスを取得する
+		/// </summary>
+		/// <returns>グループインデックス配列</returns>
+		public List<int> GetEdgeSharedGroups() {
+			var groups = new List<int>();
+			var linkedGroups = new List<int>(_Groups.Count);
+
+			foreach (var edge in this.Edges) {
+				var rg = edge.RightGroups;
+				var lg = edge.LeftGroups;
+
+				linkedGroups.Clear();
+
+				for (int i = rg.Count - 1; i != -1; i--) {
+					var g = rg[i];
+					if (!linkedGroups.Contains(g)) {
+						linkedGroups.Add(g);
+					}
+				}
+
+				for (int i = lg.Count - 1; i != -1; i--) {
+					var g = lg[i];
+					if (!linkedGroups.Contains(g)) {
+						linkedGroups.Add(g);
+					}
+				}
+
+				if (2 <= linkedGroups.Count) {
+					for (int i = linkedGroups.Count - 1; i != -1; i--) {
+						var g = linkedGroups[i];
+						if (!groups.Contains(g)) {
+							groups.Add(g);
+						}
+					}
+				}
+			}
+
+			return groups;
 		}
 
 		/// <summary>
@@ -1458,7 +1602,7 @@ namespace Jk {
 		/// <param name="edgeFilter">フィルタ、エッジと右方向かどうかを受け取り無視するなら true を返す</param>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<List<EdgeAndSide>>> Filtering(Func<Edge, bool, bool> edgeFilter) {
+		public List<List<Loop>> Filtering(Func<Edge, bool, bool> edgeFilter) {
 			return Distinguish(GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved));
 		}
 
@@ -1467,7 +1611,7 @@ namespace Jk {
 		/// </summary>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<List<EdgeAndSide>>> Or() {
+		public List<List<Loop>> Or() {
 #if POLYGONBOOLEAN_DEBUG
 			_Logging = true;
 			System.Diagnostics.POLYGONBOOLEAN_DEBUG.WriteLine("======== Or ========");
@@ -1494,7 +1638,7 @@ namespace Jk {
 		/// </summary>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<List<EdgeAndSide>>> Xor() {
+		public List<List<Loop>> Xor() {
 #if POLYGONBOOLEAN_DEBUG
 			_Logging = true;
 			System.Diagnostics.POLYGONBOOLEAN_DEBUG.WriteLine("======== Xor ========");
@@ -1524,7 +1668,7 @@ namespace Jk {
 		/// </summary>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<List<EdgeAndSide>>> And() {
+		public List<List<Loop>> And() {
 			var allpols = new int[_TopoGroups.Count];
 			for (int i = 0, n = allpols.Length; i < n; i++)
 				allpols[i] = i;
@@ -1550,7 +1694,7 @@ namespace Jk {
 		/// <param name="groupIndex">減算するグループのインデックス</param>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<List<EdgeAndSide>>> Sub(int groupIndex) {
+		public List<List<Loop>> Sub(int groupIndex) {
 			// エッジの指定方向に減算ポリゴンが存在するなら無視するフィルタ
 			var edgeFilter = new Func<Edge, bool, bool>(
 				(Edge e, bool right) => {
@@ -1566,19 +1710,19 @@ namespace Jk {
 		/// <param name="groupIndex">抽出するグループのインデックス</param>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<List<EdgeAndSide>>> Extract(int groupIndex) {
-			var list = new List<List<List<EdgeAndSide>>>();
+		public List<List<Loop>> Extract(int groupIndex) {
+			var list = new List<List<Loop>>();
 			var tpols = _TopoGroups[groupIndex];
 
 			for(int i = 0, m = tpols.Count; i < m; i++) {
 				var tpol = tpols[i];
-				var polygons = new List<List<EdgeAndSide>>();
+				var polygons = new List<Loop>();
 
-				polygons.Add(tpol.Edges);
+				polygons.Add(new Loop(tpol));
 				var holes = tpol.Holes;
 				if (holes != null) {
 					for (int hodeIndex = 0, n = holes.Count; hodeIndex < n; hodeIndex++) {
-						polygons.Add(holes[hodeIndex].Edges);
+						polygons.Add(new Loop(holes[hodeIndex]));
 					}
 				}
 
@@ -1591,31 +1735,18 @@ namespace Jk {
 
 		#region 非公開メソッド
 		/// <summary>
-		/// 摘出フラグ設定の開始
-		/// </summary>
-		private void BeginSetRemoveFlags(EdgeFlags rightFlags, EdgeFlags leftFlags) {
-			if (_RemoveFlagsIsSet) {
-				var flags = ~(rightFlags | leftFlags);
-				foreach (var edge in this.Edges) {
-					edge.Flags &= flags;
-				}
-			}
-			_RemoveFlagsIsSet = true;
-		}
-
-		/// <summary>
 		/// 指定されたフィルタでポリゴンを取得する
 		/// </summary>
 		/// <param name="edgeFilter">フィルタ</param>
 		/// <param name="onlyRight">エッジ右側のみから取得するかどうか</param>
 		/// <returns>エッジによるポリゴンの配列</returns>
 		private List<List<EdgeAndSide>> GetPolygons(Func<Edge, bool, bool> edgeFilter, EdgeFlags rightFlag, EdgeFlags leftFlag, bool onlyRight = false) {
-			BeginSetRemoveFlags(rightFlag, leftFlag);
-
 			var polygons = new List<List<EdgeAndSide>>();
 
 			// 予め無視することがわかっているエッジを処理
+			var flagsnot = ~(rightFlag | leftFlag);
 			foreach (var edge in this.Edges) {
+				edge.Flags &= flagsnot;
 				if (edgeFilter(edge, true))
 					edge.Flags |= rightFlag;
 				if (edgeFilter(edge, false))
@@ -1736,8 +1867,9 @@ namespace Jk {
 				// ポリゴンを構成するエッジとして方向と共に登録
 				list.Add(new EdgeAndSide(edge, curIsRight));
 				edge.Flags |= curIsRight ? rightFlag : leftFlag;
-				//if (nextNode == startNode)
-				//	break;
+				if (edge.UniqueIndex == 82)
+					edge = edge;
+
 #if POLYGONBOOLEAN_DEBUG
 				if (_Logging) {
 					System.Diagnostics.POLYGONBOOLEAN_DEBUG.WriteLine(list[list.Count - 1].ToString() + " : " + (curIsRight ? edge.Right : edge.Left).Count);
@@ -1794,6 +1926,8 @@ namespace Jk {
 				}
 
 				if (nextEdge == startEdge) {
+					if (list.Count < 3)
+						isNullInternal = true;
 					break;
 				}
 				if (nextEdge == null) {
@@ -1829,6 +1963,8 @@ namespace Jk {
 		/// AddPolygon() で追加されたポリゴンをノードとエッジに分解する
 		/// </summary>
 		private void MakeNodesAndEdges() {
+			var nm = _NodeMgr;
+			var em = _EdgeMgr;
 			for (int groupIndex = 0, ngroups = _Groups.Count; groupIndex < ngroups; groupIndex++) {
 				var group = _Groups[groupIndex];
 				for (int polygonIndex = 0, npolygons = group.Count; polygonIndex < npolygons; polygonIndex++) {
@@ -1842,7 +1978,7 @@ namespace Jk {
 						var nodes = new Node[nnodes];
 						for (int i = 0, nvts = vertices.Count; i < nvts; i++) {
 							var v = vertices[i];
-							var node = _NodeMgr.NewNode(v.Position);
+							var node = _NodeMgr.New(v.Position);
 							node.SetUserData(groupIndex, v.UserData);
 							nodes[i] = node;
 						}
@@ -1852,7 +1988,7 @@ namespace Jk {
 						var node1 = nodes[0];
 						for (int i = 1; i <= nnodes; i++) {
 							var node2 = nodes[i % nnodes];
-							var edge = _EdgeMgr.NewEdge(node1, node2);
+							var edge = _EdgeMgr.New(node1, node2);
 							var right = node1 == edge.From;
 							edge.LinkPolygon(right, groupIndex, polygonIndex);
 							if (pol.EdgesUserData != null)
@@ -1877,7 +2013,7 @@ namespace Jk {
 							var nodes = new Node[nnodes];
 							for (int i = 0, nvts = vertices.Count; i < nvts; i++) {
 								var v = vertices[i];
-								var node = _NodeMgr.NewNode(v.Position);
+								var node = _NodeMgr.New(v.Position);
 								node.SetUserData(groupIndex, v.UserData);
 								nodes[i] = node;
 							}
@@ -1887,7 +2023,7 @@ namespace Jk {
 							var node1 = nodes[0];
 							for (int i = 1; i <= nnodes; i++) {
 								var node2 = nodes[i % nnodes];
-								var edge = _EdgeMgr.NewEdge(node1, node2);
+								var edge = _EdgeMgr.New(node1, node2);
 								var right = node1 == edge.From;
 								edge.LinkPolygon(right, groupIndex, polygonIndex);
 								if (hole.EdgesUserData != null)
@@ -1903,6 +2039,8 @@ namespace Jk {
 					tpols.Add(tpol);
 					_TopoGroups.Add(tpols);
 				}
+				nm.Optimize();
+				em.Optimize();
 			}
 		}
 
@@ -1910,9 +2048,6 @@ namespace Jk {
 		/// エッジとノードの接触、エッジ同士の交点部分にノードを挿入する
 		/// </summary>
 		private void MakeIntersectionNodes() {
-			// 頂点とエッジの接触を調べ、ノード挿入情報を作成する
-			InsertNodeToEdge();
-
 			// エッジ同士の交点を調べ、ノード挿入情報を作成する
 			InsertIntersectionNodeToEdge();
 
@@ -1921,22 +2056,22 @@ namespace Jk {
 		}
 
 		/// <summary>
-		/// エッジに接触しているノードがあればエッジへ挿入予約する
+		/// 全エッジの交差を調べ交差しているならエッジにノード挿入予約を行う
 		/// </summary>
-		private void InsertNodeToEdge() {
+		private void InsertIntersectionNodeToEdge() {
+			HashSet<ulong> comb = new HashSet<ulong>(); // 同じ組み合わせのチェックを排除するためのテーブル
+
+			// 全エッジをチェックし、エッジ上にノードがあったら挿入予約を行う
+			// 挿入予約を行ったノードから伸びるエッジは交差判定無視リストに登録する　※これを行わないと位相構造が壊れる
 			var epsilon2 = _Epsilon * _Epsilon;
 			var edges = this.Edges;
-
-			// 全エッジをチェックしていく
-			foreach(var edge in this.Edges) {
+			foreach (var edge in this.Edges) {
 				vector p, v;
 				edge.GetLine(out p, out v);
 
 				// エッジに接触する可能性があるノード探す
 				foreach (var node in _NodeMgr.Query(edge.Volume)) {
-					// ノードが未使用だったり現在処理中のエッジに繋がっていたらスキップ
-					if (node.Edges.Count == 0)
-						continue;
+					// ノードが現在処理中のエッジに繋がっていたらスキップ
 					if (edge.From == node || edge.To == node)
 						continue;
 
@@ -1953,20 +2088,20 @@ namespace Jk {
 						continue;
 
 					// 挿入するノードとして登録
-					node.Flags |= NodeFlags.OnEdge;
+					node.Flags |= NodeFlags.OnEdge | NodeFlags.InsideOutside;
 					edge.SetNodeInsertion(t, node);
+
+					// ノードにつながるエッジを交差判定無視リストに登録する
+					var nodeEdges = node.Edges;
+					for (int i = nodeEdges.Count - 1; i != -1; i--) {
+						comb.Add(Edge.GetCombID(edge, nodeEdges[i]));
+					}
 				}
 			}
-		}
 
-		/// <summary>
-		/// 全エッジの交差を調べ交差しているならエッジ上ノード挿入予約を行う
-		/// </summary>
-		private void InsertIntersectionNodeToEdge() {
-			HashSet<ulong> comb = new HashSet<ulong>(); // 同じ組み合わせのチェックを排除するためのテーブル
+			// エッジ同士の交差判定を行い、交差しているならノード挿入予約を行う
 			var ing = _IntersectionNodeGenerator;
-
-			foreach (var edge1 in _EdgeMgr.AllEdges) {
+			foreach (var edge1 in this.Edges) {
 				ulong uidx1 = edge1.UniqueIndex;
 
 				// エッジから線分の情報取得
@@ -1976,9 +2111,9 @@ namespace Jk {
 				// エッジに接触する可能性があるエッジ探す
 				foreach (var edge2 in _EdgeMgr.Query(edge1.Volume)) {
 					ulong uidx2 = edge2.UniqueIndex;
-					var combid = uidx1 <= uidx2 ? uidx2 << 32 | uidx1 : uidx1 << 32 | uidx2;
 
 					// すでにチェック済みの組み合わせならスキップ
+					var combid = uidx1 <= uidx2 ? uidx2 << 32 | uidx1 : uidx1 << 32 | uidx2;
 					if (comb.Contains(combid))
 						continue;
 					comb.Add(combid);
@@ -1998,22 +2133,16 @@ namespace Jk {
 					if (t1 == 0 || t1 == 1 || t2 == 0 || t2 == 1)
 						continue;
 
-					// 交点座標のノードが既にエッジに挿入予約されていたらスキップ
-					var node = _NodeMgr.NewNode(p1 + v1 * t1);
-					if ((node.Flags & NodeFlags.OnEdge) != 0)
-						continue;
-
-					// TODO: ここスキップしちゃっていいのか再考必要
+					// 交点座標のノードを作成
+					var node = _NodeMgr.New(p1 + v1 * t1);
 
 					// ノードデータ生成デリゲートがあったら処理する
 					if (ing != null)
 						ing(edge1, t1, edge2, t2, node);
 
 					// このノードは内外が入れ替わるノード
-					node.Flags |= NodeFlags.InsideOutside;
-
 					// ノード挿入予約
-					node.Flags |= NodeFlags.OnEdge;
+					node.Flags |= NodeFlags.InsideOutside | NodeFlags.OnEdge;
 					edge1.SetNodeInsertion(t1, node);
 					edge2.SetNodeInsertion(t2, node);
 				}
@@ -2025,7 +2154,7 @@ namespace Jk {
 		/// </summary>
 		private void EdgeDivide() {
 			// 現時点での全エッジを対象に処理する
-			foreach (var edge in new List<Edge>(_EdgeMgr.AllEdges)) {
+			foreach (var edge in new List<Edge>(this.Edges)) {
 				var nis = edge.NodeInsertions;
 				if (nis == null)
 					continue;
@@ -2038,21 +2167,45 @@ namespace Jk {
 				var count = nis.Count;
 				for (int i = 0; i < count; i++) {
 					var ni = nis[i];
-					var newEdge = _EdgeMgr.NewEdge(node1, ni.Node);
+					var newEdge = _EdgeMgr.New(node1, ni.Node);
 
 					newEdge.CopyAttributes(edge, node1 == newEdge.From);
 
 					node1 = ni.Node;
 				}
 
-				var newEdge2 = _EdgeMgr.NewEdge(node1, edge.To);
+				var newEdge2 = _EdgeMgr.New(node1, edge.To);
 				newEdge2.CopyAttributes(edge, node1 == newEdge2.From);
 
 				// ノード挿入情報をクリア
 				edge.NodeInsertions = null;
 
 				// 元のエッジ削除
-				_EdgeMgr.RemoveEdge(edge);
+				_EdgeMgr.Remove(edge);
+			}
+		}
+
+		/// <summary>
+		/// ヒゲを取り除く
+		/// </summary>
+		private void RemoveBeard() {
+			List<Node> nodes = new List<Node>();
+			var nm = _NodeMgr;
+			var em = _EdgeMgr;
+			for(;;) {
+				// リンク数が１のノードを収集する
+				nodes.AddRange(from n in this.Nodes where n.Edges.Count == 1 select n);
+				if (nodes.Count == 0)
+					break;
+
+				// ノードとリンクしているエッジを取り除く
+				for(int i = nodes.Count - 1; i != -1; i--) {
+					var node = nodes[i];
+					nm.Remove(node);
+					if(node.Edges.Count != 0)
+						em.Remove(node.Edges[0]);
+				}
+				nodes.Clear();
 			}
 		}
 
@@ -2078,32 +2231,30 @@ namespace Jk {
 							l = e.RightGroups;
 							r = e.LeftGroups;
 						}
-						var rc = r.Contains(groupIndex);
-						var lc = l.Contains(groupIndex);
-						if (!rc)
+						if (!r.Contains(groupIndex))
 							return true;
-						if (lc)
+						if (l.Contains(groupIndex))
 							return true;
 						return false;
 					}
 				);
 
-				var polygons = Distinguish(GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, true));
+				var groups = Distinguish(GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, true));
 				var tpols = _TopoGroups[groupIndex];
 
 				tpols.Clear();
 
-				foreach (var edges in polygons) {
+				foreach (var loops in groups) {
 					var tpol = new TopologicalPolygon();
-					var nholes = edges.Count - 1;
+					var nholes = loops.Count - 1;
 
-					tpol.Edges = edges[0];
+					tpol.Edges = loops[0].Edges;
 					if (nholes != 0) {
-						tpol.Holes = new List<TopologicalPolygon>(nholes);
+						var holes = tpol.Holes = new List<TopologicalPolygon>(nholes);
 						for (int j = 1; j <= nholes; j++) {
 							var holetpol = new TopologicalPolygon();
-							holetpol.Edges = edges[j];
-							tpol.Holes.Add(holetpol);
+							holetpol.Edges = loops[j].Edges;
+							holes.Add(holetpol);
 						}
 					}
 
@@ -2127,14 +2278,18 @@ namespace Jk {
 				var tgroups = alltgroups[groupIndex];
 				for (int i = tgroups.Count - 1; i != -1; i--) {
 					var tpol = tgroups[i];
+					var area = Area(tpol.Edges);
 					tpol.Volume = new volume(from e in tpol.Edges select e.From.Position);
-					tpol.Area = Math.Abs(Area(tpol.Edges));
+					tpol.Area = Math.Abs(area);
+					tpol.CW = area <= 0;
 					var holes = tpol.Holes;
 					if (holes != null) {
 						for (int holeIndex = holes.Count - 1; holeIndex != -1; holeIndex--) {
 							var hole = holes[holeIndex];
+							area = Area(hole.Edges);
 							hole.Volume = new volume(from e in hole.Edges select e.From.Position);
-							hole.Area = Math.Abs(Area(hole.Edges));
+							hole.Area = Math.Abs(area);
+							hole.CW = area <= 0;
 						}
 					}
 				}
@@ -2167,12 +2322,12 @@ namespace Jk {
 		/// <param name="edges">エッジによるポリゴン配列</param>
 		/// <returns>外枠ポリゴン、穴、穴・・・の順に直した配列</returns>
 		/// <remarks>外枠ポリゴンは時計回り、穴は反時計回りとなる</remarks>
-		private static List<List<List<EdgeAndSide>>> Distinguish(List<List<EdgeAndSide>> edges) {
+		private static List<List<Loop>> Distinguish(List<List<EdgeAndSide>> edges) {
 			// まず面積を求め、面積降順に並び替える
-			var aes = new AreaEdges[edges.Count];
+			var aes = new Loop[edges.Count];
 			for (int i = 0, n = aes.Length; i < n; i++) {
 				var e = edges[i];
-				aes[i] = new AreaEdges(Area(e), e);
+				aes[i] = new Loop(Area(e), e);
 			}
 			Array.Sort(aes, (a, b) => Math.Sign(b.Area - a.Area));
 
@@ -2241,13 +2396,13 @@ namespace Jk {
 			}
 
 			// 親子関係を組んだリストを作成
-			var result = new List<List<List<EdgeAndSide>>>();
+			var result = new List<List<Loop>>();
 			var used = new bool[aes.Length];
 			for (int i = 0, n = aes.Length; i < n; i++) {
 				if (used[i])
 					continue;
 
-				var list = new List<List<EdgeAndSide>>();
+				var list = new List<Loop>();
 
 				// 親を取得
 				var parent = aes[i];
@@ -2259,8 +2414,9 @@ namespace Jk {
 						e.TraceRight = !e.TraceRight;
 						parentEdges[j] = e;
 					}
+					parent.CW = true;
 				}
-				list.Add(parent.Edges);
+				list.Add(parent);
 				used[i] = true;
 
 				// 子を取得
@@ -2277,8 +2433,9 @@ namespace Jk {
 							e.TraceRight = !e.TraceRight;
 							childEdges[k] = e;
 						}
+						child.CW = false;
 					}
-					list.Add(child.Edges);
+					list.Add(child);
 					used[j] = true;
 				}
 

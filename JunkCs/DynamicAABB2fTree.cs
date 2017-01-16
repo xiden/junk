@@ -144,9 +144,9 @@ namespace Jk {
 		/// </summary>
 		public class LeafNode : Node {
 			/// <summary>
-			/// データ
+			/// 値
 			/// </summary>
-			public T Data;
+			public T Value;
 
 
 			/// <summary>
@@ -174,7 +174,7 @@ namespace Jk {
 			/// <param name="volume">境界ボリューム</param>
 			/// <param name="data">データ</param>
 			public LeafNode(BranchNode parent, volume volume, T data) : base(parent, volume) {
-				this.Data = data;
+				this.Value = data;
 			}
 		}
 		#endregion
@@ -311,7 +311,7 @@ namespace Jk {
 				if (volume.Intersects(node.Volume)) {
 					var leaf = node.AsLeaf;
 					if (leaf != null) {
-						yield return leaf.Data;
+						yield return leaf.Value;
 					} else {
 						var branch = node.AsBranch;
 						stack.Push(branch.Child1);
@@ -623,7 +623,7 @@ namespace Jk {
 
 				var leaf = node.AsLeaf;
 				if (leaf != null) {
-					yield return leaf.Data;
+					yield return leaf.Value;
 				} else {
 					var branch = node.AsBranch;
 					stack.Push(branch.Child1);
@@ -642,7 +642,7 @@ namespace Jk {
 
 				var leaf = node.AsLeaf;
 				if (leaf != null) {
-					yield return leaf.Data;
+					yield return leaf.Value;
 				} else {
 					var branch = node.AsBranch;
 					stack.Push(branch.Child1);

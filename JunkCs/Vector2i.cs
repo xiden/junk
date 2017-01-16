@@ -8,6 +8,7 @@ using thisclass = Jk.Vector2i;
 namespace Jk {
 	[XmlType("Jk.Vector2i")]
 	[StructLayout(LayoutKind.Explicit, Pack = 4, Size = 8)]
+	[Serializable]
 	public struct Vector2i {
 		public static readonly thisclass Zero = new thisclass();
 

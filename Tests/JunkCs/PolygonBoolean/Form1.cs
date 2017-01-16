@@ -10,6 +10,12 @@ using Jk;
 
 namespace PolygonBoolean {
 	public partial class Form1 : Form {
+		Tf _LastTf;
+		Tf _LastObjTf;
+		Tf _ZoomTf = new Tf { X = new TransformLinearf(1, 0), Y = new TransformLinearf(1, 0) };
+		bool _ViewMoving;
+		Point _LastMousePos;
+
 		List<PolBoolF.Polygon>[] _Groups = new List<PolBoolF.Polygon>[] {
 			new List<PolBoolF.Polygon>(),
 			new List<PolBoolF.Polygon>(),
@@ -35,9 +41,18 @@ namespace PolygonBoolean {
 			}
 		}
 
+		AABB2f ViewArea {
+			get {
+				var cl = this.ClientRectangle;
+				return new AABB2f(new Vector2f(cl.Right / 2, 200), new Vector2f(cl.Right - 32, cl.Bottom - 32));
+			}
+		}
+
 
 		public Form1() {
 			InitializeComponent();
+			SetStyle(ControlStyles.ResizeRedraw, true);
+			SetStyle(ControlStyles.DoubleBuffer, true);
 		}
 
 		public static Point ToPt(Jk.Vector2i v) {
@@ -49,6 +64,31 @@ namespace PolygonBoolean {
 
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
+
+			MouseWheelHandler.Add(this, (me) => {
+				var ztf = _ZoomTf;
+				float smag;
+				if (me.Delta < 0) {
+					smag = 1.0f / 1.1f;
+				} else {
+					smag = 1.1f;
+				}
+				_ZoomTf.X.Scale *= smag;
+				_ZoomTf.Y.Scale *= smag;
+
+				var mp = this.PointToClient(new Point(me.X, me.Y));
+
+				var c = new Vector2f(mp.X, mp.Y);
+				var csrc = _LastTf.Bw(c);
+				var p1 = ztf.Fw(csrc);
+				var p2 = _ZoomTf.Fw(csrc);
+				var d = p2 - p1;
+
+				_ZoomTf.X.Translate -= d.X;
+				_ZoomTf.Y.Translate -= d.Y;
+
+				this.Invalidate();
+			});
 
 			this.cmbCurGroup.Items.Add("A");
 			this.cmbCurGroup.Items.Add("B");
@@ -70,10 +110,26 @@ namespace PolygonBoolean {
 			for (int i = 1; i <= 10; i++)
 				this.cmbHole.Items.Add(i.ToString());
 
-			var c = new Jk.Vector2i(300, 300);
-			var r1 = new Jk.Vector2i(0, -200);
-			var r2 = new Jk.Vector2i(-200, 200);
-			var r3 = new Jk.Vector2i(200, 200);
+			ReadPolygon(0, "g:/dvl/logs/in1_2.csv");
+			ReadPolygon(1, "g:/dvl/logs/in2_2.csv");
+			//var p = new PolBoolF.Polygon(null, null, null);
+			//p.Vertices = new List<PolBoolF.Vertex>();
+			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(0.1000023f, 9.350006f)));
+			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(0.7000027f, 1.150009f)));
+			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(1.000002f, 9.550003f)));
+			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(5.099998f, -2.6f)));
+			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(-11.5f, -8.449997f)));
+			//p.UserData = Color.Blue;
+			//_Groups[0].Add(p);
+			//p = p.Clone();
+			//p.UserData = Color.Green;
+			//p.Offset(new Vector2f(0, -0.1f));
+			//_Groups[1].Add(p);
+
+			//var c = new Jk.Vector2i(300, 300);
+			//var r1 = new Jk.Vector2i(0, -200);
+			//var r2 = new Jk.Vector2i(-200, 200);
+			//var r3 = new Jk.Vector2i(200, 200);
 
 			//_Points[0].Add(ToPt(c + r1));
 			//_Points[0].Add(ToPt(c + r2));
@@ -128,18 +184,47 @@ namespace PolygonBoolean {
 				hole.Vertices.Add(new PolBoolF.Vertex(pt));
 				this.Invalidate();
 			}
+			if (e.Button == MouseButtons.Middle) {
+				if (!_ViewMoving) {
+					_ViewMoving = true;
+					this.Capture = true;
+					_LastMousePos = new Point(e.X, e.Y);
+				}
+			}
+		}
+
+		protected override void OnMouseUp(MouseEventArgs e) {
+			base.OnMouseUp(e);
+			if (e.Button == MouseButtons.Middle) {
+				if (_ViewMoving) {
+					_ViewMoving = false;
+					this.Capture = false;
+				}
+			}
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e) {
 			base.OnMouseMove(e);
 			lblPos.Text = e.X + ", " + e.Y;
+
+			if (_ViewMoving) {
+				var p1 = _ZoomTf.Fw(_LastTf.Bw(new Vector2f(_LastMousePos.X, _LastMousePos.Y)));
+				var p2 = _ZoomTf.Fw(_LastTf.Bw(new Vector2f(e.X, e.Y)));
+				var d = p2 - p1;
+				_ZoomTf.X.Translate += d.X;
+				_ZoomTf.Y.Translate += d.Y;
+
+				_LastMousePos = new Point(e.X, e.Y);
+
+				this.Invalidate();
+			}
 		}
 
 		protected override void OnPaint(PaintEventArgs e) {
 			var g = e.Graphics;
 			var cl = this.ClientRectangle;
 
-			var pb = new Jk.PolBoolF(1f);
+			var pb = new PolBoolF(0.01f);
 
 			using (var brsFontNode = new SolidBrush(Color.FromArgb(64, 64, 255)))
 			using (var brsFontEdge = new SolidBrush(Color.FromArgb(255, 64, 64)))
@@ -147,23 +232,25 @@ namespace PolygonBoolean {
 			using (var brsPolygon = new SolidBrush(Color.Blue))
 			using (var brsHole = new SolidBrush(Color.White))
 			using (var penPolygon = new Pen(Color.Green, 1))
-			using (var penEdgeLeft = new Pen(Color.FromArgb(0, 255, 0), 3))
-			using (var penEdgeRight = new Pen(Color.FromArgb(255, 0, 0), 3))
-			using (var penEdgeLeftRemoved = new Pen(Color.FromArgb(0, 127, 0), 3))
-			using (var penEdgeRightRemoved = new Pen(Color.FromArgb(127, 0, 0), 3))
+			using (var penEdgeLeft = new Pen(Color.FromArgb(0, 255, 0), 1))
+			using (var penEdgeRight = new Pen(Color.FromArgb(255, 0, 0), 1))
+			using (var penEdgeLeftRemoved = new Pen(Color.FromArgb(0, 127, 0), 1))
+			using (var penEdgeRightRemoved = new Pen(Color.FromArgb(127, 0, 0), 1))
 			using (var penEdgeBoth = new Pen(Color.Black, 5))
 			using (var penLine = new Pen(Color.Black))
 			using (var penHoleLine = new Pen(Color.DarkGray))
 			using (var penRect = new Pen(Color.Red))
+			using (var penLinkCount = new Pen(Color.Gray))
 			using (var penHoleNode = new Pen(Color.DarkGray))
-			using (var penNode = new Pen(Color.Red))
-			using (var penNodeInsideOutside = new Pen(Color.Orange))
+			using (var brsNode = new SolidBrush(Color.FromArgb(0, 0, 0)))
+			using (var brsNodeInsideOutside = new SolidBrush(Color.FromArgb(0, 0, 255)))
 			using (var penVolume = new Pen(Color.Blue)) {
 				// 演算対象ポリゴンを登録
 				for (int i = 0; i < _Groups.Length; i++) {
 					var group = _Groups[i];
 
-					pb.AddPolygon(group);
+					if (group.Count != 0)
+						pb.AddPolygon(group);
 
 					foreach (var polygon in group) {
 						var vertices = polygon.Vertices;
@@ -195,6 +282,8 @@ namespace PolygonBoolean {
 					// トポロジー化
 					pb.CreateTopology(true);
 
+					var volume = new AABB2f(from n in pb.Nodes select n.Position);
+
 					var sb = new StringBuilder();
 
 					sb.AppendLine("ノード数: " + pb.Nodes.Count);
@@ -218,8 +307,65 @@ namespace PolygonBoolean {
 
 					var orgTf = g.Transform;
 
+					// エッジとノードを描画
+					var tf = new Tf { X = new TransformLinearf(1, 0), Y = new TransformLinearf(1, 0) };
+					if (!volume.Size.IsZero) {
+						var vw = this.ViewArea;
+						tf.X = new TransformLinearf(new Rangef(volume.Min.X, volume.Max.X), new Rangef(vw.Min.X, vw.Max.X));
+						tf.Y = new TransformLinearf(new Rangef(volume.Min.Y, volume.Max.Y), new Rangef(vw.Min.Y, vw.Max.Y));
+						_LastObjTf = tf;
+						tf = _ZoomTf.Mul(tf);
+					} else {
+						_LastObjTf = tf;
+					}
+					_LastTf = tf;
+					foreach (var edge in pb.Edges) {
+						var p1 = tf.Fw(edge.From.Position);
+						var p2 = tf.Fw(edge.To.Position);
+						var v = (p2 - p1).Normalize().VerticalCw();
+
+						v *= 2;
+						g.DrawLine(
+							(edge.Flags & Jk.PolBoolF.EdgeFlags.RightRemoved) != 0 ? penEdgeRightRemoved : penEdgeRight,
+							ToPt(p1 - v), ToPt(p2 - v));
+						g.DrawLine(
+							(edge.Flags & Jk.PolBoolF.EdgeFlags.LeftRemoved) != 0 ? penEdgeLeftRemoved : penEdgeLeft,
+							ToPt(p1 + v), ToPt(p2 + v));
+					}
+					foreach (var edge in pb.Edges) {
+						var p1 = tf.Fw(edge.From.Position);
+						var p2 = tf.Fw(edge.To.Position);
+						var c = (p1 + p2) / 2;
+						var v = (p2 - p1).Normalize().VerticalCw();
+						v *= 10 * _ZoomTf.X.Scale;
+						var pl = c + v;
+						var pr = c - v;
+
+						var sf = new StringFormat(StringFormat.GenericTypographic);
+						sf.FormatFlags = sf.FormatFlags & ~StringFormatFlags.LineLimit | StringFormatFlags.NoWrap; // StringFormatFlagsLineLimit があると計算誤差の関係で文字が非表示になるので消す
+
+						var size = g.MeasureString(edge.LeftGroups.Count.ToString(), this.Font, 1000, sf);
+
+						g.DrawLine(penLinkCount, ToPt(c), ToPt(pr));
+						g.DrawLine(penLinkCount, ToPt(c), ToPt(pl));
+
+						g.DrawString(edge.LeftGroups.Count.ToString(), this.Font, brsFontEdge, pl.X - size.Width / 2, pl.Y - size.Height / 2, sf);
+
+
+						size = g.MeasureString(edge.RightGroups.Count.ToString(), this.Font, 1000, sf);
+						g.DrawString(edge.RightGroups.Count.ToString(), this.Font, brsFontEdge, pr.X - size.Width / 2, pr.Y - size.Height / 2, sf);
+					}
+					foreach (var node in pb.Nodes) {
+						var p = tf.Fw(node.Position);
+						var brs = (node.Flags & Jk.PolBoolF.NodeFlags.InsideOutside) != 0 ? brsNodeInsideOutside : brsNode;
+						g.FillRectangle(brs, p.X - 3, p.Y - 3, 6, 6);
+						g.DrawString(node.UniqueIndex.ToString(), this.Font, brsFontNode, p.X, p.Y - 32);
+						g.DrawString(node.Edges.Count.ToString(), this.Font, brsFontNode, p.X, p.Y + 6);
+					}
+					g.Transform = orgTf;
+
 					// ポリゴン同士の演算を行う
-					List<List<List<Jk.PolBoolF.EdgeAndSide>>> result = null;
+					List<List<PolBoolF.Loop>> result = null;
 					if (radOr.Checked)
 						result = pb.Or();
 					else if (radXor.Checked)
@@ -290,47 +436,6 @@ namespace PolygonBoolean {
 						sb.AppendLine((r.Count - 1).ToString());
 					}
 
-					// エッジとノードを描画
-					g.TranslateTransform(500, 0);
-					foreach (var edge in pb.Edges) {
-						var p1 = edge.From.Position;
-						var p2 = edge.To.Position;
-						var v = (edge.To.Position - edge.From.Position).Normalize().VerticalCw();
-
-						v *= 2;
-						g.DrawLine(
-							(edge.Flags & Jk.PolBoolF.EdgeFlags.RightRemoved) != 0 ? penEdgeRightRemoved : penEdgeRight,
-							ToPt(p1 - v), ToPt(p2 - v));
-						g.DrawLine(
-							(edge.Flags & Jk.PolBoolF.EdgeFlags.LeftRemoved) != 0 ? penEdgeLeftRemoved : penEdgeLeft,
-							ToPt(p1 + v), ToPt(p2 + v));
-					}
-					foreach (var edge in pb.Edges) {
-						var c = (edge.From.Position + edge.To.Position) / 2;
-						var v = (edge.To.Position - edge.From.Position).Normalize().VerticalCw();
-						v *= 10;
-						var pl = c + v;
-						var pr = c - v;
-
-						var sf = new StringFormat(StringFormat.GenericTypographic);
-						sf.FormatFlags = sf.FormatFlags & ~StringFormatFlags.LineLimit | StringFormatFlags.NoWrap; // StringFormatFlagsLineLimit があると計算誤差の関係で文字が非表示になるので消す
-
-						var size = g.MeasureString(edge.LeftGroups.Count.ToString(), this.Font, 1000, sf);
-
-						g.DrawString(edge.LeftGroups.Count.ToString(), this.Font, brsFontEdge, pl.X - size.Width / 2, pl.Y - size.Height / 2, sf);
-
-
-						size = g.MeasureString(edge.RightGroups.Count.ToString(), this.Font, 1000, sf);
-						g.DrawString(edge.RightGroups.Count.ToString(), this.Font, brsFontEdge, pr.X - size.Width / 2, pr.Y - size.Height / 2, sf);
-					}
-					foreach (var node in pb.Nodes) {
-						var p = node.Position;
-						var pen = (node.Flags & Jk.PolBoolF.NodeFlags.InsideOutside) != 0 ? penNodeInsideOutside : penNode;
-						g.DrawRectangle(pen, p.X - 2, p.Y - 2, 4, 4);
-						g.DrawString(node.Edges.Count.ToString(), this.Font, brsFontNode, p.X, p.Y);
-					}
-					g.Transform = orgTf;
-
 					// 結果のポリゴンを描画
 					g.TranslateTransform(0, 500);
 					for (int j = 0; j < result.Count; j++) {
@@ -347,7 +452,7 @@ namespace PolygonBoolean {
 							if (i == 0) {
 								int group = -1, polygon = -1;
 
-								foreach (var edge in loop) {
+								foreach (var edge in loop.Edges) {
 									List<int> rg;
 									int[] rp;
 
@@ -372,7 +477,7 @@ namespace PolygonBoolean {
 								brs = new SolidBrush((Color)_Groups[group][polygon].UserData);
 							}
 
-							g.FillPolygon(brs, (from edge in loop select ToPt(edge.From.Position)).ToArray());
+							g.FillPolygon(brs, (from edge in loop.Edges select ToPt(edge.From.Position)).ToArray());
 						}
 					}
 					for (int j = 0; j < result.Count; j++) {
@@ -383,7 +488,7 @@ namespace PolygonBoolean {
 							if (1 <= cmbHole.SelectedIndex && cmbHole.SelectedIndex != (i + 1))
 								continue;
 							var loop = loops[i];
-							g.DrawPolygon(penPolygon, (from edge in loop select ToPt(edge.From.Position)).ToArray());
+							g.DrawPolygon(penPolygon, (from edge in loop.Edges select ToPt(edge.From.Position)).ToArray());
 						}
 					}
 
@@ -572,6 +677,50 @@ namespace PolygonBoolean {
 			this.cmbCurHole.EndUpdate();
 		}
 
+		void ReadPolygon(int groupIndex, string fileName) {
+			var g = _Groups[groupIndex];
+			g.Clear();
+
+			PolBoolF.Polygon p = null;
+			PolBoolF.Hole h = null;
+			int mode = 0;
+
+			using (var cr = new CsvReader(new System.IO.StreamReader(fileName))) {
+				for (;;) {
+					var fields = cr.ReadRow();
+					if (fields == null)
+						break;
+					if (fields.Count == 0)
+						continue;
+
+					switch (fields[0]) {
+					case "polygon":
+						p = new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, new List<PolBoolF.Hole>());
+						p.UserData = Color.Red;
+						g.Add(p);
+						mode = 1;
+						break;
+					case "hole":
+						h = new PolBoolF.Hole(new List<PolBoolF.Vertex>(), null);
+						p.Holes.Add(h);
+						mode = 2;
+						break;
+					default: {
+							var v = new Vector2f(float.Parse(fields[0]), float.Parse(fields[1]));
+							if (mode == 1) {
+								p.Vertices.Add(new PolBoolF.Vertex(v));
+							} else if (mode == 2) {
+								h.Vertices.Add(new PolBoolF.Vertex(v));
+							}
+						}
+						break;
+					}
+				}
+			}
+
+			this.Invalidate();
+		}
+
 		private void pictureBox1_Click(object sender, EventArgs e) {
 			var pol = this.CurPolygon;
 			if (pol == null)
@@ -588,6 +737,17 @@ namespace PolygonBoolean {
 			pol.UserData = cd.Color;
 
 			this.Invalidate();
+		}
+
+		private void btnOpen_Click(object sender, EventArgs e) {
+			using (var od = new OpenFileDialog()) {
+				od.Filter = "CSVファイル(*.csv)|*.csv|すべてのファイル(*.*)|*.*";
+				od.CheckPathExists = true;
+				if (od.ShowDialog() != DialogResult.OK)
+					return;
+				ReadPolygon(this.cmbCurGroup.SelectedIndex, od.FileName);
+				UpdatePolygonCmb(false);
+			}
 		}
 	}
 }

@@ -15,6 +15,7 @@ namespace Jk {
 	/// </summary>
 	[XmlType("Jk.AABB2f")]
 	[StructLayout(LayoutKind.Explicit, Pack = 4, Size = 16)]
+	[Serializable]
 	public struct AABB2f {
 		[FieldOffset(0)]
 		public vector Min;
@@ -59,6 +60,23 @@ namespace Jk {
 				} else {
 					min.ElementWiseMinSelf(p);
 					max.ElementWiseMaxSelf(p);
+				}
+			}
+			this.Min = min;
+			this.Max = max;
+		}
+
+		public AABB2f(IEnumerable<thisclass> volumes) {
+			bool first = true;
+			vector min = new vector(), max = new vector();
+			foreach (var v in volumes) {
+				if (first) {
+					first = false;
+					min = v.Min;
+					max = v.Max;
+				} else {
+					min.ElementWiseMinSelf(v.Min);
+					max.ElementWiseMaxSelf(v.Max);
 				}
 			}
 			this.Min = min;

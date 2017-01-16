@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// マウスホイールをハンドリングするためのクラス
 	/// </summary>
