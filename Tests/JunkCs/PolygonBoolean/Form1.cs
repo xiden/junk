@@ -110,8 +110,8 @@ namespace PolygonBoolean {
 			for (int i = 1; i <= 10; i++)
 				this.cmbHole.Items.Add(i.ToString());
 
-			ReadPolygon(0, "g:/dvl/logs/in1_2.csv");
-			ReadPolygon(1, "g:/dvl/logs/in2_2.csv");
+			ReadPolygon(0, "g:/dvl/logs/in1_36.csv");
+			ReadPolygon(1, "g:/dvl/logs/in2_36.csv");
 			//var p = new PolBoolF.Polygon(null, null, null);
 			//p.Vertices = new List<PolBoolF.Vertex>();
 			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(0.1000023f, 9.350006f)));
@@ -345,15 +345,21 @@ namespace PolygonBoolean {
 						sf.FormatFlags = sf.FormatFlags & ~StringFormatFlags.LineLimit | StringFormatFlags.NoWrap; // StringFormatFlagsLineLimit があると計算誤差の関係で文字が非表示になるので消す
 
 						var size = g.MeasureString(edge.LeftGroups.Count.ToString(), this.Font, 1000, sf);
+						size.Width /= 2;
+						size.Height /= 2;
+
+
+						g.DrawString(edge.UniqueIndex.ToString(), this.Font, brsFontEdge, c.X - size.Width, c.Y - size.Height - 20, sf);
+
 
 						g.DrawLine(penLinkCount, ToPt(c), ToPt(pr));
 						g.DrawLine(penLinkCount, ToPt(c), ToPt(pl));
 
-						g.DrawString(edge.LeftGroups.Count.ToString(), this.Font, brsFontEdge, pl.X - size.Width / 2, pl.Y - size.Height / 2, sf);
+						g.DrawString(edge.LeftGroups.Count.ToString(), this.Font, brsFontEdge, pl.X - size.Width, pl.Y - size.Height, sf);
 
 
 						size = g.MeasureString(edge.RightGroups.Count.ToString(), this.Font, 1000, sf);
-						g.DrawString(edge.RightGroups.Count.ToString(), this.Font, brsFontEdge, pr.X - size.Width / 2, pr.Y - size.Height / 2, sf);
+						g.DrawString(edge.RightGroups.Count.ToString(), this.Font, brsFontEdge, pr.X - size.Width, pr.Y - size.Height, sf);
 					}
 					foreach (var node in pb.Nodes) {
 						var p = tf.Fw(node.Position);

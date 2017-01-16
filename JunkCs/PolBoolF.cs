@@ -692,16 +692,16 @@ namespace Jk {
 					rp = edge.LeftPolygons;
 				}
 				foreach (var g in rg) {
-					this.LinkPolygon(sameDir, g, rp[g]);
-					var d = edge.GetUserData(true, g);
+					this.LinkPolygon(true, g, rp[g]);
+					var d = edge.GetUserData(sameDir, g);
 					if (d != null)
-						this.SetUserData(sameDir, g, d);
+						this.SetUserData(true, g, d);
 				}
 				foreach (var g in lg) {
-					this.LinkPolygon(!sameDir, g, lp[g]);
-					var d = edge.GetUserData(false, g);
+					this.LinkPolygon(false, g, lp[g]);
+					var d = edge.GetUserData(!sameDir, g);
 					if (d != null)
-						this.SetUserData(!sameDir, g, d);
+						this.SetUserData(false, g, d);
 				}
 			}
 
@@ -1867,8 +1867,6 @@ namespace Jk {
 				// ポリゴンを構成するエッジとして方向と共に登録
 				list.Add(new EdgeAndSide(edge, curIsRight));
 				edge.Flags |= curIsRight ? rightFlag : leftFlag;
-				if (edge.UniqueIndex == 82)
-					edge = edge;
 
 #if POLYGONBOOLEAN_DEBUG
 				if (_Logging) {
@@ -2090,6 +2088,7 @@ namespace Jk {
 					// 挿入するノードとして登録
 					node.Flags |= NodeFlags.OnEdge | NodeFlags.InsideOutside;
 					edge.SetNodeInsertion(t, node);
+					System.Diagnostics.Debug.WriteLine("On edge: " + edge + " " + node);
 
 					// ノードにつながるエッジを交差判定無視リストに登録する
 					var nodeEdges = node.Edges;
@@ -2145,6 +2144,7 @@ namespace Jk {
 					node.Flags |= NodeFlags.InsideOutside | NodeFlags.OnEdge;
 					edge1.SetNodeInsertion(t1, node);
 					edge2.SetNodeInsertion(t2, node);
+					System.Diagnostics.Debug.WriteLine("Intersection: " + edge1 + "*" + edge2 + " " + node);
 				}
 			}
 		}
@@ -2239,7 +2239,7 @@ namespace Jk {
 					}
 				);
 
-				var groups = Distinguish(GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, true));
+				var groups = Distinguish(GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, false));
 				var tpols = _TopoGroups[groupIndex];
 
 				tpols.Clear();
