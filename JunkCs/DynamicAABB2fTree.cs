@@ -591,7 +591,7 @@ namespace Jk {
 			left.Clear();
 			right.Clear();
 			for (int i = 0, n = leaves.Count; i < n; ++i) {
-				if (axis.Dot(leaves[i].Volume.Center - org) < 0)
+				if (axis.Dot(leaves[i].Volume.Center - org) <= 0)
 					left.Add(leaves[i]);
 				else
 					right.Add(leaves[i]);

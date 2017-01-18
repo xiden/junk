@@ -58,7 +58,8 @@ namespace Jk {
 				// Not matching for these /*MK_SHIFT=0x0004;MK_CONTROL=0x0008*/
 
 				var delta = (short)(ushort)(uiWParam >> 16);
-				var e = new MouseEventArgs(buttons, 0, x, y, delta);
+				var cp = _ctrl.PointToClient(new Point(x, y));
+				var e = new MouseEventArgs(buttons, 0, cp.X, cp.Y, delta);
 				_onMouseWheel(e);
 
 				return true;

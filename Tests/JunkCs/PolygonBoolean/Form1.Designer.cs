@@ -47,6 +47,9 @@
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.btnOpen = new System.Windows.Forms.Button();
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.btnDebug = new System.Windows.Forms.Button();
+			this.cmbSrcHole = new System.Windows.Forms.ComboBox();
+			this.cmbSrcPol = new System.Windows.Forms.ComboBox();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			this.panel1.SuspendLayout();
@@ -295,6 +298,9 @@
 			// 
 			// panel1
 			// 
+			this.panel1.Controls.Add(this.cmbSrcHole);
+			this.panel1.Controls.Add(this.cmbSrcPol);
+			this.panel1.Controls.Add(this.btnDebug);
 			this.panel1.Controls.Add(this.cmbCurGroup);
 			this.panel1.Controls.Add(this.btnOpen);
 			this.panel1.Controls.Add(this.lblResult);
@@ -317,6 +323,36 @@
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(885, 166);
 			this.panel1.TabIndex = 24;
+			// 
+			// btnDebug
+			// 
+			this.btnDebug.Location = new System.Drawing.Point(84, 31);
+			this.btnDebug.Name = "btnDebug";
+			this.btnDebug.Size = new System.Drawing.Size(75, 23);
+			this.btnDebug.TabIndex = 24;
+			this.btnDebug.Text = "デバッグ";
+			this.btnDebug.UseVisualStyleBackColor = true;
+			this.btnDebug.Click += new System.EventHandler(this.btnDebug_Click);
+			// 
+			// cmbSrcHole
+			// 
+			this.cmbSrcHole.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cmbSrcHole.FormattingEnabled = true;
+			this.cmbSrcHole.Location = new System.Drawing.Point(243, 34);
+			this.cmbSrcHole.Name = "cmbSrcHole";
+			this.cmbSrcHole.Size = new System.Drawing.Size(59, 20);
+			this.cmbSrcHole.TabIndex = 26;
+			this.cmbSrcHole.SelectedIndexChanged += new System.EventHandler(this.cmbSrcHole_SelectedIndexChanged);
+			// 
+			// cmbSrcPol
+			// 
+			this.cmbSrcPol.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cmbSrcPol.FormattingEnabled = true;
+			this.cmbSrcPol.Location = new System.Drawing.Point(178, 34);
+			this.cmbSrcPol.Name = "cmbSrcPol";
+			this.cmbSrcPol.Size = new System.Drawing.Size(59, 20);
+			this.cmbSrcPol.TabIndex = 25;
+			this.cmbSrcPol.SelectedIndexChanged += new System.EventHandler(this.cmbSrcPol_SelectedIndexChanged);
 			// 
 			// Form1
 			// 
@@ -360,6 +396,9 @@
 		private System.Windows.Forms.RadioButton radFilter;
 		private System.Windows.Forms.Button btnOpen;
 		private System.Windows.Forms.Panel panel1;
+		private System.Windows.Forms.Button btnDebug;
+		private System.Windows.Forms.ComboBox cmbSrcHole;
+		private System.Windows.Forms.ComboBox cmbSrcPol;
 	}
 }
 

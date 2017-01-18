@@ -50,7 +50,7 @@ namespace Jk {
 		}
 
 		public AABB2f(IEnumerable<vector> positions) {
-			bool first = true;
+			var first = true;
 			vector min = new vector(), max = new vector();
 			foreach(var p in positions) {
 				if (first) {
@@ -136,6 +136,10 @@ namespace Jk {
 			}
 		}
 
+		public bool Contains(vector v) {
+			return Min.X <= v.X && Min.Y <= v.Y && v.X <= Max.X && v.Y <= Max.Y;
+		}
+
 		public bool Contains(thisclass aabb) {
 			return Min.X <= aabb.Min.X && Min.Y <= aabb.Min.Y && aabb.Max.X <= Max.X && aabb.Max.Y <= Max.Y;
 		}
@@ -154,6 +158,26 @@ namespace Jk {
 
 		public thisclass Merge(thisclass aabb) {
 			return new thisclass(vector.ElementWiseMin(this.Min, aabb.Min), vector.ElementWiseMax(this.Max, aabb.Max));
+		}
+
+		public thisclass Merge(IEnumerable<vector> positions) {
+			var min = this.Min;
+			var max = this.Max;
+			foreach (var p in positions) {
+				min.ElementWiseMinSelf(p);
+				max.ElementWiseMaxSelf(p);
+			}
+			return new thisclass(min, max);
+		}
+
+		public thisclass Merge(IEnumerable<thisclass> volumes) {
+			var min = this.Min;
+			var max = this.Max;
+			foreach (var v in volumes) {
+				min.ElementWiseMinSelf(v.Min);
+				max.ElementWiseMaxSelf(v.Max);
+			}
+			return new thisclass(min, max);
 		}
 
 		public void MergeSelf(vector v) {

@@ -11,6 +11,8 @@ namespace Jk {
 	[Serializable]
 	public struct Vector2i {
 		public static readonly thisclass Zero = new thisclass();
+		public static readonly thisclass MinValue = new thisclass(element.MinValue, element.MinValue);
+		public static readonly thisclass MaxValue = new thisclass(element.MaxValue, element.MaxValue);
 
 		[FieldOffset(0)]
 		public element X;

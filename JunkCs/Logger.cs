@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
 
-namespace Junk {
+namespace Jk {
 	/// <summary>
 	/// ログ出力用クラス、ファイル構造は以下の様になる
 	///		ルートディレクトリ

@@ -10,6 +10,8 @@ namespace Jk {
 	[StructLayout(LayoutKind.Explicit, Pack = 4, Size = 12)]
 	public struct Vector3i {
 		public static readonly thisclass Zero = new thisclass();
+		public static readonly thisclass MinValue = new thisclass(element.MinValue, element.MinValue, element.MinValue);
+		public static readonly thisclass MaxValue = new thisclass(element.MaxValue, element.MaxValue, element.MaxValue);
 
 		[FieldOffset(0)]
 		public element X;
