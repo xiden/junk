@@ -475,12 +475,12 @@ namespace Jk {
 			/// 指定されたポリゴンがリンクされているかどうか調べる
 			/// </summary>
 			/// <param name="groupIndex">グループインデックス</param>
+			/// <param name="polygonIndex">ポリゴンインデックス</param>
 			/// <returns>リンクされているなら true</returns>
-			public bool IsPolygonLinked(int groupIndex) {
+			public bool IsPolygonLinked(int groupIndex, int polygonIndex) {
 				var edges = this.Edges;
 				for (int i = edges.Count - 1; i != -1; i--) {
-					var edge = edges[i];
-					if (edge.IsGroupLinked(groupIndex))
+					if (edges[i].IsPolygonLinked(groupIndex, polygonIndex))
 						return true;
 				}
 				return false;
@@ -490,13 +490,14 @@ namespace Jk {
 			/// 指定されたポリゴンがリンクされているかどうか調べる
 			/// </summary>
 			/// <param name="groupIndex">グループインデックス</param>
+			/// <param name="polygonIndex">ポリゴンインデックス</param>
 			/// <param name="excludeEdge">チェックから除外するエッジ</param>
 			/// <returns>リンクされているなら true</returns>
-			public bool IsPolygonLinked(int groupIndex, Edge excludeEdge) {
+			public bool IsPolygonLinked(int groupIndex, int polygonIndex, Edge excludeEdge) {
 				var edges = this.Edges;
 				for (int i = edges.Count - 1; i != -1; i--) {
 					var edge = edges[i];
-					if (edge != excludeEdge && edge.IsGroupLinked(groupIndex))
+					if (edge != excludeEdge && edge.IsPolygonLinked(groupIndex, polygonIndex))
 						return true;
 				}
 				return false;
@@ -598,6 +599,15 @@ namespace Jk {
 			/// null でない場合にはエッジ上にノードを挿入する予定であることを示す
 			/// </summary>
 			public List<NodeInsertion> NodeInsertions;
+
+			/// <summary>
+			/// エッジの中心座標
+			/// </summary>
+			public vector Center {
+				get {
+					return (this.From.Position + this.To.Position) * (element)0.5;
+				}
+			}
 
 			/// <summary>
 			/// エッジの境界ボリュームの取得
@@ -738,6 +748,22 @@ namespace Jk {
 			/// <returns>リンクされているなら true</returns>
 			public bool IsGroupLinked(int groupIndex) {
 				return this.RightGroups.Contains(groupIndex) || this.LeftGroups.Contains(groupIndex);
+			}
+
+			/// <summary>
+			/// 指定されたポリゴンがリンクされているかどうか調べる
+			/// </summary>
+			/// <param name="groupIndex">グループインデックス</param>
+			/// <param name="polygonIndex">ポリゴンインデックス</param>
+			/// <returns>リンクされているなら true</returns>
+			public bool IsPolygonLinked(int groupIndex, int polygonIndex) {
+				if (this.RightGroups.Contains(groupIndex)) {
+					return this.RightPolygons[groupIndex] == polygonIndex;
+				}
+				if (this.LeftGroups.Contains(groupIndex)) {
+					return this.LeftPolygons[groupIndex] == polygonIndex;
+				}
+				return false;
 			}
 
 			/// <summary>
@@ -991,29 +1017,22 @@ namespace Jk {
 		/// </summary>
 		public class TopologicalPolygon {
 			/// <summary>
-			/// エッジ配列
+			/// ユニークなエッジインデックス、 PolBoolF 内で同じ値があってはならない
 			/// </summary>
-			public List<EdgeAndSide> Edges;
-
+			public uint UniqueIndex;
+			
 			/// <summary>
-			/// 穴配列
+			/// ループ配列、添字[0:外枠、1...:穴]
 			/// </summary>
-			public List<TopologicalPolygon> Holes;
+			public List<Loop> Loops;
 
-			/// <summary>
-			/// ポリゴンの境界ボリューム
-			/// </summary>
-			public volume Volume;
+			public TopologicalPolygon() {
+				this.Loops = new List<Loop>();
+			}
 
-			/// <summary>
-			/// ポリゴンの面積
-			/// </summary>
-			public element Area;
-
-			/// <summary>
-			/// 時計回りかどうか
-			/// </summary>
-			public bool CW;
+			public TopologicalPolygon(List<Loop> loops) {
+				this.Loops = loops;
+			}
 
 			/// <summary>
 			/// 指定座標を包含しているか調べる
@@ -1021,13 +1040,18 @@ namespace Jk {
 			/// <param name="c">座標</param>
 			/// <returns>包含しているなら true</returns>
 			public bool Contains(vector c) {
-				if (PointTouchPolygon2(c, this.Edges, true) == 0)
-					return false;
-				var holes = this.Holes;
-				if (holes != null) {
-					for (int i = holes.Count - 1; i != -1; i--) {
-						var hole = holes[i];
-						if (PointTouchPolygon2(c, hole.Edges, true) != 0)
+				var loops = this.Loops;
+				for (int i = 0, n = loops.Count; i < n; i++) {
+					var loop = loops[i];
+					var touch = loop.Volume.Contains(c);
+					if (touch) {
+						touch = PointTouchPolygon2(c, loop.Edges, true) != 0;
+					}
+					if (i == 0) {
+						if (!touch)
+							return false;
+					} else {
+						if (touch)
 							return false;
 					}
 				}
@@ -1035,82 +1059,245 @@ namespace Jk {
 			}
 
 			/// <summary>
-			/// 指定ポリゴンのエッジを完全に包含しているか調べる
+			/// 指定ポリゴンのエッジを包含しているならこのポリゴンをリンクさせる
 			/// </summary>
 			/// <param name="thisGroupIndex">自分のグループインデックス</param>
+			/// <param name="thisPolygonIndex">自分のポリゴンインデックス</param>
 			/// <param name="polygon">包含チェック対象ポリゴン</param>
-			/// <returns>包含しているなら true</returns>
-			public bool Contains(int thisGroupIndex, TopologicalPolygon polygon) {
-				// 面積が小さいなら包含はあり得ない
-				if (this.Area < polygon.Area)
-					return false;
+			/// <returns>立場を逆にしたパターンを調べる必要が無いなら true</returns>
+			public bool LinkPolygonIfContains(int thisGroupIndex, int thisPolygonIndex, TopologicalPolygon polygon) {
+				var volume = this.Loops[0].Volume;
+				var loops = polygon.Loops;
+				var noNeedToCheckReverse = true; // 立場を逆にしてチェックを行う必要があるか
 
-				// 境界ボリュームが完全に包含されていないなら包含はあり得ない
-				if (!this.Volume.Contains(polygon.Volume))
-					return false;
-
-				// エッジを共有しているなら PolygonizeAll() で勝手に調整されるので包含されていないことにする
-				var edges = polygon.Edges;
-				var nedges = edges.Count;
-				for (int i = nedges - 1; i != -1; i--) {
-					if (edges[i].Edge.IsGroupLinked(thisGroupIndex))
-						return false;
-				}
-
-				// this と polygon が共用しているノードを1とし、それ以外を0とする
-				// 0→1へ変化した際の0と1→0へ変化した際の0がポリゴンに包含されているか調べる
-				// 0↔1の変化が無い場合には適当に選んだノードの包含を調べる
-				// 又、1のノードに貫通フラグがセットされていたら貫通してるということなので包含はあり得ない　※これは高速化のため
-				var intersects = false;
-				var edge1 = edges[0];
-				var node1 = edge1.From;
-				var type1 = node1.IsPolygonLinked(thisGroupIndex, edge1.Edge);
-				for (int i = nedges - 1; i != -1; i--) {
-					if (type1 && (node1.Flags & NodeFlags.InsideOutside) != 0)
-						return false; // TODO: 貫通フラグ見てるけど計算ポリゴン数２つだからこそできてる
-
-					var edge2 = edges[i];
-					var node2 = edge2.From;
-					var type2 = node2.IsPolygonLinked(thisGroupIndex, edge2.Edge);
-					if (type1 != type2) {
-						if (!Contains(type1 ? node2.Position : node1.Position))
-							return false;
-						intersects = true;
+				for (int iloop = 0, nloops = loops.Count; iloop < nloops; iloop++) {
+					var loop = loops[iloop];
+					if (iloop == 0 && !volume.Intersects(loop.Volume)) {
+						// 外枠同士が接触していないなら何もする必要無し
+						break;
 					}
-					node1 = node2;
-					type1 = type2;
-				}
-				if (!intersects) {
-					if (!Contains(node1.Position))
-						return false;
-				}
 
-				// 上記を全てパスしたら包含されていることになる
-				return true;
-			}
+					var edges = loop.Edges;
+					var nedges = edges.Count;
+					if (nedges == 0)
+						continue;
 
-			/// <summary>
-			/// エッジが指定ポリゴンに包含されているなら指定ポリゴンインデックスをリンクする
-			/// </summary>
-			/// <param name="polygon">包含元グループ</param>
-			/// <param name="groupIndex">包含元グループインデックス</param>
-			/// <param name="polygonIndex">包含元ポリゴンインデックス</param>
-			public void LinkPolygonIfContained(TopologicalPolygon polygon, int groupIndex, int polygonIndex) {
-				if (polygon.Contains(groupIndex, this)) {
-					var edges = this.Edges;
-					for (int i = edges.Count - 1; i != -1; i--) {
+					// 交点を探す
+					// 位相構造構築後なので共有されているノードが交点となっている
+					var intersects = false;
+					for (int i = nedges - 1; i != -1; i--) {
 						var edge = edges[i];
-						edge.Edge.LinkPolygon(true, groupIndex, polygonIndex);
-						edge.Edge.LinkPolygon(false, groupIndex, polygonIndex);
+						if (edge.From.IsPolygonLinked(thisGroupIndex, thisPolygonIndex)) {
+							intersects = true;
+							break;
+						}
 					}
-				}
-				var holes = this.Holes;
-				if (holes != null) {
-					for (int holeIndex = holes.Count - 1; holeIndex != -1; holeIndex--) {
-						holes[holeIndex].LinkPolygonIfContained(polygon, groupIndex, polygonIndex);
+
+					// もし交点が無いなら完全に包含されているか完全にポリゴン外と言える
+					// 適当な頂点を選び内外判定結果が「内」ならエッジの両側に自分をリンクする
+					if (!intersects) {
+						var position = edges[0].From.Position;
+						if (volume.Contains(position) && Contains(position)) {
+							for (int i = nedges - 1; i != -1; i--) {
+								var edge = edges[i];
+								edge.Edge.LinkPolygon(true, thisGroupIndex, thisPolygonIndex);
+								edge.Edge.LinkPolygon(false, thisGroupIndex, thisPolygonIndex);
+							}
+						}
+						continue;
 					}
+
+					// 交点があるということは包含されているエッジとそうでないものがある
+					// 包含されているエッジは両側に自分をリンクする、但し共有されているエッジは除く
+					// エッジ包含の調べ方は以下の通り
+					// 一度共有されていないエッジが現れると共有ノードが現れるまで包含／非包含状態が継続する
+					// つまり最初に現れた非共有エッジの中間点を内外判定すればおのずとわかる
+					int unshareStartIndex = -1;
+					var edgeShared = edges[0].Edge.IsPolygonLinked(thisGroupIndex, thisPolygonIndex);
+					for (int i = nedges - 1; i != -1; i--) {
+						var es = edges[i].Edge.IsPolygonLinked(thisGroupIndex, thisPolygonIndex);
+						if (edgeShared && !es) {
+							unshareStartIndex = i;
+							break;
+						}
+						edgeShared = es;
+					}
+					if (unshareStartIndex < 0)
+						continue; // 全エッジが共有済みなら何もする必要無し
+
+					var edgeInclusion = false;
+					edgeShared = true;
+					for (int i = nedges; i != 0; i--) {
+						var iedge = (unshareStartIndex + i) % nedges;
+						var edge = edges[iedge];
+						var es = edge.Edge.IsPolygonLinked(thisGroupIndex, thisPolygonIndex);
+
+						if (edgeShared && !es) {
+							var position = edge.Edge.Center;
+							edgeInclusion = volume.Contains(position) && Contains(position);
+						}
+						if (edgeInclusion) {
+							edge.Edge.LinkPolygon(true, thisGroupIndex, thisPolygonIndex);
+							edge.Edge.LinkPolygon(false, thisGroupIndex, thisPolygonIndex);
+						}
+						if (edge.From.IsPolygonLinked(thisGroupIndex, thisPolygonIndex)) {
+							edgeInclusion = false;
+							edgeShared = true;
+						} else {
+							edgeShared = es;
+						}
+					}
+
+					// 完全に包含されているわけでも全エッジ共有しているわけでもないので逆のチェックが必要になる
+					noNeedToCheckReverse = false;
 				}
+
+				return noNeedToCheckReverse;
+
+
+
+				//// 面積が小さいなら包含はあり得ない
+				//if (this.Area < polygon.Area)
+				//	return false;
+
+				//// 境界ボリュームが完全に包含されていないなら包含はあり得ない
+				//if (!this.Volume.Contains(polygon.Volume))
+				//	return false;
+
+				//// エッジを共有しているなら PolygonizeAll() で勝手に調整されるので包含されていないことにする
+				//var edges = polygon.Edges;
+				//var nedges = edges.Count;
+				//for (int i = nedges - 1; i != -1; i--) {
+				//	if (edges[i].Edge.IsGroupLinked(thisGroupIndex))
+				//		return false;
+				//}
+
+				//// this と polygon が共用しているノードを1とし、それ以外を0とする
+				//// 0→1へ変化した際の0と1→0へ変化した際の0がポリゴンに包含されているか調べる
+				//// 0↔1の変化が無い場合には適当に選んだノードの包含を調べる
+				//// 又、1のノードに貫通フラグがセットされていたら貫通してるということなので包含はあり得ない　※これは高速化のため
+				//var intersects = false;
+				//var edge1 = edges[0];
+				//var node1 = edge1.From;
+				//var type1 = node1.IsPolygonLinked(thisGroupIndex, edge1.Edge);
+				//for (int i = nedges - 1; i != -1; i--) {
+				//	if (type1 && (node1.Flags & NodeFlags.InsideOutside) != 0)
+				//		return false; // TODO: 貫通フラグ見てるけど計算ポリゴン数２つだからこそできてる
+
+				//	var edge2 = edges[i];
+				//	var node2 = edge2.From;
+				//	var type2 = node2.IsPolygonLinked(thisGroupIndex, edge2.Edge);
+				//	if (type1 != type2) {
+				//		if (!Contains(type1 ? node2.Position : node1.Position))
+				//			return false;
+				//		intersects = true;
+				//	}
+				//	node1 = node2;
+				//	type1 = type2;
+				//}
+				//if (!intersects) {
+				//	if (!Contains(node1.Position))
+				//		return false;
+				//}
+
+				//// 上記を全てパスしたら包含されていることになる
+				//return true;
 			}
+
+			///// <summary>
+			///// 指定ポリゴンのエッジを完全に包含しているか調べる
+			///// </summary>
+			///// <param name="thisGroupIndex">自分のグループインデックス</param>
+			///// <param name="loop">包含チェック対象ループ</param>
+			///// <returns>包含しているなら true</returns>
+			//public bool Contains(int thisGroupIndex, Loop loop) {
+			//	// 面積が小さいなら包含はあり得ない
+			//	if (this.Area < loop.Area)
+			//		return false;
+
+			//	// 境界ボリュームが完全に包含されていないなら包含はあり得ない
+			//	if (!this.Volume.Contains(loop.Volume))
+			//		return false;
+
+			//	// エッジを共有しているなら PolygonizeAll() で勝手に調整されるので包含されていないことにする
+			//	var edges = loop.Edges;
+			//	var nedges = edges.Count;
+			//	for (int i = nedges - 1; i != -1; i--) {
+			//		if (edges[i].Edge.IsGroupLinked(thisGroupIndex))
+			//			return false;
+			//	}
+
+			//	// this と polygon が共用しているノードを1とし、それ以外を0とする
+			//	// 0→1へ変化した際の0と1→0へ変化した際の0がポリゴンに包含されているか調べる
+			//	// 0↔1の変化が無い場合には適当に選んだノードの包含を調べる
+			//	// 又、1のノードに貫通フラグがセットされていたら貫通してるということなので包含はあり得ない　※これは高速化のため
+			//	var intersects = false;
+			//	var edge1 = edges[0];
+			//	var node1 = edge1.From;
+			//	var type1 = node1.IsPolygonLinked(thisGroupIndex, edge1.Edge);
+			//	for (int i = nedges - 1; i != -1; i--) {
+			//		if (type1 && (node1.Flags & NodeFlags.InsideOutside) != 0)
+			//			return false; // TODO: 貫通フラグ見てるけど計算ポリゴン数２つだからこそできてる
+
+			//		var edge2 = edges[i];
+			//		var node2 = edge2.From;
+			//		var type2 = node2.IsPolygonLinked(thisGroupIndex, edge2.Edge);
+			//		if (type1 != type2) {
+			//			if (!Contains(type1 ? node2.Position : node1.Position))
+			//				return false;
+			//			intersects = true;
+			//		}
+			//		node1 = node2;
+			//		type1 = type2;
+			//	}
+			//	if (!intersects) {
+			//		if (!Contains(node1.Position))
+			//			return false;
+			//	}
+
+			//	// 上記を全てパスしたら包含されていることになる
+			//	return true;
+			//}
+
+			///// <summary>
+			///// エッジが指定ポリゴンに包含されているなら指定ポリゴンインデックスをリンクする
+			///// </summary>
+			///// <param name="polygon">包含元グループ</param>
+			///// <param name="groupIndex">包含元グループインデックス</param>
+			///// <param name="polygonIndex">包含元ポリゴンインデックス</param>
+			//public void LinkPolygonIfContained(TopologicalPolygon polygon, int groupIndex, int polygonIndex) {
+			//	if (polygon.Contains(groupIndex, this)) {
+			//		var edges = this.Edges;
+			//		for (int i = edges.Count - 1; i != -1; i--) {
+			//			var edge = edges[i];
+			//			edge.Edge.LinkPolygon(true, groupIndex, polygonIndex);
+			//			edge.Edge.LinkPolygon(false, groupIndex, polygonIndex);
+			//		}
+			//	}
+			//	var holes = this.Holes;
+			//	if (holes != null) {
+			//		for (int holeIndex = holes.Count - 1; holeIndex != -1; holeIndex--) {
+			//			holes[holeIndex].LinkPolygonIfContained(polygon, groupIndex, polygonIndex);
+			//		}
+			//	}
+			//}
+
+			///// <summary>
+			///// 指定ループを包含しているなら自分のグループをリンクさせる
+			///// </summary>
+			///// <param name="thisGroupIndex">自分のグループインデックス</param>
+			///// <param name="thisPolygonIndex">自分のポリゴンインデックス</param>
+			///// <param name="loop">チェック対象ループ</param>
+			//public void LinkPolygonIfContains(int thisGroupIndex, int thisPolygonIndex, Loop loop) {
+			//	if (this.Contains(thisGroupIndex, loop)) {
+			//		var edges = loop.Edges;
+			//		for (int i = edges.Count - 1; i != -1; i--) {
+			//			var edge = edges[i];
+			//			edge.Edge.LinkPolygon(true, thisGroupIndex, thisPolygonIndex);
+			//			edge.Edge.LinkPolygon(false, thisGroupIndex, thisPolygonIndex);
+			//		}
+			//	}
+			//}
 		}
 
 		/// <summary>
@@ -1307,10 +1494,33 @@ namespace Jk {
 				}
 			}
 
+			public Node To {
+				get {
+					return this.TraceRight ? this.Edge.To : this.Edge.From;
+				}
+			}
+
 			public override string ToString() {
 				var from = this.TraceRight ? this.Edge.From : this.Edge.To;
 				var to = this.TraceRight ? this.Edge.To : this.Edge.From;
-				return string.Format("{{ {0} => {1} {2} }}", from.Position, to.Position, this.TraceRight ? "Right" : "Left");
+				var s = string.Format("{{ {0} => {1} {2} }}", from.Position, to.Position, this.TraceRight ? "Right" : "Left");
+				var rg = this.Edge.RightGroups;
+				var lg = this.Edge.LeftGroups;
+
+				s += " [";
+				for (int i = 0; i < rg.Count; i++) {
+					if (i != 0)
+						s += ", ";
+					s += rg[i];
+				}
+				s += "] [";
+				for (int i = 0; i < lg.Count; i++) {
+					if (i != 0)
+						s += ", ";
+					s += lg[i];
+				}
+				s += "]";
+				return s;
 			}
 		}
 
@@ -1363,11 +1573,7 @@ namespace Jk {
 			/// </summary>
 			public volume Volume;
 
-			public Loop(TopologicalPolygon tpol) {
-				this.Area = tpol.Area;
-				this.CW = tpol.CW;
-				this.Edges = tpol.Edges;
-				this.Volume = tpol.Volume;
+			public Loop(List<EdgeAndSide> edges) : this(Area(edges), edges) {
 			}
 
 			public Loop(element area, List<EdgeAndSide> edges) {
@@ -1381,6 +1587,10 @@ namespace Jk {
 				}
 
 				this.Volume = volume;
+			}
+
+			public override string ToString() {
+				return this.Volume.ToString();
 			}
 		}
 
@@ -1530,8 +1740,8 @@ namespace Jk {
 			// _TopologicalPolygons を再構成する
 			RebuildTpols();
 
-			// tpol が他の tpol に包含されているかチェックし包含されているならエッジに他のtpolをリンクする
-			TpolsInclusionCheck();
+			//// tpol が他の tpol に包含されているかチェックし包含されているならエッジに他のtpolをリンクする
+			//TpolsInclusionCheck();
 
 			// ポリゴンを構成する
 			PolygonizeAll();
@@ -1750,25 +1960,14 @@ namespace Jk {
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
 		public List<List<Loop>> Extract(int groupIndex) {
-			var list = new List<List<Loop>>();
+			var group = new List<List<Loop>>();
 			var tpols = _TopoGroups[groupIndex];
 
 			for(int i = 0, m = tpols.Count; i < m; i++) {
-				var tpol = tpols[i];
-				var polygons = new List<Loop>();
-
-				polygons.Add(new Loop(tpol));
-				var holes = tpol.Holes;
-				if (holes != null) {
-					for (int hodeIndex = 0, n = holes.Count; hodeIndex < n; hodeIndex++) {
-						polygons.Add(new Loop(holes[hodeIndex]));
-					}
-				}
-
-				list.Add(polygons);
+				group.Add(tpols[i].Loops);
 			}
 
-			return list;
+			return group;
 		}
 
 		/// <summary>
@@ -1866,55 +2065,58 @@ namespace Jk {
 		/// </summary>
 		/// <returns>全てのポリゴンを構成するエッジと方向の一覧</returns>
 		private void PolygonizeAll() {
-			// 未処理のエッジのみ処理する
+			// 作成できるループを全て取得する
+			var loops = new List<Loop>();
 			foreach (var edge in this.Edges) {
-				if ((edge.Flags & EdgeFlags.RightPolygonized) == 0)
-					Polygonize(edge, true);
-			}
-			foreach (var edge in this.Edges) {
-				if ((edge.Flags & EdgeFlags.LeftPolygonized) == 0)
-					Polygonize(edge, false);
-			}
-		}
-
-		/// <summary>
-		/// 指定エッジの指定側を辿りポリゴン化する
-		/// </summary>
-		/// <param name="edge">エッジ</param>
-		/// <param name="traceRight">右側を辿るなら true 、左側を辿るなら false</param>
-		private static void Polygonize(Edge edge, bool traceRight) {
-			bool isNull;
-			var list = TracePolygon(edge, traceRight, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, out isNull);
-			if (isNull)
-				return;
-
-			// エッジの指定方向にあるグループ＆ポリゴン一覧を作成
-			var groupPolygons = new HashSet<ulong>();
-			for (int i = list.Count - 1; i != -1; i--) {
-				var eas = list[i];
-				List<int> groups;
-				int[] polygons;
-				if (eas.TraceRight) {
-					groups = eas.Edge.RightGroups;
-					polygons = eas.Edge.RightPolygons;
-				} else {
-					groups = eas.Edge.LeftGroups;
-					polygons = eas.Edge.LeftPolygons;
+				if ((edge.Flags & EdgeFlags.RightPolygonized) == 0) {
+					bool isNull;
+					var edges = TracePolygon(edge, true, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, out isNull);
+					if (!isNull) {
+						loops.Add(new Loop(Area(edges), edges));
+					}
 				}
-				for (int j = groups.Count - 1; j != -1; j--) {
-					var g = groups[j];
-					var p = polygons[g];
-					groupPolygons.Add((ulong)g << 32 | (ulong)(uint)p);
+			}
+			foreach (var edge in this.Edges) {
+				if ((edge.Flags & EdgeFlags.LeftPolygonized) == 0) {
+					bool isNull;
+					var edges = TracePolygon(edge, false, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, out isNull);
+					if (!isNull) {
+						loops.Add(new Loop(Area(edges), edges));
+					}
 				}
 			}
 
-			// ポリゴンを構成するエッジのポリゴン情報を統一する
-			for (int i = list.Count - 1; i != -1; i--) {
-				var eas = list[i];
-				foreach (var gp in groupPolygons) {
-					var g = (int)(gp >> 32);
-					var p = (int)(gp & 0xffffffff);
-					eas.Edge.LinkPolygon(eas.TraceRight, g, p);
+			// ループがリンクしているポリゴンを統一する
+			for (int iloop = loops.Count - 1; iloop != -1; iloop--) {
+				// エッジの指定方向にあるグループ＆ポリゴン一覧を作成
+				var edges = loops[iloop].Edges;
+				var groupPolygons = new HashSet<ulong>();
+				for (int i = edges.Count - 1; i != -1; i--) {
+					var eas = edges[i];
+					List<int> groups;
+					int[] polygons;
+					if (eas.TraceRight) {
+						groups = eas.Edge.RightGroups;
+						polygons = eas.Edge.RightPolygons;
+					} else {
+						groups = eas.Edge.LeftGroups;
+						polygons = eas.Edge.LeftPolygons;
+					}
+					for (int j = groups.Count - 1; j != -1; j--) {
+						var g = groups[j];
+						var p = polygons[g];
+						groupPolygons.Add((ulong)g << 32 | (ulong)(uint)p);
+					}
+				}
+
+				// ポリゴンを構成するエッジのポリゴン情報を統一する
+				for (int i = edges.Count - 1; i != -1; i--) {
+					var eas = edges[i];
+					foreach (var gp in groupPolygons) {
+						var g = (int)(gp >> 32);
+						var p = (int)(gp & 0xffffffff);
+						eas.Edge.LinkPolygon(eas.TraceRight, g, p);
+					}
 				}
 			}
 		}
@@ -2062,7 +2264,7 @@ namespace Jk {
 						}
 
 						// ラインをエッジに変換する、既存エッジに同じノード組み合わせのものが存在したらそちらを使用する
-						var edges = tpol.Edges = new List<EdgeAndSide>(nnodes);
+						var edges = new List<EdgeAndSide>(nnodes);
 						var node1 = nodes[0];
 						for (int i = 1; i <= nnodes; i++) {
 							var node2 = nodes[i % nnodes];
@@ -2074,13 +2276,12 @@ namespace Jk {
 							edges.Add(new EdgeAndSide(edge, right));
 							node1 = node2;
 						}
+						tpol.Loops.Add(new Loop(edges));
 					}
 
 					// 穴を処理
 					var holes = pol.Holes;
 					if (holes != null) {
-						tpol.Holes = new List<TopologicalPolygon>(holes.Count);
-
 						for (int holeIndex = 0, nholes = holes.Count; holeIndex < nholes; holeIndex++) {
 							var hole = holes[holeIndex];
 							var holetpol = new TopologicalPolygon();
@@ -2097,7 +2298,7 @@ namespace Jk {
 							}
 
 							// ラインをエッジに変換する、既存エッジに同じノード組み合わせのものが存在したらそちらを使用する
-							var edges = holetpol.Edges = new List<EdgeAndSide>(nnodes);
+							var edges = new List<EdgeAndSide>(nnodes);
 							var node1 = nodes[0];
 							for (int i = 1; i <= nnodes; i++) {
 								var node2 = nodes[i % nnodes];
@@ -2109,8 +2310,7 @@ namespace Jk {
 								edges.Add(new EdgeAndSide(edge, right));
 								node1 = node2;
 							}
-
-							tpol.Holes.Add(holetpol);
+							tpol.Loops.Add(new Loop(edges));
 						}
 					}
 					tpols.Add(tpol);
@@ -2296,7 +2496,11 @@ namespace Jk {
 #if POLYGONBOOLEAN_DEBUG
 			_Logging = true;
 #endif
-			for (int i = 0, n = _TopoGroups.Count; i < n; i++) {
+			var topoGroups = _TopoGroups;
+			var ntopoGroups = topoGroups.Count;
+			uint uniqueIndex = 0;
+
+			for (int i = 0; i < ntopoGroups; i++) {
 				var groupIndex = i;
 
 				// エッジの指定方向に指定ポリゴンが存在しないなら無視するフィルタ
@@ -2317,80 +2521,47 @@ namespace Jk {
 				);
 
 				var groups = Distinguish(GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, false));
-				var tpols = _TopoGroups[groupIndex];
+				var tpols = topoGroups[groupIndex];
 
 				tpols.Clear();
 
 				foreach (var loops in groups) {
-					var tpol = new TopologicalPolygon();
-					var nholes = loops.Count - 1;
-
-					tpol.Edges = loops[0].Edges;
-					if (nholes != 0) {
-						var holes = tpol.Holes = new List<TopologicalPolygon>(nholes);
-						for (int j = 1; j <= nholes; j++) {
-							var holetpol = new TopologicalPolygon();
-							holetpol.Edges = loops[j].Edges;
-							holes.Add(holetpol);
-						}
-					}
-
+					var tpol = new TopologicalPolygon(loops);
+					tpol.UniqueIndex = uniqueIndex++;
 					tpols.Add(tpol);
 				}
 			}
-#if POLYGONBOOLEAN_DEBUG
-			_Logging = false;
-#endif
-		}
 
-		/// <summary>
-		/// ノードとエッジに分解後のデータを使い _TopologicalPolygons 内ポリゴンエッジが他ポリゴンエッジに包含されているなら情報を付与する
-		/// </summary>
-		private void TpolsInclusionCheck() {
-			var alltgroups = _TopoGroups;
-			var nalltgroups = alltgroups.Count;
-
-			// まず境界ボリュームと面積を計算する
-			for (int groupIndex = nalltgroups - 1; groupIndex != -1; groupIndex--) {
-				var tgroups = alltgroups[groupIndex];
-				for (int i = tgroups.Count - 1; i != -1; i--) {
-					var tpol = tgroups[i];
-					var area = Area(tpol.Edges);
-					tpol.Volume = new volume(from e in tpol.Edges select e.From.Position);
-					tpol.Area = Math.Abs(area);
-					tpol.CW = area <= 0;
-					var holes = tpol.Holes;
-					if (holes != null) {
-						for (int holeIndex = holes.Count - 1; holeIndex != -1; holeIndex--) {
-							var hole = holes[holeIndex];
-							area = Area(hole.Edges);
-							hole.Volume = new volume(from e in hole.Edges select e.From.Position);
-							hole.Area = Math.Abs(area);
-							hole.CW = area <= 0;
-						}
-					}
-				}
-			}
-
-			// ポリゴンのエッジが他ポリゴンに完全に包含されているなら
+			// 他グループに包含されているエッジがあれば包含しているポリゴンをリンクする
 			// エッジの両側に包含ポリゴンをリンクする
 			// ※ポリゴンを構成するエッジが共有されているなら PolygonizeAll() によりリンクされるので必要ない
-			for (int groupIndex1 = nalltgroups - 1; groupIndex1 != -1; groupIndex1--) {
-				var tpols1 = alltgroups[groupIndex1];
-				for (int i = tpols1.Count - 1; i != -1; i--) {
-					var tpol1 = tpols1[i];
+			var cmbs = new bool[uniqueIndex * uniqueIndex];
+			for (int groupIndex1 = ntopoGroups - 1; groupIndex1 != -1; groupIndex1--) {
+				var tpols1 = topoGroups[groupIndex1];
+				for (int polygonIndex1 = tpols1.Count - 1; polygonIndex1 != -1; polygonIndex1--) {
+					var tpol1 = tpols1[polygonIndex1];
 
-					for (int groupIndex2 = nalltgroups - 1; groupIndex2 != -1; groupIndex2--) {
+					for (int groupIndex2 = ntopoGroups - 1; groupIndex2 != -1; groupIndex2--) {
 						if (groupIndex2 == groupIndex1)
 							continue;
 
-						var tpols2 = alltgroups[groupIndex2];
-						for (int j = tpols2.Count - 1; j != -1; j--) {
-							tpol1.LinkPolygonIfContained(tpols2[j], groupIndex2, j);
+						var tpols2 = topoGroups[groupIndex2];
+						for (int polygonIndex2 = tpols2.Count - 1; polygonIndex2 != -1; polygonIndex2--) {
+							var tpol2 = tpols2[polygonIndex2];
+							var cmb = tpol1.UniqueIndex <= tpol2.UniqueIndex ? tpol1.UniqueIndex + tpol2.UniqueIndex * uniqueIndex : tpol2.UniqueIndex + tpol1.UniqueIndex * uniqueIndex;
+
+							if (cmbs[cmb])
+								continue; // 既にチェック済みの組み合わせなら無視
+
+							cmbs[cmb] = tpol1.LinkPolygonIfContains(groupIndex1, polygonIndex1, tpol2);
 						}
 					}
 				}
 			}
+
+#if POLYGONBOOLEAN_DEBUG
+			_Logging = false;
+#endif
 		}
 
 		/// <summary>

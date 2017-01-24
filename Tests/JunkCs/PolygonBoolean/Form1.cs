@@ -152,8 +152,8 @@ namespace PolygonBoolean {
 
 			//var polygonFileName = "PolygonOverwrite";
 			//var polygonFileName = "PolygonOr";
-			//var polygonFileName = "PolygonSub";
-			var polygonFileName = "TopologyFailed";
+			var polygonFileName = "PolygonSub";
+			//var polygonFileName = "TopologyFailed";
 			for (int i = 0; i < 2; i++) {
 				ReadPolygon(i, "g:/dvl/logs/" + polygonFileName + (i + 1) + ".csv");
 			}
@@ -382,7 +382,7 @@ namespace PolygonBoolean {
 					}
 				}
 
-				/*try */{
+				try {
 					// トポロジー化
 					pb.CreateTopology(true);
 
@@ -633,9 +633,9 @@ namespace PolygonBoolean {
 					//}
 
 					this.label1.Text = sb.ToString();
-				}/* catch (Exception ex) {
+				} catch (Exception ex) {
 					this.lblResult.Text = ex.Message;
-				}*/
+				}
 			}
 		}
 
