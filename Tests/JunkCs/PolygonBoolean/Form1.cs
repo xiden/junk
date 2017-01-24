@@ -451,15 +451,17 @@ namespace PolygonBoolean {
 						g.DrawLine(penLinkCount, ToPt(c), ToPt(pr));
 						g.DrawLine(penLinkCount, ToPt(c), ToPt(pl));
 
-						size = g.MeasureString(edge.LeftGroups.Count.ToString(), this.Font, 1000, sf);
+						var lgc = edge.LeftGroupCount.ToString();
+						size = g.MeasureString(lgc, this.Font, 1000, sf);
 						size.Width /= 2;
 						size.Height /= 2;
-						g.DrawString(edge.LeftGroups.Count.ToString(), this.Font, brsFontPolCount, pl.X - size.Width, pl.Y - size.Height, sf);
+						g.DrawString(lgc, this.Font, brsFontPolCount, pl.X - size.Width, pl.Y - size.Height, sf);
 
-						size = g.MeasureString(edge.RightGroups.Count.ToString(), this.Font, 1000, sf);
+						var rgc = edge.RightGroupCount.ToString();
+						size = g.MeasureString(rgc, this.Font, 1000, sf);
 						size.Width /= 2;
 						size.Height /= 2;
-						g.DrawString(edge.RightGroups.Count.ToString(), this.Font, brsFontPolCount, pr.X - size.Width, pr.Y - size.Height, sf);
+						g.DrawString(rgc, this.Font, brsFontPolCount, pr.X - size.Width, pr.Y - size.Height, sf);
 					}
 					foreach (var node in pb.Nodes) {
 						var p = tf.Fw(node.Position);
@@ -561,22 +563,23 @@ namespace PolygonBoolean {
 								int group = -1, polygon = -1;
 
 								foreach (var edge in loop.Edges) {
-									List<int> rg;
+									bool[] rg;
 									int[] rp;
 
 									if (edge.TraceRight) {
-										rg = edge.Edge.RightGroups;
+										rg = edge.Edge.RightGroupExists;
 										rp = edge.Edge.RightPolygons;
 									} else {
-										rg = edge.Edge.LeftGroups;
+										rg = edge.Edge.LeftGroupExists;
 										rp = edge.Edge.LeftPolygons;
 									}
 
-									for (int ig = 1; ig != -1; ig--) {
-										if (rg.Contains(ig)) {
+									for (int ig = rg.Length - 1; ig != -1; ig--) {
+										if (rg[ig]) {
 											if (group < ig) {
 												group = ig;
 												polygon = rp[ig];
+												break;
 											}
 										}
 									}

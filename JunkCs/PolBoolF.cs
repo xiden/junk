@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -430,9 +431,10 @@ namespace Jk {
 			/// </summary>
 			/// <param name="edge">エッジ</param>
 			public void LinkEdge(Edge edge) {
-				if (this.Edges.Contains(edge))
+				var edges = this.Edges;
+				if (edges.Contains(edge))
 					return;
-				this.Edges.Add(edge);
+				edges.Add(edge);
 			}
 
 			/// <summary>
@@ -440,9 +442,10 @@ namespace Jk {
 			/// </summary>
 			/// <param name="edge">エッジ</param>
 			public void Remove(Edge edge) {
-				if (!this.Edges.Contains(edge))
+				var edges = this.Edges;
+				if (!edges.Contains(edge))
 					return;
-				this.Edges.Remove(edge);
+				edges.Remove(edge);
 			}
 
 			/// <summary>
@@ -556,14 +559,14 @@ namespace Jk {
 			public element Length;
 
 			/// <summary>
-			/// 進行方向From→Toの右側のグループインデックス一覧
+			/// 進行方向From→Toの右側にグループが存在するかどうか、[グループインデックス]
 			/// </summary>
-			public List<int> RightGroups = new List<int>();
+			public bool[] RightGroupExists;
 
 			/// <summary>
-			/// 進行方向From→Toの左側のグループインデックス一覧
+			/// 進行方向From→Toの左側にグループが存在するかどうか、[グループインデックス]
 			/// </summary>
-			public List<int> LeftGroups = new List<int>();
+			public bool[] LeftGroupExists;
 
 			/// <summary>
 			/// 進行方向From→Toの右側のグループ内ポリゴンインデックス一覧、[グループインデックス]
@@ -619,6 +622,34 @@ namespace Jk {
 			}
 
 			/// <summary>
+			/// 進行方向From→Toの右側に存在するグループ数
+			/// </summary>
+			public int RightGroupCount {
+				get {
+					var g = this.RightGroupExists;
+					int count = 0;
+					for (int i = g.Length - 1; i != -1; i--)
+						if (g[i])
+							count++;
+					return count;
+				}
+			}
+
+			/// <summary>
+			/// 進行方向From→Toの左側に存在するグループ数
+			/// </summary>
+			public int LeftGroupCount {
+				get {
+					var g = this.LeftGroupExists;
+					int count = 0;
+					for (int i = g.Length - 1; i != -1; i--)
+						if (g[i])
+							count++;
+					return count;
+				}
+			}
+
+			/// <summary>
 			/// ノードの組み合わせからユニークなエッジIDを取得する
 			/// </summary>
 			public static ulong GetID(Node n1, Node n2) {
@@ -643,11 +674,13 @@ namespace Jk {
 			/// <param name="uniqueIndex">ユニークなインデックス</param>
 			/// <param name="from">エッジの開始ノード</param>
 			/// <param name="to">エッジの終了ノード</param>
-			public Edge(uint uniqueIndex, Node from, Node to) {
+			public Edge(int groupCount, uint uniqueIndex, Node from, Node to) {
 				this.UniqueIndex = uniqueIndex;
 				this.From = from;
 				this.To = to;
 				this.Length = (to.Position - from.Position).Length;
+				this.RightGroupExists = new bool[groupCount];
+				this.LeftGroupExists = new bool[groupCount];
 				from.LinkEdge(this);
 				to.LinkEdge(this);
 			}
@@ -673,10 +706,10 @@ namespace Jk {
 			/// <param name="groupIndex">グループインデックス</param>
 			/// <param name="polygonIndex">グループ内のポリゴンインデックス</param>
 			public void LinkPolygon(bool right, int groupIndex, int polygonIndex) {
-				var g = right ? this.RightGroups : this.LeftGroups;
-				if (g.Contains(groupIndex))
+				var g = right ? this.RightGroupExists : this.LeftGroupExists;
+				if (g[groupIndex])
 					return; // 既にリンク済みならスキップ　※同じ側に同グループのポリゴンはリンクされない仕様なので polygonIndex はチェックしなくて良い
-				g.Add(groupIndex);
+				g[groupIndex] = true;
 
 				var p = right ? this.RightPolygons : this.LeftPolygons;
 				if (p == null) {
@@ -714,30 +747,34 @@ namespace Jk {
 			/// <param name="sameDir">指定エッジが同じ方向かどうか</param>
 			/// <param name="userDataCloner">ユーザーデータの複製を作成するデリゲート</param>
 			public void CopyAttributes(Edge edge, bool sameDir, Func<object, object> userDataCloner) {
-				List<int> rg, lg;
+				bool[] rg, lg;
 				int[] rp, lp;
 				if (sameDir) {
-					rg = edge.RightGroups;
-					lg = edge.LeftGroups;
+					rg = edge.RightGroupExists;
+					lg = edge.LeftGroupExists;
 					rp = edge.RightPolygons;
 					lp = edge.LeftPolygons;
 				} else {
-					lg = edge.RightGroups;
-					rg = edge.LeftGroups;
+					lg = edge.RightGroupExists;
+					rg = edge.LeftGroupExists;
 					lp = edge.RightPolygons;
 					rp = edge.LeftPolygons;
 				}
-				foreach (var g in rg) {
-					this.LinkPolygon(true, g, rp[g]);
-					var d = edge.GetUserData(sameDir, g);
-					if (d != null)
-						this.SetUserData(true, g, userDataCloner != null ? userDataCloner(d) : d);
+				for (int i = rg.Length - 1; i != -1; i--) {
+					if (rg[i]) {
+						this.LinkPolygon(true, i, rp[i]);
+						var d = edge.GetUserData(sameDir, i);
+						if (d != null)
+							this.SetUserData(true, i, userDataCloner != null ? userDataCloner(d) : d);
+					}
 				}
-				foreach (var g in lg) {
-					this.LinkPolygon(false, g, lp[g]);
-					var d = edge.GetUserData(!sameDir, g);
-					if (d != null)
-						this.SetUserData(false, g, userDataCloner != null ? userDataCloner(d) : d);
+				for (int i = lg.Length - 1; i != -1; i--) {
+					if (lg[i]) {
+						this.LinkPolygon(false, i, lp[i]);
+						var d = edge.GetUserData(!sameDir, i);
+						if (d != null)
+							this.SetUserData(false, i, userDataCloner != null ? userDataCloner(d) : d);
+					}
 				}
 			}
 
@@ -747,7 +784,7 @@ namespace Jk {
 			/// <param name="groupIndex">グループインデックス</param>
 			/// <returns>リンクされているなら true</returns>
 			public bool IsGroupLinked(int groupIndex) {
-				return this.RightGroups.Contains(groupIndex) || this.LeftGroups.Contains(groupIndex);
+				return this.RightGroupExists[groupIndex] || this.LeftGroupExists[groupIndex];
 			}
 
 			/// <summary>
@@ -757,10 +794,10 @@ namespace Jk {
 			/// <param name="polygonIndex">ポリゴンインデックス</param>
 			/// <returns>リンクされているなら true</returns>
 			public bool IsPolygonLinked(int groupIndex, int polygonIndex) {
-				if (this.RightGroups.Contains(groupIndex)) {
+				if (this.RightGroupExists[groupIndex]) {
 					return this.RightPolygons[groupIndex] == polygonIndex;
 				}
-				if (this.LeftGroups.Contains(groupIndex)) {
+				if (this.LeftGroupExists[groupIndex]) {
 					return this.LeftPolygons[groupIndex] == polygonIndex;
 				}
 				return false;
@@ -838,26 +875,14 @@ namespace Jk {
 				if (this == edge)
 					return false;
 
-				// ポリゴンは自己交差しない前提なので
-				// リンクしているポリゴンが両方とも同じなら交差しない
-				var set1 = new List<int>();
-				var set2 = new List<int>();
-
-				foreach (var p in this.RightGroups)
-					set1.Add(p);
-				foreach (var p in this.LeftGroups)
-					set1.Add(p);
-				foreach (var p in edge.RightGroups)
-					set2.Add(p);
-				foreach (var p in edge.LeftGroups)
-					set2.Add(p);
-
-				foreach (var p in set1) {
-					if (!set2.Contains(p))
-						return true;
-				}
-				foreach (var p in set2) {
-					if (!set1.Contains(p))
+				// 同グループのポリゴンは自己交差しない前提なので
+				// リンクしているグループが両方とも同じなら交差しない
+				var r1 = this.RightGroupExists;
+				var l1 = this.LeftGroupExists;
+				var r2 = edge.RightGroupExists;
+				var l2 = edge.LeftGroupExists;
+				for (int i = r1.Length - 1; i != -1; i--) {
+					if ((r1[i] || l1[i]) == (r2[i] || l2[i]))
 						return true;
 				}
 
@@ -1393,6 +1418,11 @@ namespace Jk {
 		/// エッジ管理クラス
 		/// </summary>
 		class EdgeManager {
+			/// <summary>
+			/// グループ数
+			/// </summary>
+			public int GroupCount;
+
 			uint _UniqueIndex;
 			Dictionary<ulong, Edge> _Edges = new Dictionary<ulong, Edge>();
 			DynamicAABB2fTree<Edge> _Tree = new DynamicAABB2fTree<Edge>();
@@ -1427,7 +1457,7 @@ namespace Jk {
 				if (_Edges.TryGetValue(id, out edge)) {
 					return edge;
 				} else {
-					edge = new Edge(++_UniqueIndex, from, to);
+					edge = new Edge(this.GroupCount, ++_UniqueIndex, from, to);
 					_Edges[id] = edge;
 					_Tree.Add(edge.Volume.Expand(_Epsilon), edge);
 					return edge;
@@ -1504,23 +1534,27 @@ namespace Jk {
 				var from = this.TraceRight ? this.Edge.From : this.Edge.To;
 				var to = this.TraceRight ? this.Edge.To : this.Edge.From;
 				var s = string.Format("{{ {0} => {1} {2} }}", from.Position, to.Position, this.TraceRight ? "Right" : "Left");
-				var rg = this.Edge.RightGroups;
-				var lg = this.Edge.LeftGroups;
+				var rg = this.Edge.RightGroupExists;
+				var lg = this.Edge.LeftGroupExists;
 
-				s += " [";
-				for (int i = 0; i < rg.Count; i++) {
-					if (i != 0)
-						s += ", ";
-					s += rg[i];
+				var sb1 = new StringBuilder();
+				for (int i = 0; i < rg.Length; i++) {
+					if (rg[i]) {
+						if (sb1.Length != 0)
+							sb1.Append(", ");
+						sb1.Append(i.ToString());
+					}
 				}
-				s += "] [";
-				for (int i = 0; i < lg.Count; i++) {
-					if (i != 0)
-						s += ", ";
-					s += lg[i];
+				var sb2 = new StringBuilder();
+				for (int i = 0; i < lg.Length; i++) {
+					if (lg[i]) {
+						if (sb2.Length != 0)
+							sb2.Append(", ");
+						sb2.Append(i.ToString());
+					}
 				}
-				s += "]";
-				return s;
+
+				return s + " [" + sb1.ToString() + "] [" + sb2.ToString() + "]";
 			}
 		}
 
@@ -1728,6 +1762,8 @@ namespace Jk {
 				}
 			}
 
+			_EdgeMgr.GroupCount = _Groups.Count;
+
 			// ポリゴンからノードとエッジを作成する
 			MakeNodesAndEdges();
 
@@ -1753,33 +1789,24 @@ namespace Jk {
 		/// <returns>グループインデックス配列</returns>
 		public List<int> GetEdgeSharedGroups() {
 			var groups = new List<int>();
-			var linkedGroups = new List<int>(_Groups.Count);
 
 			foreach (var edge in this.Edges) {
-				var rg = edge.RightGroups;
-				var lg = edge.LeftGroups;
+				var rg = edge.RightGroupExists;
+				var lg = edge.LeftGroupExists;
+				int groupCount = 0;
 
-				linkedGroups.Clear();
-
-				for (int i = rg.Count - 1; i != -1; i--) {
-					var g = rg[i];
-					if (!linkedGroups.Contains(g)) {
-						linkedGroups.Add(g);
+				for (int i = rg.Length - 1; i != -1; i--) {
+					if (rg[i] || lg[i]) {
+						groupCount++;
 					}
 				}
 
-				for (int i = lg.Count - 1; i != -1; i--) {
-					var g = lg[i];
-					if (!linkedGroups.Contains(g)) {
-						linkedGroups.Add(g);
-					}
-				}
-
-				if (2 <= linkedGroups.Count) {
-					for (int i = linkedGroups.Count - 1; i != -1; i--) {
-						var g = linkedGroups[i];
-						if (!groups.Contains(g)) {
-							groups.Add(g);
+				if (2 <= groupCount) {
+					for (int i = rg.Length - 1; i != -1; i--) {
+						if (rg[i] || lg[i]) {
+							if (!groups.Contains(i)) {
+								groups.Add(i);
+							}
 						}
 					}
 				}
@@ -1868,7 +1895,7 @@ namespace Jk {
 			// エッジの両側にポリゴンが存在するなら無視するフィルタ
 			var edgeFilter = new Func<Edge, bool, bool>(
 				(Edge e, bool right) => {
-					return e.LeftGroups.Count != 0 && e.RightGroups.Count != 0;
+					return 0 <= e.RightGroupMax && 0 <= e.LeftGroupMax;
 				}
 			);
 #if POLYGONBOOLEAN_DEBUG
@@ -1895,9 +1922,11 @@ namespace Jk {
 			// エッジの両側のポリゴン数が同じか、指定方向に偶数ポリゴンが存在するなら無視するフィルタ
 			var edgeFilter = new Func<Edge, bool, bool>(
 				(Edge e, bool right) => {
-					if (e.LeftGroups.Count == e.RightGroups.Count)
+					var rc = e.RightGroupCount;
+					var lc = e.LeftGroupCount;
+					if (rc == lc)
 						return true;
-					return (right ? e.RightGroups : e.LeftGroups).Count % 2 == 0;
+					return (right ? rc : lc) % 2 == 0;
 				}
 			);
 
@@ -1918,16 +1947,12 @@ namespace Jk {
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
 		public List<List<Loop>> And() {
-			var allpols = new int[_TopoGroups.Count];
-			for (int i = 0, n = allpols.Length; i < n; i++)
-				allpols[i] = i;
-
 			// エッジの指定方向に登録ポリゴンの内一つでも存在しないなら無視するフィルタ
 			var edgeFilter = new Func<Edge, bool, bool>(
 				(Edge e, bool right) => {
-					var pols = right ? e.RightGroups : e.LeftGroups;
-					foreach (var p in allpols) {
-						if (!pols.Contains(p))
+					var g = right ? e.RightGroupExists : e.LeftGroupExists;
+					for (int i = g.Length - 1; i != -1; i--) {
+						if (!g[i])
 							return true;
 					}
 					return false;
@@ -1947,7 +1972,7 @@ namespace Jk {
 			// エッジの指定方向に減算ポリゴンが存在するなら無視するフィルタ
 			var edgeFilter = new Func<Edge, bool, bool>(
 				(Edge e, bool right) => {
-					return (right ? e.RightGroups : e.LeftGroups).Contains(groupIndex);
+					return (right ? e.RightGroupExists : e.LeftGroupExists)[groupIndex];
 				}
 			);
 			return Filtering(edgeFilter);
@@ -2087,25 +2112,27 @@ namespace Jk {
 			}
 
 			// ループがリンクしているポリゴンを統一する
+			var groupPolygons = new HashSet<ulong>();
 			for (int iloop = loops.Count - 1; iloop != -1; iloop--) {
 				// エッジの指定方向にあるグループ＆ポリゴン一覧を作成
+				groupPolygons.Clear();
 				var edges = loops[iloop].Edges;
-				var groupPolygons = new HashSet<ulong>();
 				for (int i = edges.Count - 1; i != -1; i--) {
 					var eas = edges[i];
-					List<int> groups;
+					bool[] groups;
 					int[] polygons;
 					if (eas.TraceRight) {
-						groups = eas.Edge.RightGroups;
+						groups = eas.Edge.RightGroupExists;
 						polygons = eas.Edge.RightPolygons;
 					} else {
-						groups = eas.Edge.LeftGroups;
+						groups = eas.Edge.LeftGroupExists;
 						polygons = eas.Edge.LeftPolygons;
 					}
-					for (int j = groups.Count - 1; j != -1; j--) {
-						var g = groups[j];
-						var p = polygons[g];
-						groupPolygons.Add((ulong)g << 32 | (ulong)(uint)p);
+					for (int j = groups.Length - 1; j != -1; j--) {
+						if (groups[j]) {
+							var p = polygons[j];
+							groupPolygons.Add((ulong)j << 32 | (ulong)(uint)p);
+						}
 					}
 				}
 
@@ -2156,7 +2183,7 @@ namespace Jk {
 #endif
 
 				// 指定側に１つでもポリゴンが存在すればポリゴンを形成できる
-				if ((curIsRight ? edge.RightGroups : edge.LeftGroups).Count != 0)
+				if (0 <= (curIsRight ? edge.RightGroupMax : edge.LeftGroupMax))
 					isNullInternal = false;
 
 				// エッジのベクトルを計算
@@ -2506,15 +2533,7 @@ namespace Jk {
 				// エッジの指定方向に指定ポリゴンが存在しないなら無視するフィルタ
 				var edgeFilter = new Func<Edge, bool, bool>(
 					(Edge e, bool right) => {
-						List<int> r, l;
-						if (right) {
-							r = e.RightGroups;
-							l = e.LeftGroups;
-						} else {
-							l = e.RightGroups;
-							r = e.LeftGroups;
-						}
-						if (!r.Contains(groupIndex))
+						if (!(right ? e.RightGroupExists : e.LeftGroupExists)[groupIndex])
 							return true;
 						return false;
 					}
