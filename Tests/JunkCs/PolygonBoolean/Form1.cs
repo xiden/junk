@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml.Serialization;
 using Jk;
 
 namespace PolygonBoolean {
@@ -158,21 +159,16 @@ namespace PolygonBoolean {
 				ReadPolygon(i, "g:/dvl/logs/" + polygonFileName + (i + 1) + ".csv");
 			}
 
-			//foreach (var p in _Groups[0]) {
-			//	p.Holes = null;
-			//}
 			//var p = new PolBoolF.Polygon(null, null, null);
 			//p.Vertices = new List<PolBoolF.Vertex>();
-			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(0.1000023f, 9.350006f)));
-			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(0.7000027f, 1.150009f)));
-			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(1.000002f, 9.550003f)));
-			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(5.099998f, -2.6f)));
-			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(-11.5f, -8.449997f)));
+			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(0, 0)));
+			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(0, 1)));
+			//p.Vertices.Add(new PolBoolF.Vertex(new Vector2f(1, 1)));
 			//p.UserData = Color.Blue;
 			//_Groups[0].Add(p);
 			//p = p.Clone();
 			//p.UserData = Color.Green;
-			//p.Offset(new Vector2f(0, -0.1f));
+			//p.Offset(new Vector2f(0.5f, 0.9f));
 			//_Groups[1].Add(p);
 
 			//var c = new Jk.Vector2i(300, 300);
@@ -385,6 +381,7 @@ namespace PolygonBoolean {
 				try {
 					// トポロジー化
 					pb.CreateTopology(true);
+					Write(pb, "g:/dvl/logs/PolygonBoolean.tsv");
 
 					var sb = new StringBuilder();
 
@@ -501,9 +498,6 @@ namespace PolygonBoolean {
 									rightPolygons = edge.LeftPolygons;
 								}
 
-								if (edge.UniqueIndex == 48)
-									edge = edge; // TODO: 消す
-
 								// 進行方向右側にポリゴンが無ければ無視
 								if (rightGroupMax < 0)
 									return true;
@@ -563,19 +557,10 @@ namespace PolygonBoolean {
 								int group = -1, polygon = -1;
 
 								foreach (var edge in loop.Edges) {
-									bool[] rg;
-									int[] rp;
+									var rp = edge.TraceRight ? edge.Edge.RightPolygons : edge.Edge.LeftPolygons;
 
-									if (edge.TraceRight) {
-										rg = edge.Edge.RightGroupExists;
-										rp = edge.Edge.RightPolygons;
-									} else {
-										rg = edge.Edge.LeftGroupExists;
-										rp = edge.Edge.LeftPolygons;
-									}
-
-									for (int ig = rg.Length - 1; ig != -1; ig--) {
-										if (rg[ig]) {
+									for (int ig = rp.Length - 1; ig != -1; ig--) {
+										if (0 <= rp[ig]) {
 											if (group < ig) {
 												group = ig;
 												polygon = rp[ig];
@@ -585,7 +570,11 @@ namespace PolygonBoolean {
 									}
 								}
 
-								brs = new SolidBrush((Color)_Groups[group][polygon].UserData);
+								if (group < 0) {
+									brs = new SolidBrush(Color.Black);
+								} else {
+									brs = new SolidBrush((Color)_Groups[group][polygon].UserData);
+								}
 							}
 
 							var pts = (from edge in loop.Edges select ToPt(tf.Fw(edge.From.Position))).ToArray();
@@ -971,6 +960,27 @@ namespace PolygonBoolean {
 
 		private void cmbSrcHole_SelectedIndexChanged(object sender, EventArgs e) {
 			this.Invalidate();
+		}
+
+		static void Write(PolBoolF pb, string fileName) {
+			var nodes = new List<PolBoolF.Node>(pb.Nodes);
+			var edges = new List<PolBoolF.Edge>(pb.Edges);
+			nodes.Sort((a, b) => (int)a.UniqueIndex - (int)b.UniqueIndex);
+			edges.Sort((a, b) => (int)a.UniqueIndex - (int)b.UniqueIndex);
+			// ファイルを開く
+			using (var fs = new System.IO.StreamWriter(fileName, false)) {
+				foreach (var g in pb.Groups) {
+					foreach (var p in g) {
+						fs.Write(p.ToStringForDebug());
+					}
+				}
+				foreach (var n in nodes) {
+					fs.WriteLine(n.ToStringForDebug());
+				}
+				foreach (var n in edges) {
+					fs.WriteLine(n.ToStringForDebug());
+				}
+			}
 		}
 	}
 }
