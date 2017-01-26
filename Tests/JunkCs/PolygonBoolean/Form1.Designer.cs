@@ -47,9 +47,12 @@
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.btnOpen = new System.Windows.Forms.Button();
 			this.panel1 = new System.Windows.Forms.Panel();
-			this.btnDebug = new System.Windows.Forms.Button();
 			this.cmbSrcHole = new System.Windows.Forms.ComboBox();
 			this.cmbSrcPol = new System.Windows.Forms.ComboBox();
+			this.btnDebug = new System.Windows.Forms.Button();
+			this.tbSearch = new System.Windows.Forms.TextBox();
+			this.btnSearchNode = new System.Windows.Forms.Button();
+			this.btnSearchEdge = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			this.panel1.SuspendLayout();
@@ -298,6 +301,9 @@
 			// 
 			// panel1
 			// 
+			this.panel1.Controls.Add(this.btnSearchEdge);
+			this.panel1.Controls.Add(this.btnSearchNode);
+			this.panel1.Controls.Add(this.tbSearch);
 			this.panel1.Controls.Add(this.cmbSrcHole);
 			this.panel1.Controls.Add(this.cmbSrcPol);
 			this.panel1.Controls.Add(this.btnDebug);
@@ -324,16 +330,6 @@
 			this.panel1.Size = new System.Drawing.Size(885, 166);
 			this.panel1.TabIndex = 24;
 			// 
-			// btnDebug
-			// 
-			this.btnDebug.Location = new System.Drawing.Point(84, 31);
-			this.btnDebug.Name = "btnDebug";
-			this.btnDebug.Size = new System.Drawing.Size(75, 23);
-			this.btnDebug.TabIndex = 24;
-			this.btnDebug.Text = "デバッグ";
-			this.btnDebug.UseVisualStyleBackColor = true;
-			this.btnDebug.Click += new System.EventHandler(this.btnDebug_Click);
-			// 
 			// cmbSrcHole
 			// 
 			this.cmbSrcHole.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -353,6 +349,44 @@
 			this.cmbSrcPol.Size = new System.Drawing.Size(59, 20);
 			this.cmbSrcPol.TabIndex = 25;
 			this.cmbSrcPol.SelectedIndexChanged += new System.EventHandler(this.cmbSrcPol_SelectedIndexChanged);
+			// 
+			// btnDebug
+			// 
+			this.btnDebug.Location = new System.Drawing.Point(84, 31);
+			this.btnDebug.Name = "btnDebug";
+			this.btnDebug.Size = new System.Drawing.Size(75, 23);
+			this.btnDebug.TabIndex = 24;
+			this.btnDebug.Text = "デバッグ";
+			this.btnDebug.UseVisualStyleBackColor = true;
+			this.btnDebug.Click += new System.EventHandler(this.btnDebug_Click);
+			// 
+			// tbSearch
+			// 
+			this.tbSearch.Location = new System.Drawing.Point(466, 33);
+			this.tbSearch.Name = "tbSearch";
+			this.tbSearch.Size = new System.Drawing.Size(49, 19);
+			this.tbSearch.TabIndex = 27;
+			this.tbSearch.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+			// 
+			// btnSearchNode
+			// 
+			this.btnSearchNode.Location = new System.Drawing.Point(521, 31);
+			this.btnSearchNode.Name = "btnSearchNode";
+			this.btnSearchNode.Size = new System.Drawing.Size(75, 23);
+			this.btnSearchNode.TabIndex = 28;
+			this.btnSearchNode.Text = "ノード検索";
+			this.btnSearchNode.UseVisualStyleBackColor = true;
+			this.btnSearchNode.Click += new System.EventHandler(this.btnSearchNode_Click);
+			// 
+			// btnSearchEdge
+			// 
+			this.btnSearchEdge.Location = new System.Drawing.Point(602, 31);
+			this.btnSearchEdge.Name = "btnSearchEdge";
+			this.btnSearchEdge.Size = new System.Drawing.Size(75, 23);
+			this.btnSearchEdge.TabIndex = 29;
+			this.btnSearchEdge.Text = "エッジ検索";
+			this.btnSearchEdge.UseVisualStyleBackColor = true;
+			this.btnSearchEdge.Click += new System.EventHandler(this.btnSearchEdge_Click);
 			// 
 			// Form1
 			// 
@@ -399,6 +433,9 @@
 		private System.Windows.Forms.Button btnDebug;
 		private System.Windows.Forms.ComboBox cmbSrcHole;
 		private System.Windows.Forms.ComboBox cmbSrcPol;
+		private System.Windows.Forms.Button btnSearchEdge;
+		private System.Windows.Forms.Button btnSearchNode;
+		private System.Windows.Forms.TextBox tbSearch;
 	}
 }
 

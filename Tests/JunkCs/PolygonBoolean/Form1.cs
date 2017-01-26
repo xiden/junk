@@ -20,6 +20,8 @@ namespace PolygonBoolean {
 		bool _ViewMoving;
 		int _MovingViewType;
 		Point _LastMousePos;
+		int _SearchNodeIndex = -1;
+		int _SearchEdgeIndex = -1;
 
 		List<PolBoolF.Polygon>[] _Groups = new List<PolBoolF.Polygon>[] {
 			new List<PolBoolF.Polygon>(),
@@ -304,6 +306,7 @@ namespace PolygonBoolean {
 			var sf = new StringFormat(StringFormat.GenericTypographic);
 			sf.FormatFlags = sf.FormatFlags & ~StringFormatFlags.LineLimit | StringFormatFlags.NoWrap; // StringFormatFlagsLineLimit があると計算誤差の関係で文字が非表示になるので消す
 
+			using (var penSearch = new Pen(Color.FromArgb(255, 255, 0), 2))
 			using (var brsFontVertex = new SolidBrush(Color.FromArgb(0, 0, 0)))
 			using (var brsFontNode = new SolidBrush(Color.FromArgb(64, 64, 255)))
 			using (var brsFontPolCount = new SolidBrush(Color.FromArgb(255, 64, 64)))
@@ -395,7 +398,9 @@ namespace PolygonBoolean {
 				try {
 					// トポロジー化
 					pb.CreateTopology(true);
-					Write(pb, "g:/dvl/logs/PolygonBoolean.tsv");
+					Write(pb, "g:/dvl/logs/PolygonBooleanCmp.tsv");
+					//Write(pb, "g:/dvl/logs/PolygonBooleanFloat.tsv");
+					//Write(pb, "g:/dvl/logs/PolygonBooleanDouble.tsv");
 
 					var sb = new StringBuilder();
 
@@ -477,6 +482,10 @@ namespace PolygonBoolean {
 						g.FillRectangle(brs, p.X - 3, p.Y - 3, 6, 6);
 						g.DrawString(node.UniqueIndex.ToString(), this.Font, brsFontNode, p.X, p.Y - 32);
 						g.DrawString(node.Edges.Count.ToString(), this.Font, brsFontNode, p.X, p.Y + 6);
+
+						if (node.UniqueIndex == _SearchNodeIndex) {
+							g.DrawRectangle(penSearch, p.X - 6, p.Y - 6, 12, 12);
+						}
 					}
 
 					// ポリゴン同士の演算を行う
@@ -988,10 +997,37 @@ namespace PolygonBoolean {
 				foreach (var n in nodes) {
 					fs.WriteLine(n.ToStringForDebug());
 				}
-				foreach (var n in edges) {
-					fs.WriteLine(n.ToStringForDebug());
+				foreach (var e in edges) {
+					fs.WriteLine(e.ToStringForDebug());
+				}
+				for (int igroup = 0, ngroups = pb.Groups.Count; igroup < ngroups; igroup++) {
+					var result = pb.Extract(igroup);
+					for (int ipolygon = 0, npolygons = result.Count; ipolygon < npolygons; ipolygon++) {
+						var loops = result[ipolygon];
+						for (int iloop = 0, nloops = loops.Count; iloop < nloops; iloop++) {
+							var loop = loops[iloop];
+							if (iloop == 0) {
+								fs.WriteLine("topopol" + igroup + "_" + ipolygon);
+							} else {
+								fs.WriteLine("topohole" + igroup + "_" + ipolygon);
+							}
+							foreach (var e in loop.Edges) {
+								fs.WriteLine(e.ToStringForDebug());
+							}
+						}
+					}
 				}
 			}
+		}
+
+		private void btnSearchNode_Click(object sender, EventArgs e) {
+			_SearchNodeIndex = int.Parse(tbSearch.Text);
+			this.Invalidate();
+		}
+
+		private void btnSearchEdge_Click(object sender, EventArgs e) {
+			_SearchEdgeIndex = int.Parse(tbSearch.Text);
+			this.Invalidate();
 		}
 	}
 }

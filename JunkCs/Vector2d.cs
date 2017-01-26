@@ -29,6 +29,11 @@ namespace Jk {
 			Y = (element)v.Y;
 		}
 
+		public Vector2d(Vector2f v) {
+			X = (element)v.X;
+			Y = (element)v.Y;
+		}
+
 		public Vector2d(element[] arr) {
 			X = arr[0];
 			Y = arr[1];

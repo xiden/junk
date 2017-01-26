@@ -1456,6 +1456,10 @@ namespace Jk {
 
 				return s + " [" + sb1.ToString() + "] [" + sb2.ToString() + "]";
 			}
+
+			public string ToStringForDebug() {
+				return (this.TraceRight ? "Right\t" : "Left\t") + this.Edge.ToStringForDebug();
+			}
 		}
 
 		/// <summary>
@@ -1524,7 +1528,7 @@ namespace Jk {
 			}
 
 			public override string ToString() {
-				return this.Volume.ToString();
+				return string.Concat("Area=", this.Area, " CW=", this.CW, " EdgesCount=", this.Edges.Count, " Volume=", this.Volume);
 			}
 		}
 
@@ -2006,7 +2010,7 @@ namespace Jk {
 					bool isNull;
 					var edges = TracePolygon(edge, true, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, out isNull);
 					if (!isNull) {
-						loops.Add(new Loop(Area(edges), edges));
+						loops.Add(new Loop(edges));
 					}
 				}
 			}
@@ -2015,7 +2019,7 @@ namespace Jk {
 					bool isNull;
 					var edges = TracePolygon(edge, false, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, out isNull);
 					if (!isNull) {
-						loops.Add(new Loop(Area(edges), edges));
+						loops.Add(new Loop(edges));
 					}
 				}
 			}
@@ -2084,7 +2088,7 @@ namespace Jk {
 #endif
 
 				// 指定側に１つでもポリゴンが存在すればポリゴンを形成できる
-				if (0 <= (curIsRight ? edge.RightGroupMax : edge.LeftGroupMax))
+				if (isNullInternal && 0 <= (curIsRight ? edge.RightGroupMax : edge.LeftGroupMax))
 					isNullInternal = false;
 
 				// エッジのベクトルを計算
@@ -2442,31 +2446,34 @@ namespace Jk {
 #if POLYGONBOOLEAN_DEBUG
 			_Logging = true;
 #endif
+			var inGroups = _Groups;
 			var topoGroups = _TopoGroups;
 			var ntopoGroups = topoGroups.Count;
 			uint uniqueIndex = 0;
 
-			for (int i = 0; i < ntopoGroups; i++) {
-				var groupIndex = i;
-
-				// エッジの指定方向に指定ポリゴンが存在しないなら無視するフィルタ
-				var edgeFilter = new Func<Edge, bool, bool>(
-					(Edge e, bool right) => {
-						if ((right ? e.RightPolygons : e.LeftPolygons)[groupIndex] < 0)
-							return true;
-						return false;
-					}
-				);
-
-				var groups = Distinguish(GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved));
-				var tpols = topoGroups[groupIndex];
-
+			for (int igroup = 0; igroup < ntopoGroups; igroup++) {
+				var inGroup = inGroups[igroup];
+				var tpols = topoGroups[igroup];
+				var groupIndex = igroup;
 				tpols.Clear();
 
-				foreach (var loops in groups) {
-					var tpol = new TopologicalPolygon(loops);
-					tpol.UniqueIndex = uniqueIndex++;
-					tpols.Add(tpol);
+				for (int ipolygon = 0, npolygon = inGroup.Count; ipolygon < npolygon; ipolygon++) {
+					var polygonIndex = ipolygon;
+
+					// エッジの指定方向に指定ポリゴンが存在しないなら無視するフィルタ
+					var edgeFilter = new Func<Edge, bool, bool>(
+						(Edge e, bool right) => {
+							return (right ? e.RightPolygons : e.LeftPolygons)[groupIndex] != polygonIndex;
+						}
+					);
+
+					// トポロジー構造から目的のポリゴンだけ抽出する
+					var loopGroup = Distinguish(GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved));
+					foreach (var loops in loopGroup) {
+						var tpol = new TopologicalPolygon(loops);
+						tpol.UniqueIndex = uniqueIndex++;
+						tpols.Add(tpol);
+					}
 				}
 			}
 
@@ -2513,7 +2520,7 @@ namespace Jk {
 				if (b.Area == a.Area) {
 					if (a.CW == b.CW)
 						return 0;
-					return a.CW ? 1 : -1;// 同じ面積でも時計回りの方を小さくする、穴同士で親子関係にならないようにしなければならない
+					return a.CW ? 1 : -1; // 同じ面積でも時計回りの方を小さくする、穴同士で親子関係にならないようにしなければならない
 				} else {
 					return Math.Sign(b.Area - a.Area);
 				}
