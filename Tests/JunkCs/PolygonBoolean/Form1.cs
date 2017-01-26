@@ -151,9 +151,9 @@ namespace PolygonBoolean {
 			for (int i = 1; i <= 20; i++)
 				this.cmbHole.Items.Add(i.ToString());
 
-			//var polygonFileName = "PolygonOverwrite";
+			var polygonFileName = "PolygonOverwrite";
 			//var polygonFileName = "PolygonOr";
-			var polygonFileName = "PolygonSub";
+			//var polygonFileName = "PolygonSub";
 			//var polygonFileName = "TopologyFailed";
 			for (int i = 0; i < 2; i++) {
 				ReadPolygon(i, "g:/dvl/logs/" + polygonFileName + (i + 1) + ".csv");
@@ -301,6 +301,10 @@ namespace PolygonBoolean {
 			var pb = new PolBoolF(Epsilon);
 			pb.UserDataCloner = new Func<object, object>(UserDataClone);
 
+			var sf = new StringFormat(StringFormat.GenericTypographic);
+			sf.FormatFlags = sf.FormatFlags & ~StringFormatFlags.LineLimit | StringFormatFlags.NoWrap; // StringFormatFlagsLineLimit があると計算誤差の関係で文字が非表示になるので消す
+
+			using (var brsFontVertex = new SolidBrush(Color.FromArgb(0, 0, 0)))
 			using (var brsFontNode = new SolidBrush(Color.FromArgb(64, 64, 255)))
 			using (var brsFontPolCount = new SolidBrush(Color.FromArgb(255, 64, 64)))
 			using (var brsFontEdge = new SolidBrush(Color.FromArgb(64, 255, 64)))
@@ -353,9 +357,14 @@ namespace PolygonBoolean {
 							g.DrawLines(penLine, (from v in vertices select ToPt(tf.Fw(v.Position))).ToArray());
 						else if (3 <= vertices.Count)
 							g.DrawPolygon(penLine, (from v in vertices select ToPt(tf.Fw(v.Position))).ToArray());
-						foreach (var v in vertices) {
-							var p = tf.Fw(v.Position);
+						for (int i = 0, n = vertices.Count; i < n; i++) {
+							var p = tf.Fw(vertices[i].Position);
 							g.DrawRectangle(penRect, p.X - 2, p.Y - 2, 4, 4);
+
+							var size = g.MeasureString(i.ToString(), this.Font, 1000, sf);
+							size.Width /= 2;
+							size.Height /= 2;
+							g.DrawString(i.ToString(), this.Font, brsFontVertex, p.X - size.Width, p.Y - size.Height - 10, sf);
 						}
 
 						if (polygon.Holes != null) {
@@ -369,9 +378,14 @@ namespace PolygonBoolean {
 									g.DrawLines(penHoleLine, (from v in vertices select ToPt(tf.Fw(v.Position))).ToArray());
 								else if (3 <= vertices.Count)
 									g.DrawPolygon(penHoleLine, (from v in vertices select ToPt(tf.Fw(v.Position))).ToArray());
-								foreach (var v in vertices) {
-									var p = tf.Fw(v.Position);
+								for (int i = 0, n = vertices.Count; i < n; i++) {
+									var p = tf.Fw(vertices[i].Position);
 									g.DrawRectangle(penHoleNode, p.X - 2, p.Y - 2, 4, 4);
+
+									var size = g.MeasureString(i.ToString(), this.Font, 1000, sf);
+									size.Width /= 2;
+									size.Height /= 2;
+									g.DrawString(i.ToString(), this.Font, brsFontVertex, p.X - size.Width, p.Y - size.Height - 10, sf);
 								}
 							}
 						}
@@ -436,9 +450,6 @@ namespace PolygonBoolean {
 						v *= 10 * _TopoZoomTf.X.Scale;
 						var pl = c + v;
 						var pr = c - v;
-
-						var sf = new StringFormat(StringFormat.GenericTypographic);
-						sf.FormatFlags = sf.FormatFlags & ~StringFormatFlags.LineLimit | StringFormatFlags.NoWrap; // StringFormatFlagsLineLimit があると計算誤差の関係で文字が非表示になるので消す
 
 						var size = g.MeasureString(edge.UniqueIndex.ToString(), this.Font, 1000, sf);
 						size.Width /= 2;

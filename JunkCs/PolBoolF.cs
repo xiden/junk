@@ -197,10 +197,10 @@ namespace Jk {
 					var p2 = vertices[i % nvts].Position;
 
 					if(lfinder.TestShare(p1, p2, this, id1, epsilon2))
-						return new ValidationResult(false, "ポリゴンは辺を共有してはなりません。");
+						return new ValidationResult(false, "ポリゴンの辺" + i + "が共有されています。");
 
 					if (lfinder.TestIntersect(p1, p2, this, id1, id2, id3))
-						return new ValidationResult(false, "ポリゴンは自己交差があってはなりません。");
+						return new ValidationResult(false, "ポリゴンの辺" + i + "が自己交差しています。");
 
 					p1 = p2;
 				}
@@ -225,10 +225,10 @@ namespace Jk {
 							id1 += startId;
 
 							if (lfinder.TestShare(p1, p2, this, id1, epsilon2))
-								return new ValidationResult(false, "穴" + (i + 1) + "が辺を共有しています。");
+								return new ValidationResult(false, "穴" + (i + 1) + "の辺" + j + "が共有されています。");
 
 							if (lfinder.TestIntersect(p1, p2, this, id1, id2, id3))
-								return new ValidationResult(false, "穴" + (i + 1) + "がポリゴンと交差または自己交差しています。");
+								return new ValidationResult(false, "穴" + (i + 1) + "の辺" + j + "が自己交差しています。");
 
 							p1 = p2;
 						}
@@ -2540,7 +2540,7 @@ namespace Jk {
 					// 面積が同じなら穴なので親にはできない、
 					// ポリゴン同士は重複あり得ないので親は存在しないことになる
 					if (child.Area == parent.Area)
-						break;
+						continue;
 
 					// 親境界ボリュームが子境界ボリュームを包含していないならポリゴン包含はあり得ない
 					if (!parent.Volume.Contains(childVolume))
