@@ -336,7 +336,7 @@ namespace PolygonBoolean {
 				if (volume.IsValid && volume.Size != Vector2f.Zero) {
 					var sv = this.SrcArea;
 					tf.X = new TransformLinearf(new Rangef(volume.Min.X, volume.Max.X), new Rangef(sv.Min.X, sv.Max.X));
-					tf.Y = new TransformLinearf(new Rangef(volume.Min.Y, volume.Max.Y), new Rangef(sv.Min.Y, sv.Max.Y));
+					tf.Y = new TransformLinearf(new Rangef(volume.Min.Y, volume.Max.Y), new Rangef(sv.Max.Y, sv.Min.Y));
 					tf = _SrcZoomTf.Mul(tf);
 				}
 				_SrcLastTf = tf;
@@ -424,7 +424,7 @@ namespace PolygonBoolean {
 					if (!volume.Size.IsZero) {
 						var vw = this.TopoArea;
 						tf.X = new TransformLinearf(new Rangef(volume.Min.X, volume.Max.X), new Rangef(vw.Min.X, vw.Max.X));
-						tf.Y = new TransformLinearf(new Rangef(volume.Min.Y, volume.Max.Y), new Rangef(vw.Min.Y, vw.Max.Y));
+						tf.Y = new TransformLinearf(new Rangef(volume.Min.Y, volume.Max.Y), new Rangef(vw.Max.Y, vw.Min.Y));
 						tf = _TopoZoomTf.Mul(tf);
 					} else {
 					}
@@ -437,10 +437,10 @@ namespace PolygonBoolean {
 						v *= 2;
 						g.DrawLine(
 							(edge.Flags & Jk.PolBoolF.EdgeFlags.RightRemoved) != 0 ? penEdgeRightRemoved : penEdgeRight,
-							ToPt(p1 - v), ToPt(p2 - v));
+							ToPt(p1 + v), ToPt(p2 + v));
 						g.DrawLine(
 							(edge.Flags & Jk.PolBoolF.EdgeFlags.LeftRemoved) != 0 ? penEdgeLeftRemoved : penEdgeLeft,
-							ToPt(p1 + v), ToPt(p2 + v));
+							ToPt(p1 - v), ToPt(p2 - v));
 					}
 					foreach (var edge in pb.Edges) {
 						var p1 = tf.Fw(edge.From.Position);
@@ -448,8 +448,8 @@ namespace PolygonBoolean {
 						var c = (p1 + p2) / 2;
 						var v = (p2 - p1).Normalize().VerticalCw();
 						v *= 10 * _TopoZoomTf.X.Scale;
-						var pl = c + v;
-						var pr = c - v;
+						var pl = c - v;
+						var pr = c + v;
 
 						var size = g.MeasureString(edge.UniqueIndex.ToString(), this.Font, 1000, sf);
 						size.Width /= 2;
@@ -550,7 +550,7 @@ namespace PolygonBoolean {
 					if (volume.IsValid && volume.Size != Vector2f.Zero) {
 						var ra = this.ResultArea;
 						tf.X = new TransformLinearf(new Rangef(volume.Min.X, volume.Max.X), new Rangef(ra.Min.X, ra.Max.X));
-						tf.Y = new TransformLinearf(new Rangef(volume.Min.Y, volume.Max.Y), new Rangef(ra.Min.Y, ra.Max.Y));
+						tf.Y = new TransformLinearf(new Rangef(volume.Min.Y, volume.Max.Y), new Rangef(ra.Max.Y, ra.Min.Y));
 					}
 
 					for (int j = 0; j < result.Count; j++) {

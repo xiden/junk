@@ -1516,7 +1516,7 @@ namespace Jk {
 				this.Edges = edges;
 
 				var volume = new volume(edges[0].From.Position);
-				for (int i = 0, n = edges.Count; i < n; i++) {
+				for (int i = edges.Count - 1; i != 0; i--) {
 					volume.MergeSelf(edges[i].From.Position);
 				}
 
@@ -1953,9 +1953,8 @@ namespace Jk {
 		/// 指定されたフィルタでポリゴンを取得する
 		/// </summary>
 		/// <param name="edgeFilter">フィルタ</param>
-		/// <param name="onlyRight">エッジ右側のみから取得するかどうか</param>
 		/// <returns>エッジによるポリゴンの配列</returns>
-		private List<List<EdgeAndSide>> GetPolygons(Func<Edge, bool, bool> edgeFilter, EdgeFlags rightFlag, EdgeFlags leftFlag, bool onlyRight = false) {
+		private List<List<EdgeAndSide>> GetPolygons(Func<Edge, bool, bool> edgeFilter, EdgeFlags rightFlag, EdgeFlags leftFlag) {
 			var polygons = new List<List<EdgeAndSide>>();
 
 			// 予め無視することがわかっているエッジを処理
@@ -1981,16 +1980,14 @@ namespace Jk {
 			}
 
 			// 左側にまだポリゴンが存在するエッジのみ処理する
-			if (!onlyRight) {
-				foreach (var edge in this.Edges) {
-					if ((edge.Flags & leftFlag) == 0) {
-						// ポリゴンを構成するエッジと方向一覧を取得
-						bool isNull;
-						var edges = TracePolygon(edge, false, false, rightFlag, leftFlag, out isNull);
-						// 結果のポリゴン一覧に追加
-						if (!isNull)
-							polygons.Add(edges);
-					}
+			foreach (var edge in this.Edges) {
+				if ((edge.Flags & leftFlag) == 0) {
+					// ポリゴンを構成するエッジと方向一覧を取得
+					bool isNull;
+					var edges = TracePolygon(edge, false, false, rightFlag, leftFlag, out isNull);
+					// 結果のポリゴン一覧に追加
+					if (!isNull)
+						polygons.Add(edges);
 				}
 			}
 
@@ -2461,7 +2458,7 @@ namespace Jk {
 					}
 				);
 
-				var groups = Distinguish(GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, false));
+				var groups = Distinguish(GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved));
 				var tpols = topoGroups[groupIndex];
 
 				tpols.Clear();
@@ -2508,7 +2505,7 @@ namespace Jk {
 		private static List<List<Loop>> Distinguish(List<List<EdgeAndSide>> edges) {
 			// まず面積を求め、面積降順に並び替える
 			var loops = new Loop[edges.Count];
-			for (int i = 0, n = loops.Length; i < n; i++) {
+			for (int i = loops.Length - 1; i != -1; i--) {
 				var e = edges[i];
 				loops[i] = new Loop(Area(e), e);
 			}
