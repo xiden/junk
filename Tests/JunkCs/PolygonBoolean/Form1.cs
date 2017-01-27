@@ -489,7 +489,7 @@ namespace PolygonBoolean {
 					}
 
 					// ポリゴン同士の演算を行う
-					List<List<PolBoolF.Loop>> result = null;
+					List<List<PolBoolF.EdgeLoop>> result = null;
 					if (radOr.Checked)
 						result = pb.Or();
 					else if (radXor.Checked)
