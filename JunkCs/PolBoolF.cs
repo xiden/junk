@@ -1000,8 +1000,8 @@ namespace Jk {
 			/// </summary>
 			/// <param name="volume">検索範囲を表す境界ボリューム</param>
 			/// <returns>範囲内の頂点インデックス番号配列</returns>
-			public List<LineWithId> Query(volume volume) {
-				return new List<LineWithId>(_Tree.Query(volume));
+			public IEnumerable<LineWithId> Query(volume volume) {
+				return _Tree.Query(volume);
 			}
 
 			/// <summary>
@@ -1015,9 +1015,7 @@ namespace Jk {
 			/// <param name="id3">除外する線分ID３</param>
 			/// <returns>接触しているならtrue</returns>
 			public bool TestIntersect(vector p1, vector p2, object polygon, int id1, int id2, int id3) {
-				var qs = Query(new volume(p1, p2, true));
-				for (int i = qs.Count - 1; i != -1; i--) {
-					var q = qs[i];
+				foreach(var q in Query(new volume(p1, p2, true))) {
 					if ((q.Polygon != polygon || q.Id != id1 && q.Id != id2 && q.Id != id3) && LineIntersect(p1, p2, q.P1, q.P2)) {
 						return true;
 					}
@@ -1041,12 +1039,11 @@ namespace Jk {
 					p2 = t;
 				}
 
-				var qs = Query(new volume(p1, p2, true));
-				for (int i = qs.Count - 1; i != -1; i--) {
-					var q = qs[i];
-					if (q.Polygon != polygon || q.Id == id)
+				foreach (var tq in Query(new volume(p1, p2, true))) {
+					if (tq.Polygon != polygon || tq.Id == id)
 						continue;
 
+					var q = tq;
 					if (q.P2 < q.P1) {
 						var t = q.P1;
 						q.P1 = q.P2;
@@ -1795,8 +1792,9 @@ namespace Jk {
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
 		public List<List<EdgeLoop>> Filtering(Func<Edge, bool, bool> edgeFilter) {
+			var edges = new List<EdgeDir>();
 			var polygons = new List<List<EdgeDir>>();
-			GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, polygons);
+			GetPolygons(edges, edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, polygons);
 			return Distinguish(polygons);
 		}
 
@@ -1958,13 +1956,12 @@ namespace Jk {
 		/// <summary>
 		/// 指定されたフィルタでポリゴンを取得する
 		/// </summary>
+		/// <param name="edges">使いまわすための EdgeDir リスト</param>
 		/// <param name="edgeFilter">フィルタ</param>
 		/// <param name="rightFlag">エッジの右側に付与する辿ったことを示すフラグ</param>
 		/// <param name="leftFlag">エッジの左側に付与する辿ったことを示すフラグ</param>
 		/// <param name="polygons">ポリゴン一覧が返る</param>
-		private void GetPolygons(Func<Edge, bool, bool> edgeFilter, EdgeFlags rightFlag, EdgeFlags leftFlag, List<List<EdgeDir>> polygons) {
-			var edges = new List<EdgeDir>();
-
+		private void GetPolygons(List<EdgeDir> edges, Func<Edge, bool, bool> edgeFilter, EdgeFlags rightFlag, EdgeFlags leftFlag, List<List<EdgeDir>> polygons) {
 			polygons.Clear();
 
 			// 予め無視することがわかっているエッジを処理
@@ -2424,7 +2421,7 @@ namespace Jk {
 		/// ヒゲを取り除く
 		/// </summary>
 		private void RemoveBeard() {
-			List<Node> nodes = new List<Node>();
+			var nodes = new List<Node>();
 			var nm = _NodeMgr;
 			var em = _EdgeMgr;
 			for(;;) {
@@ -2456,6 +2453,7 @@ namespace Jk {
 			var topoGroups = _TopoGroups;
 			var ntopoGroups = topoGroups.Count;
 			uint uniqueIndex = 0;
+			var edges = new List<EdgeDir>();
 			var polygons = new List<List<EdgeDir>>();
 
 			for (int igroup = 0; igroup < ntopoGroups; igroup++) {
@@ -2475,7 +2473,7 @@ namespace Jk {
 					);
 
 					// トポロジー構造から目的のポリゴンだけ抽出する
-					GetPolygons(edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, polygons);
+					GetPolygons(edges, edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, polygons);
 					var loopGroup = Distinguish(polygons);
 					foreach (var loops in loopGroup) {
 						var tpol = new TopologicalPolygon(loops);
