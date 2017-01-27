@@ -62,9 +62,9 @@ namespace Jk {
 		}
 
 		/// <summary>
-		/// ポリゴン情報、頂点は３つ以上で並びは時計回り且つ自己交差してはならない
+		/// 頂点によるループデータ
 		/// </summary>
-		public class Polygon {
+		public class VertexLoop {
 			/// <summary>
 			/// 頂点配列
 			/// </summary>
@@ -76,22 +76,7 @@ namespace Jk {
 			public List<object> EdgesUserData;
 
 			/// <summary>
-			/// 穴配列、null なら穴無し
-			/// </summary>
-			public List<Hole> Holes;
-
-			/// <summary>
-			/// このポリゴンに紐づくユーザーデータ
-			/// </summary>
-			public object UserData;
-
-			/// <summary>
-			/// ポリゴンの境界ボリューム
-			/// </summary>
-			public volume Volume;
-
-			/// <summary>
-			/// ポリゴンの面積
+			/// 面積
 			/// </summary>
 			public element Area;
 
@@ -100,20 +85,84 @@ namespace Jk {
 			/// </summary>
 			public bool CW;
 
+			/// <summary>
+			/// 境界ボリューム
+			/// </summary>
+			public volume Volume;
+
+			/// <summary>
+			/// コンストラクタ
+			/// </summary>
+			public VertexLoop() : this(new List<Vertex>(), null) {
+			}
+
+			/// <summary>
+			/// コンストラクタ、頂点配列エッジユーザーデータ配列を渡して初期化する
+			/// </summary>
+			/// <param name="vertices"></param>
+			/// <param name="edgesUserData"></param>
+			public VertexLoop(List<Vertex> vertices, List<object> edgesUserData) {
+				this.Vertices = vertices;
+				this.EdgesUserData = edgesUserData;
+			}
+
+			/// <summary>
+			/// 平行移動する
+			/// </summary>
+			/// <param name="offset">移動量</param>
+			public void Offset(vector offset) {
+				var vertices = this.Vertices;
+				for (int i = vertices.Count - 1; i != -1; i--) {
+					var v = vertices[i];
+					v.Position += offset;
+					vertices[i] = v;
+				}
+			}
+
+			/// <summary>
+			/// 複製を作成
+			/// </summary>
+			/// <returns>複製</returns>
+			public VertexLoop Clone() {
+				var c = this.MemberwiseClone() as VertexLoop;
+				if (c.Vertices != null)
+					c.Vertices = new List<Vertex>(c.Vertices);
+				if (c.EdgesUserData != null)
+					c.EdgesUserData = new List<object>(c.EdgesUserData);
+				return c;
+			}
+		}
+
+		/// <summary>
+		/// ポリゴン情報、頂点は３つ以上で並びは時計回り且つ自己交差してはならない
+		/// </summary>
+		public class Polygon {
+			/// <summary>
+			/// ループ配列、添字[0:外枠、1...:穴]
+			/// </summary>
+			public List<VertexLoop> Loops;
+
+			/// <summary>
+			/// このポリゴンに紐づくユーザーデータ
+			/// </summary>
+			public object UserData;
+
 			public thisclass Owner;
 			public int GroupIndex;
 			public int PolygonIndex;
 
 			/// <summary>
-			/// コンストラクタ、頂点座標配列、エッジユーザーデータ配列、穴配列を渡して初期化する
+			/// コンストラクタ
 			/// </summary>
-			/// <param name="vertices">頂点配列</param>
-			/// <param name="edgesUserData">エッジのユーザーデータ配列、null 指定可能</param>
-			/// <param name="holes">穴配列、null 指定可能</param>
-			public Polygon(List<Vertex> vertices, List<object> edgesUserData, List<Hole> holes) {
-				this.Vertices = vertices;
-				this.EdgesUserData = edgesUserData;
-				this.Holes = holes;
+			public Polygon() : this(new List<VertexLoop>()) {
+			}
+
+			/// <summary>
+			/// コンストラクタ、頂点ループ配列を渡して初期化する
+			/// </summary>
+			/// <param name="loops">ループ配列、添字[0:外枠、1...:穴]</param>
+			public Polygon(List<VertexLoop> loops) {
+				this.Loops = loops;
 			}
 
 			/// <summary>
@@ -123,54 +172,43 @@ namespace Jk {
 			/// <param name="epsilon">頂点半径</param>
 			/// <returns>使えるなら true が返る</returns>
 			public ValidationResult PrepareValidation(LineFinder lfinder, element epsilon) {
-				var vertices = this.Vertices;
-				var nvts = vertices.Count;
-				var holes = this.Holes;
-				element area;
+				var loops = this.Loops;
 
-				// 最低でも３点以上ないとだめ
-				if (nvts < 3)
-					return new ValidationResult(false, "ポリゴンの頂点数は３以上でなければなりません。");
+				// 全ループに対して頂点数と回転方向チェック
+				for (int iloop = loops.Count - 1; iloop != -1; iloop--) {
+					var loop = loops[iloop];
+					var vertices = loop.Vertices;
+					var nvts = vertices.Count;
+					element area;
 
-				// 頂点数とエッジ数が矛盾してたらだめ
-				if (this.EdgesUserData != null && this.EdgesUserData.Count != nvts)
-					return new ValidationResult(false, "ポリゴンの頂点数とエッジ数が矛盾しています。");
+					// 最低でも３点以上ないとだめ
+					if (nvts < 3)
+						return new ValidationResult(false, "ループ" + (iloop + 1) + "の頂点数が３未満です。");
 
-				// 時計回りチェック
-				area = Area(vertices);
-				if (0 <= area)
-					return new ValidationResult(false, "ポリゴンは時計回りでなければなりません。");
+					// 頂点数とエッジ数が矛盾してたらだめ
+					if (loop.EdgesUserData != null && loop.EdgesUserData.Count != nvts)
+						return new ValidationResult(false, "ループ" + (iloop + 1) + "の頂点数とエッジ数が矛盾しています。");
 
-				if (holes != null) {
-					for (int i = holes.Count - 1; i != -1; i--) {
-						var hole = holes[i];
-
-						// 最低でも３点以上ないとだめ
-						if (hole.Vertices.Count < 3)
-							return new ValidationResult(false, "穴の頂点数は３以上でなければなりません。");
-
-						// 頂点数とエッジ数が矛盾してたらだめ
-						if (hole.EdgesUserData != null && hole.EdgesUserData.Count != hole.Vertices.Count)
-							return new ValidationResult(false, "穴の頂点数とエッジ数が矛盾しています。");
-
-						// 時計回りチェック
-						area = Area(hole.Vertices);
+					// 時計回りチェック
+					area = Area(vertices);
+					if (iloop == 0) {
+						if (0 <= area)
+							return new ValidationResult(false, "ループ" + (iloop + 1) + "は時計回りでなければなりません。");
+					} else {
 						if (area <= 0)
-							return new ValidationResult(false, "穴は反時計回りでなければなりません。");
+							return new ValidationResult(false, "ループ" + (iloop + 1) + "は反時計回りでなければなりません。");
 					}
 				}
 
 				// 全頂点とラインを検索用ツリーに登録
 				int startId = 0;
-				lfinder.Add(this, startId, vertices, epsilon);
-				startId += vertices.Count;
+				for (int iloop = loops.Count - 1; iloop != -1; iloop--) {
+					var loop = loops[iloop];
+					var vertices = loop.Vertices;
+					var nvts = vertices.Count;
 
-				if (holes != null) {
-					for (int i = 0, n = holes.Count; i < n; i++) {
-						var hole = holes[i];
-						lfinder.Add(this, startId, hole.Vertices, epsilon);
-						startId += hole.Vertices.Count;
-					}
+					lfinder.Add(this, startId, vertices, epsilon);
+					startId += vertices.Count;
 				}
 
 				return new ValidationResult(true, null);
@@ -183,64 +221,42 @@ namespace Jk {
 			/// <param name="epsilon">頂点半径</param>
 			/// <returns>使えるなら true が返る</returns>
 			public ValidationResult Validation(LineFinder lfinder, element epsilon) {
-				var vertices = this.Vertices;
-				var nvts = vertices.Count;
-				var holes = this.Holes;
+				var loops = this.Loops;
 
-				// 辺同士の共有と交差チェック
+				// 全ループチェック
+				int startId = 0;
 				var epsilon2 = epsilon * epsilon;
-				var p1 = vertices[0].Position;
-				for (int i = 1; i <= nvts; i++) {
-					var id1 = i - 1;
-					var id2 = (id1 + 1) % nvts;
-					var id3 = (id1 - 1 + nvts) % nvts;
-					var p2 = vertices[i % nvts].Position;
+				for (int iloop = loops.Count - 1; iloop != -1; iloop--) {
+					var loop = loops[iloop];
+					var vertices = loop.Vertices;
+					var nvts = vertices.Count;
 
-					if(lfinder.TestShare(p1, p2, this, id1, epsilon2))
-						return new ValidationResult(false, "ポリゴンの辺" + i + "が共有されています。");
+					// 辺同士の共有と交差チェック
+					var p1 = vertices[0].Position;
+					for (int i = 1; i <= nvts; i++) {
+						var id1 = i - 1;
+						var id2 = startId + (id1 + 1) % nvts;
+						var id3 = startId + (id1 - 1 + nvts) % nvts;
+						id1 += startId;
 
-					if (lfinder.TestIntersect(p1, p2, this, id1, id2, id3))
-						return new ValidationResult(false, "ポリゴンの辺" + i + "が自己交差しています。");
+						var p2 = vertices[i % nvts].Position;
 
-					p1 = p2;
-				}
+						if (lfinder.TestShare(p1, p2, this, id1, epsilon2))
+							return new ValidationResult(false, "ループ" + (iloop + 1) + "の辺" + i + "が共有されています。");
 
-				// 穴のチェック
-				if (holes != null) {
-					int startId = nvts;
-					for (int i = 0, nholes = holes.Count; i < nholes; i++) {
-						var hole = holes[i];
-						var holevts = hole.Vertices;
-						var nholevts = holevts.Count;
+						if (lfinder.TestIntersect(p1, p2, this, id1, id2, id3))
+							return new ValidationResult(false, "ループ" + (iloop + 1) + "の辺" + i + "が自己交差しています。");
 
-						// 辺同士の共有と交差チェック
-						p1 = holevts[0].Position;
+						p1 = p2;
+					}
 
-						for (int j = 1; j <= nholevts; j++) {
-							var id1 = j - 1;
-							var id2 = startId + (id1 + 1) % nholevts;
-							var id3 = startId + (id1 - 1 + nholevts) % nholevts;
-							var p2 = holevts[j % nholevts].Position;
+					startId += nvts;
 
-							id1 += startId;
-
-							if (lfinder.TestShare(p1, p2, this, id1, epsilon2))
-								return new ValidationResult(false, "穴" + (i + 1) + "の辺" + j + "が共有されています。");
-
-							if (lfinder.TestIntersect(p1, p2, this, id1, id2, id3))
-								return new ValidationResult(false, "穴" + (i + 1) + "の辺" + j + "が自己交差しています。");
-
-							p1 = p2;
+					// 穴が外側のポリゴン外に出ていないかチェック
+					if (1 <= iloop) {
+						if (!PointInPolygon2(vertices[0].Position, loops[0].Vertices, true)) {
+							return new ValidationResult(false, "ループ" + (iloop + 1) + "はポリゴン外に出てはなりません。");
 						}
-
-						startId += nholevts;
-
-						// 外側のポリゴン外に出ていないかチェック
-						if (!PointInPolygon2(holevts[0].Position, vertices, true)) {
-							return new ValidationResult(false, "穴はポリゴン外に出てはなりません。");
-						}
-
-						// TODO: 他の穴の中に入ってないかチェック
 					}
 				}
 
@@ -252,20 +268,10 @@ namespace Jk {
 			/// </summary>
 			/// <returns>複製</returns>
 			public Polygon Clone() {
-				var p = this.MemberwiseClone() as Polygon;
-				if (p.Vertices != null)
-					p.Vertices = new List<Vertex>(p.Vertices);
-				if (p.EdgesUserData != null)
-					p.EdgesUserData = new List<object>(p.EdgesUserData);
-				var holes2 = p.Holes;
-				if (holes2 != null) {
-					var holes1 = this.Holes;
-					p.Holes = holes2 = new List<Hole>(holes1);
-					for (int i = holes2.Count - 1; i != -1; i--) {
-						holes2[i] = holes1[i].Clone();
-					}
-				}
-				return p;
+				var c = this.MemberwiseClone() as Polygon;
+				if (c.Loops != null)
+					c.Loops = new List<VertexLoop>(c.Loops);
+				return c;
 			}
 
 			/// <summary>
@@ -273,84 +279,27 @@ namespace Jk {
 			/// </summary>
 			/// <param name="offset">移動量</param>
 			public void Offset(vector offset) {
-				var vertices = this.Vertices;
-				for (int i = vertices.Count - 1; i != -1; i--) {
-					var v = vertices[i];
-					v.Position += offset;
-					vertices[i] = v;
-				}
-				var holes = this.Holes;
-				if (holes != null) {
-					for (int ihole = holes.Count - 1; ihole != -1; ihole--) {
-						vertices = holes[ihole].Vertices;
-						for (int i = vertices.Count - 1; i != -1; i--) {
-							var v = vertices[i];
-							v.Position += offset;
-							vertices[i] = v;
-						}
-					}
+				var loops = this.Loops;
+				for (int i = loops.Count - 1; i != -1; i--) {
+					loops[i].Offset(offset);
 				}
 			}
 
 			public string ToStringForDebug() {
 				var sb = new StringBuilder();
-				var vertices = this.Vertices;
-				sb.AppendLine("polygon");
-				for (int i = 0, n = vertices.Count; i < n; i++) {
-					sb.AppendLine(vertices[i].ToStringForDebug());
-				}
-				var holes = this.Holes;
-				if (holes != null) {
-					for (int i = 0, n = holes.Count; i < n; i++) {
-						sb.Append(holes[i].ToStringForDebug());
+				var loops = this.Loops;
+				for (int iloop = 0, nloops = loops.Count; iloop < nloops; iloop++) {
+					var loop = loops[iloop];
+
+					if (iloop == 0)
+						sb.AppendLine("polygon");
+					else
+						sb.AppendLine("hole");
+
+					var vertices = loop.Vertices;
+					for (int i = 0, n = vertices.Count; i < n; i++) {
+						sb.AppendLine(vertices[i].ToStringForDebug());
 					}
-				}
-				return sb.ToString();
-			}
-		}
-
-		/// <summary>
-		/// ポリゴンの穴情報、頂点は３つ以上で並びは反時計回り且つ自己交差してはならない
-		/// </summary>
-		public class Hole {
-			/// <summary>
-			/// 頂点配列
-			/// </summary>
-			public List<Vertex> Vertices;
-
-			/// <summary>
-			/// エッジのユーザーデータ配列、null ならエッジユーザーデータ無し
-			/// </summary>
-			public List<object> EdgesUserData;
-
-			/// <summary>
-			/// コンストラクタ、頂点座標配列、エッジユーザーデータ配列を渡して初期化する
-			/// </summary>
-			/// <param name="vertices">頂点配列</param>
-			public Hole(List<Vertex> vertices, List<object> edgesUserData) {
-				this.Vertices = vertices;
-				this.EdgesUserData = edgesUserData;
-			}
-
-			/// <summary>
-			/// 複製を作成
-			/// </summary>
-			/// <returns>複製</returns>
-			public Hole Clone() {
-				var p = this.MemberwiseClone() as Hole;
-				if (p.Vertices != null)
-					p.Vertices = new List<Vertex>(p.Vertices);
-				if (p.EdgesUserData != null)
-					p.EdgesUserData = new List<object>(p.EdgesUserData);
-				return p;
-			}
-
-			public string ToStringForDebug() {
-				var sb = new StringBuilder();
-				var vertices = this.Vertices;
-				sb.AppendLine("hole");
-				for (int i = 0, n = vertices.Count; i < n; i++) {
-					sb.AppendLine(vertices[i].ToStringForDebug());
 				}
 				return sb.ToString();
 			}
@@ -1489,6 +1438,11 @@ namespace Jk {
 		/// </summary>
 		public class EdgeLoop {
 			/// <summary>
+			/// ループを構成するエッジ配列
+			/// </summary>
+			public List<EdgeDir> Edges;
+
+			/// <summary>
 			/// 面積
 			/// </summary>
 			public element Area;
@@ -1497,11 +1451,6 @@ namespace Jk {
 			/// 時計回りかどうか
 			/// </summary>
 			public bool CW;
-
-			/// <summary>
-			/// ループを構成するエッジ配列
-			/// </summary>
-			public List<EdgeDir> Edges;
 
 			/// <summary>
 			/// 境界ボリューム
@@ -1919,32 +1868,23 @@ namespace Jk {
 		public static List<Polygon> ToPolygons(List<List<EdgeLoop>> result) {
 			var polygons = new List<Polygon>(result.Count);
 			for (int i = 0, n = result.Count; i < n; i++) {
-				var loops = result[i];
-				if (loops.Count == 0)
+				var eloops = result[i];
+				if (eloops.Count == 0)
 					continue;
 
-				var polygon = new Polygon(null, null, null);
-				var loop = loops[0];
-				polygon.Vertices = new List<Vertex>(from e in loop.Edges select new Vertex(e.From));
-				polygon.EdgesUserData = null;
-				polygon.Area = loop.Area;
-				polygon.CW = loop.CW;
-				polygon.Volume = loop.Volume;
+				var vloops = new List<VertexLoop>();
+				foreach (var eloop in eloops) {
+					var vloop = new VertexLoop(new List<Vertex>(from e in eloop.Edges select new Vertex(e.From)), null);
+					vloop.Area = eloop.Area;
+					vloop.CW = eloop.CW;
+					vloop.Volume = eloop.Volume;
+					vloops.Add(vloop);
+				}
+
+				var polygon = new Polygon(vloops);
 				polygon.GroupIndex = 0;
 				polygon.PolygonIndex = i;
 				polygon.UserData = null;
-
-				if (2 <= loops.Count) {
-					var holes = polygon.Holes = new List<Hole>(loops.Count - 1);
-					for (int j = 1, m = loops.Count; j < m; j++) {
-						loop = loops[j];
-						var hole = new Hole(null, null);
-						hole.Vertices = new List<Vertex>(from e in loop.Edges select new Vertex(e.From));
-						hole.EdgesUserData = null;
-						holes.Add(hole);
-					}
-				}
-
 				polygons.Add(polygon);
 			}
 
@@ -1978,11 +1918,9 @@ namespace Jk {
 			foreach (var edge in this.Edges) {
 				if ((edge.Flags & rightFlag) == 0) {
 					// ポリゴンを構成するエッジと方向一覧を取得
-					bool isNull;
-					TracePolygon(edge, true, false, rightFlag, leftFlag, edges, out isNull);
 					// 結果のポリゴン一覧に追加
-					if (!isNull)
-						polygons.Add(edges);
+					if (TracePolygon(edge, true, false, rightFlag, leftFlag, edges))
+						polygons.Add(new List<EdgeDir>(edges));
 				}
 			}
 
@@ -1990,11 +1928,9 @@ namespace Jk {
 			foreach (var edge in this.Edges) {
 				if ((edge.Flags & leftFlag) == 0) {
 					// ポリゴンを構成するエッジと方向一覧を取得
-					bool isNull;
-					TracePolygon(edge, false, false, rightFlag, leftFlag, edges, out isNull);
 					// 結果のポリゴン一覧に追加
-					if (!isNull)
-						polygons.Add(edges);
+					if (TracePolygon(edge, false, false, rightFlag, leftFlag, edges))
+						polygons.Add(new List<EdgeDir>(edges));
 				}
 			}
 		}
@@ -2009,19 +1945,15 @@ namespace Jk {
 			var loops = new List<EdgeLoop>();
 			foreach (var edge in this.Edges) {
 				if ((edge.Flags & EdgeFlags.RightPolygonized) == 0) {
-					bool isNull;
-					TracePolygon(edge, true, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, edges, out isNull);
-					if (!isNull) {
-						loops.Add(new EdgeLoop(edges));
+					if (TracePolygon(edge, true, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, edges)) {
+						loops.Add(new EdgeLoop(new List<EdgeDir>(edges)));
 					}
 				}
 			}
 			foreach (var edge in this.Edges) {
 				if ((edge.Flags & EdgeFlags.LeftPolygonized) == 0) {
-					bool isNull;
-					TracePolygon(edge, false, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, edges, out isNull);
-					if (!isNull) {
-						loops.Add(new EdgeLoop(edges));
+					if (TracePolygon(edge, false, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, edges)) {
+						loops.Add(new EdgeLoop(new List<EdgeDir>(edges)));
 					}
 				}
 			}
@@ -2064,14 +1996,14 @@ namespace Jk {
 		/// <param name="rightFlag">エッジの右側に付与する辿ったことを示すフラグ</param>
 		/// <param name="leftFlag">エッジの左側に付与する辿ったことを示すフラグ</param>
 		/// <param name="list">結果のエッジ一覧が返る</param>
-		/// <param name="isNull">指定された側にポリゴン形成できないなら true が返る</param>
-		private static void TracePolygon(Edge edge, bool traceRight, bool traceCCW, EdgeFlags rightFlag, EdgeFlags leftFlag, List<EdgeDir> list, out bool isNull) {
+		/// <returns>指定された側にポリゴン形成できたなら true が返る</returns>
+		private static bool TracePolygon(Edge edge, bool traceRight, bool traceCCW, EdgeFlags rightFlag, EdgeFlags leftFlag, List<EdgeDir> list) {
 			var startEdge = edge;
 			var startNode = traceRight ? edge.From : edge.To; // ポリゴンの開始ノード
 			var nextNode = traceRight ? edge.To : edge.From;
 			var curNode = startNode;
 			var curIsRight = traceRight; // エッジの右側を辿るなら true、左側なら false
-			var isNullInternal = true;
+			var isNull = true;
 
 			list.Clear();
 
@@ -2093,8 +2025,8 @@ namespace Jk {
 #endif
 
 				// 指定側に１つでもポリゴンが存在すればポリゴンを形成できる
-				if (isNullInternal && 0 <= (curIsRight ? edge.RightGroupMax : edge.LeftGroupMax))
-					isNullInternal = false;
+				if (isNull && 0 <= (curIsRight ? edge.RightGroupMax : edge.LeftGroupMax))
+					isNull = false;
 
 				// エッジのベクトルを計算
 				var nextNodePos = nextNode.Position;
@@ -2143,7 +2075,7 @@ namespace Jk {
 
 				if (nextEdge == startEdge) {
 					if (list.Count < 3)
-						isNullInternal = true;
+						isNull = true;
 					break;
 				}
 				if (nextEdge == null) {
@@ -2152,7 +2084,7 @@ namespace Jk {
 						System.Diagnostics.POLYGONBOOLEAN_DEBUG.WriteLine("ヒゲ");
 					}
 #endif
-					isNullInternal = true;
+					isNull = true;
 					break;
 				}
 
@@ -2163,14 +2095,13 @@ namespace Jk {
 				curIsRight = nextIsRight;
 			}
 
-			isNull = isNullInternal;
-
 #if POLYGONBOOLEAN_DEBUG
 			if (_Logging) {
 				if (isNull)
 					System.Diagnostics.POLYGONBOOLEAN_DEBUG.WriteLine("Is null");
 			}
 #endif
+			return !isNull;
 		}
 
 		/// <summary>
@@ -2186,9 +2117,9 @@ namespace Jk {
 					var pol = group[polygonIndex];
 					var tpol = new TopologicalPolygon();
 
-					{
+					foreach (var loop in pol.Loops) {
 						// 頂点をノードに変換する、半径 _Epsilon を使いノードの接触を調べ、接触しているなら既存のノードを使用する
-						var vertices = pol.Vertices;
+						var vertices = loop.Vertices;
 						var nnodes = vertices.Count;
 						var nodes = new Node[nnodes];
 						for (int i = 0, nvts = vertices.Count; i < nvts; i++) {
@@ -2206,47 +2137,14 @@ namespace Jk {
 							var edge = _EdgeMgr.New(node1, node2);
 							var right = node1 == edge.From;
 							edge.LinkPolygon(right, groupIndex, polygonIndex);
-							if (pol.EdgesUserData != null)
-								edge.SetUserData(right, groupIndex, pol.EdgesUserData[i - 1]);
+							if (loop.EdgesUserData != null)
+								edge.SetUserData(right, groupIndex, loop.EdgesUserData[i - 1]);
 							edges.Add(new EdgeDir(edge, right));
 							node1 = node2;
 						}
 						tpol.Loops.Add(new EdgeLoop(edges));
 					}
 
-					// 穴を処理
-					var holes = pol.Holes;
-					if (holes != null) {
-						for (int holeIndex = 0, nholes = holes.Count; holeIndex < nholes; holeIndex++) {
-							var hole = holes[holeIndex];
-
-							// 頂点をノードに変換する、半径 _Epsilon を使いノードの接触を調べ、接触しているなら既存のノードを使用する
-							var vertices = hole.Vertices;
-							var nnodes = vertices.Count;
-							var nodes = new Node[nnodes];
-							for (int i = 0, nvts = vertices.Count; i < nvts; i++) {
-								var v = vertices[i];
-								var node = _NodeMgr.New(v.Position);
-								node.SetUserData(groupIndex, v.UserData);
-								nodes[i] = node;
-							}
-
-							// ラインをエッジに変換する、既存エッジに同じノード組み合わせのものが存在したらそちらを使用する
-							var edges = new List<EdgeDir>(nnodes);
-							var node1 = nodes[0];
-							for (int i = 1; i <= nnodes; i++) {
-								var node2 = nodes[i % nnodes];
-								var edge = _EdgeMgr.New(node1, node2);
-								var right = node1 == edge.From;
-								edge.LinkPolygon(right, groupIndex, polygonIndex);
-								if (hole.EdgesUserData != null)
-									edge.SetUserData(right, groupIndex, hole.EdgesUserData[i - 1]);
-								edges.Add(new EdgeDir(edge, right));
-								node1 = node2;
-							}
-							tpol.Loops.Add(new EdgeLoop(edges));
-						}
-					}
 					tpols.Add(tpol);
 				}
 				_TopoGroups.Add(tpols);

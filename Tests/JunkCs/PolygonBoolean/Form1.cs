@@ -41,10 +41,10 @@ namespace PolygonBoolean {
 			}
 		}
 
-		PolBoolF.Hole CurHole {
+		PolBoolF.VertexLoop CurLoop {
 			get {
-				var index = this.cmbCurHole.SelectedIndex;
-				return 0 <= index ? this.CurPolygon.Holes[index] : null;
+				var index = this.cmbCurLoop.SelectedIndex;
+				return 0 <= index ? this.CurPolygon.Loops[index] : null;
 			}
 		}
 
@@ -215,21 +215,10 @@ namespace PolygonBoolean {
 					btnAddPol_Click(this, EventArgs.Empty);
 
 				var pol = this.CurPolygon;
+				if (pol.Loops.Count == 0)
+					pol.Loops.Add(new PolBoolF.VertexLoop());
 
-				pol.Vertices.Add(new PolBoolF.Vertex(pt));
-				this.Invalidate();
-			}
-			if (e.Button == MouseButtons.Right) {
-				if (group.Count == 0)
-					btnAddPol_Click(this, EventArgs.Empty);
-
-				var pol = this.CurPolygon;
-
-				if(pol.Holes == null || pol.Holes.Count == 0)
-					btnAddHole_Click(this, EventArgs.Empty);
-
-				var hole = this.CurHole;
-				hole.Vertices.Add(new PolBoolF.Vertex(pt));
+				pol.Loops[0].Vertices.Add(new PolBoolF.Vertex(pt));
 				this.Invalidate();
 			}
 			if (e.Button == MouseButtons.Middle) {
@@ -333,7 +322,8 @@ namespace PolygonBoolean {
 				var volume = new AABB2f(Vector2f.MaxValue, Vector2f.MinValue);
 				foreach (var group in _Groups) {
 					foreach (var p in group) {
-						volume = volume.Merge(from v in p.Vertices select v.Position);
+						if (p.Loops.Count != 0)
+							volume = volume.Merge(from v in p.Loops[0].Vertices select v.Position);
 					}
 				}
 				if (volume.IsValid && volume.Size != Vector2f.Zero) {
@@ -354,42 +344,23 @@ namespace PolygonBoolean {
 							continue;
 
 						var polygon = group[ipolygon];
-						var vertices = polygon.Vertices;
+						var loops = polygon.Loops;
+						for (int iloop = 0; iloop < loops.Count; iloop++) {
+							var loop = loops[iloop];
+							var vertices = loop.Vertices;
 
-						if (2 <= vertices.Count && vertices.Count < 3)
-							g.DrawLines(penLine, (from v in vertices select ToPt(tf.Fw(v.Position))).ToArray());
-						else if (3 <= vertices.Count)
-							g.DrawPolygon(penLine, (from v in vertices select ToPt(tf.Fw(v.Position))).ToArray());
-						for (int i = 0, n = vertices.Count; i < n; i++) {
-							var p = tf.Fw(vertices[i].Position);
-							g.DrawRectangle(penRect, p.X - 2, p.Y - 2, 4, 4);
+							if (2 <= vertices.Count && vertices.Count < 3)
+								g.DrawLines(iloop == 0 ? penLine : penHoleLine, (from v in vertices select ToPt(tf.Fw(v.Position))).ToArray());
+							else if (3 <= vertices.Count)
+								g.DrawPolygon(iloop == 0 ? penLine : penHoleLine, (from v in vertices select ToPt(tf.Fw(v.Position))).ToArray());
+							for (int i = 0, n = vertices.Count; i < n; i++) {
+								var p = tf.Fw(vertices[i].Position);
+								g.DrawRectangle(iloop == 0 ? penRect : penHoleNode, p.X - 2, p.Y - 2, 4, 4);
 
-							var size = g.MeasureString(i.ToString(), this.Font, 1000, sf);
-							size.Width /= 2;
-							size.Height /= 2;
-							g.DrawString(i.ToString(), this.Font, brsFontVertex, p.X - size.Width, p.Y - size.Height - 10, sf);
-						}
-
-						if (polygon.Holes != null) {
-							for (int ihole = 0; ihole < polygon.Holes.Count; ihole++) {
-								if (cmbCurGroup.SelectedIndex == igroup && 1 <= cmbSrcHole.SelectedIndex && cmbSrcHole.SelectedIndex != (ihole + 1))
-									continue;
-
-								var hole = polygon.Holes[ihole];
-								vertices = hole.Vertices;
-								if (2 <= vertices.Count && vertices.Count < 3)
-									g.DrawLines(penHoleLine, (from v in vertices select ToPt(tf.Fw(v.Position))).ToArray());
-								else if (3 <= vertices.Count)
-									g.DrawPolygon(penHoleLine, (from v in vertices select ToPt(tf.Fw(v.Position))).ToArray());
-								for (int i = 0, n = vertices.Count; i < n; i++) {
-									var p = tf.Fw(vertices[i].Position);
-									g.DrawRectangle(penHoleNode, p.X - 2, p.Y - 2, 4, 4);
-
-									var size = g.MeasureString(i.ToString(), this.Font, 1000, sf);
-									size.Width /= 2;
-									size.Height /= 2;
-									g.DrawString(i.ToString(), this.Font, brsFontVertex, p.X - size.Width, p.Y - size.Height - 10, sf);
-								}
+								var size = g.MeasureString(i.ToString(), this.Font, 1000, sf);
+								size.Width /= 2;
+								size.Height /= 2;
+								g.DrawString(i.ToString(), this.Font, brsFontVertex, p.X - size.Width, p.Y - size.Height - 10, sf);
 							}
 						}
 					}
@@ -681,7 +652,7 @@ namespace PolygonBoolean {
 		}
 
 		private void btnAddPol_Click(object sender, EventArgs e) {
-			var pol = new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, null);
+			var pol = new PolBoolF.Polygon();
 			pol.UserData = Color.FromArgb(0, 127, 255);
 			this.CurGroup.Add(pol);
 			UpdatePolygonCmb(true);
@@ -697,43 +668,31 @@ namespace PolygonBoolean {
 			this.Invalidate();
 		}
 
-		private void btnAddHole_Click(object sender, EventArgs e) {
+		private void btnAddLoop_Click(object sender, EventArgs e) {
 			var group = this.CurGroup;
 			if (group.Count == 0)
-				group.Add(new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, null));
+				group.Add(new PolBoolF.Polygon());
 
 			var polygon = group[group.Count - 1];
+			polygon.Loops.Add(new PolBoolF.VertexLoop());
 
-			var holes = polygon.Holes;
-			if (holes == null)
-				polygon.Holes = holes = new List<PolBoolF.Hole>();
-
-			holes.Add(new PolBoolF.Hole(new List<PolBoolF.Vertex>(), null));
-
-			UpdateHoleCmb(true);
+			UpdateLoopCmb(true);
 
 			this.Invalidate();
 		}
 
-		private void btnDelHole_Click(object sender, EventArgs e) {
+		private void btnDelLoop_Click(object sender, EventArgs e) {
 			var group = this.CurGroup;
 			if (group.Count == 0)
 				return;
 
 			var polygon = group[group.Count - 1];
+			var loops = polygon.Loops;
+			var index = this.cmbCurLoop.SelectedIndex;
+			if (0 <= index && index < loops.Count)
+				loops.RemoveAt(index);
 
-			var holes = polygon.Holes;
-			if (holes == null)
-				return;
-
-			var index = this.cmbCurHole.SelectedIndex;
-			if (0 <= index && index < holes.Count)
-				polygon.Holes.RemoveAt(index);
-
-			if (polygon.Holes.Count == 0)
-				polygon.Holes = null;
-
-			UpdateHoleCmb(false);
+			UpdateLoopCmb(false);
 
 			this.Invalidate();
 		}
@@ -751,7 +710,7 @@ namespace PolygonBoolean {
 		}
 
 		private void cmbCurPolygon_SelectedIndexChanged(object sender, EventArgs e) {
-			UpdateHoleCmb(true);
+			UpdateLoopCmb(true);
 			var pol = this.CurPolygon;
 			if (pol != null) {
 				this.pictureBox1.BackColor = (Color)pol.UserData;
@@ -773,34 +732,32 @@ namespace PolygonBoolean {
 			this.cmbCurPolygon.EndUpdate();
 
 			if (this.cmbCurPolygon.SelectedIndex != index)
-				UpdateHoleCmb(true);
+				UpdateLoopCmb(true);
 		}
 
-		void UpdateHoleCmb(bool selectLast) {
+		void UpdateLoopCmb(bool selectLast) {
 			var polygon = this.CurPolygon;
 			if (polygon == null)
 				return;
 
-			var index = this.cmbCurHole.SelectedIndex;
-			this.cmbCurHole.BeginUpdate();
-			this.cmbCurHole.Items.Clear();
-			if (polygon.Holes != null) {
-				for (int i = 1; i <= polygon.Holes.Count; i++) {
-					this.cmbCurHole.Items.Add(i);
-				}
-				if (this.cmbCurHole.Items.Count != 0) {
-					if (selectLast || index < 0 || this.cmbCurHole.Items.Count <= index)
-						this.cmbCurHole.SelectedIndex = this.cmbCurHole.Items.Count - 1;
-				}
+			var index = this.cmbCurLoop.SelectedIndex;
+			this.cmbCurLoop.BeginUpdate();
+			this.cmbCurLoop.Items.Clear();
+			var loops = polygon.Loops;
+			for (int i = 1; i <= loops.Count; i++) {
+				this.cmbCurLoop.Items.Add(i);
 			}
-			this.cmbCurHole.EndUpdate();
+			if (this.cmbCurLoop.Items.Count != 0) {
+				if (selectLast || index < 0 || this.cmbCurLoop.Items.Count <= index)
+					this.cmbCurLoop.SelectedIndex = this.cmbCurLoop.Items.Count - 1;
+			}
+			this.cmbCurLoop.EndUpdate();
 		}
 
 		public static List<PolBoolF.Polygon> ReadPolygonFromCsv(string fileName) {
 			var polygons = new List<PolBoolF.Polygon>();
 			PolBoolF.Polygon p = null;
-			PolBoolF.Hole h = null;
-			int mode = 0;
+			PolBoolF.VertexLoop l = null;
 
 			using (var cr = new CsvReader(new System.IO.StreamReader(fileName))) {
 				for (;;) {
@@ -812,22 +769,16 @@ namespace PolygonBoolean {
 
 					switch (fields[0]) {
 					case "polygon":
-						p = new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, new List<PolBoolF.Hole>());
+						p = new PolBoolF.Polygon();
+						p.Loops.Add(l = new PolBoolF.VertexLoop());
 						polygons.Add(p);
-						mode = 1;
 						break;
 					case "hole":
-						h = new PolBoolF.Hole(new List<PolBoolF.Vertex>(), null);
-						p.Holes.Add(h);
-						mode = 2;
+						p.Loops.Add(l = new PolBoolF.VertexLoop());
 						break;
 					default: {
 							var v = new Vector2f(float.Parse(fields[0]), float.Parse(fields[1]));
-							if (mode == 1) {
-								p.Vertices.Add(new PolBoolF.Vertex(v));
-							} else if (mode == 2) {
-								h.Vertices.Add(new PolBoolF.Vertex(v));
-							}
+							l.Vertices.Add(new PolBoolF.Vertex(v));
 						}
 						break;
 					}
@@ -842,8 +793,7 @@ namespace PolygonBoolean {
 			g.Clear();
 
 			PolBoolF.Polygon p = null;
-			PolBoolF.Hole h = null;
-			int mode = 0;
+			PolBoolF.VertexLoop l = null;
 			var colors = new Color[] {
 				Color.Red,
 				Color.Orange,
@@ -864,24 +814,18 @@ namespace PolygonBoolean {
 
 					switch (fields[0]) {
 					case "polygon":
-						p = new PolBoolF.Polygon(new List<PolBoolF.Vertex>(), null, new List<PolBoolF.Hole>());
+						p = new PolBoolF.Polygon();
+						p.Loops.Add(l = new PolBoolF.VertexLoop());
 						p.UserData = colors[colorIndex % colors.Length];
 						colorIndex++;
 						g.Add(p);
-						mode = 1;
 						break;
 					case "hole":
-						h = new PolBoolF.Hole(new List<PolBoolF.Vertex>(), null);
-						p.Holes.Add(h);
-						mode = 2;
+						p.Loops.Add(l = new PolBoolF.VertexLoop());
 						break;
 					default: {
 							var v = new Vector2f(float.Parse(fields[0]), float.Parse(fields[1]));
-							if (mode == 1) {
-								p.Vertices.Add(new PolBoolF.Vertex(v));
-							} else if (mode == 2) {
-								h.Vertices.Add(new PolBoolF.Vertex(v));
-							}
+							l.Vertices.Add(new PolBoolF.Vertex(v));
 						}
 						break;
 					}
@@ -1028,6 +972,10 @@ namespace PolygonBoolean {
 		private void btnSearchEdge_Click(object sender, EventArgs e) {
 			_SearchEdgeIndex = int.Parse(tbSearch.Text);
 			this.Invalidate();
+		}
+
+		private void panel1_Paint(object sender, PaintEventArgs e) {
+
 		}
 	}
 }

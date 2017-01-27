@@ -34,8 +34,8 @@
 			this.radAnd = new System.Windows.Forms.RadioButton();
 			this.cmbPolygonIndex = new System.Windows.Forms.ComboBox();
 			this.btnClear = new System.Windows.Forms.Button();
-			this.btnAddHole = new System.Windows.Forms.Button();
-			this.btnDelHole = new System.Windows.Forms.Button();
+			this.btnAddLoop = new System.Windows.Forms.Button();
+			this.btnDelLoop = new System.Windows.Forms.Button();
 			this.lblPos = new System.Windows.Forms.Label();
 			this.cmbPol = new System.Windows.Forms.ComboBox();
 			this.cmbHole = new System.Windows.Forms.ComboBox();
@@ -43,16 +43,16 @@
 			this.btnAddPol = new System.Windows.Forms.Button();
 			this.cmbCurGroup = new System.Windows.Forms.ComboBox();
 			this.cmbCurPolygon = new System.Windows.Forms.ComboBox();
-			this.cmbCurHole = new System.Windows.Forms.ComboBox();
+			this.cmbCurLoop = new System.Windows.Forms.ComboBox();
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.btnOpen = new System.Windows.Forms.Button();
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.btnSearchEdge = new System.Windows.Forms.Button();
+			this.btnSearchNode = new System.Windows.Forms.Button();
+			this.tbSearch = new System.Windows.Forms.TextBox();
 			this.cmbSrcHole = new System.Windows.Forms.ComboBox();
 			this.cmbSrcPol = new System.Windows.Forms.ComboBox();
 			this.btnDebug = new System.Windows.Forms.Button();
-			this.tbSearch = new System.Windows.Forms.TextBox();
-			this.btnSearchNode = new System.Windows.Forms.Button();
-			this.btnSearchEdge = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			this.panel1.SuspendLayout();
@@ -63,9 +63,9 @@
 			this.lblResult.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.lblResult.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.lblResult.Location = new System.Drawing.Point(521, 6);
+			this.lblResult.Location = new System.Drawing.Point(545, 6);
 			this.lblResult.Name = "lblResult";
-			this.lblResult.Size = new System.Drawing.Size(361, 14);
+			this.lblResult.Size = new System.Drawing.Size(337, 14);
 			this.lblResult.TabIndex = 4;
 			this.lblResult.Text = "label3";
 			// 
@@ -180,25 +180,25 @@
 			this.btnClear.UseVisualStyleBackColor = true;
 			this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
 			// 
-			// btnAddHole
+			// btnAddLoop
 			// 
-			this.btnAddHole.Location = new System.Drawing.Point(342, 2);
-			this.btnAddHole.Name = "btnAddHole";
-			this.btnAddHole.Size = new System.Drawing.Size(56, 23);
-			this.btnAddHole.TabIndex = 12;
-			this.btnAddHole.Text = "穴追加";
-			this.btnAddHole.UseVisualStyleBackColor = true;
-			this.btnAddHole.Click += new System.EventHandler(this.btnAddHole_Click);
+			this.btnAddLoop.Location = new System.Drawing.Point(397, 2);
+			this.btnAddLoop.Name = "btnAddLoop";
+			this.btnAddLoop.Size = new System.Drawing.Size(68, 23);
+			this.btnAddLoop.TabIndex = 12;
+			this.btnAddLoop.Text = "ループ追加";
+			this.btnAddLoop.UseVisualStyleBackColor = true;
+			this.btnAddLoop.Click += new System.EventHandler(this.btnAddLoop_Click);
 			// 
-			// btnDelHole
+			// btnDelLoop
 			// 
-			this.btnDelHole.Location = new System.Drawing.Point(404, 2);
-			this.btnDelHole.Name = "btnDelHole";
-			this.btnDelHole.Size = new System.Drawing.Size(56, 23);
-			this.btnDelHole.TabIndex = 13;
-			this.btnDelHole.Text = "穴削除";
-			this.btnDelHole.UseVisualStyleBackColor = true;
-			this.btnDelHole.Click += new System.EventHandler(this.btnDelHole_Click);
+			this.btnDelLoop.Location = new System.Drawing.Point(471, 2);
+			this.btnDelLoop.Name = "btnDelLoop";
+			this.btnDelLoop.Size = new System.Drawing.Size(68, 23);
+			this.btnDelLoop.TabIndex = 13;
+			this.btnDelLoop.Text = "ループ削除";
+			this.btnDelLoop.UseVisualStyleBackColor = true;
+			this.btnDelLoop.Click += new System.EventHandler(this.btnDelLoop_Click);
 			// 
 			// lblPos
 			// 
@@ -270,19 +270,19 @@
 			this.cmbCurPolygon.TabIndex = 20;
 			this.cmbCurPolygon.SelectedIndexChanged += new System.EventHandler(this.cmbCurPolygon_SelectedIndexChanged);
 			// 
-			// cmbCurHole
+			// cmbCurLoop
 			// 
-			this.cmbCurHole.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.cmbCurHole.FormattingEnabled = true;
-			this.cmbCurHole.Location = new System.Drawing.Point(291, 3);
-			this.cmbCurHole.Name = "cmbCurHole";
-			this.cmbCurHole.Size = new System.Drawing.Size(45, 20);
-			this.cmbCurHole.TabIndex = 21;
+			this.cmbCurLoop.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cmbCurLoop.FormattingEnabled = true;
+			this.cmbCurLoop.Location = new System.Drawing.Point(346, 3);
+			this.cmbCurLoop.Name = "cmbCurLoop";
+			this.cmbCurLoop.Size = new System.Drawing.Size(45, 20);
+			this.cmbCurLoop.TabIndex = 21;
 			// 
 			// pictureBox1
 			// 
 			this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.pictureBox1.Location = new System.Drawing.Point(466, 3);
+			this.pictureBox1.Location = new System.Drawing.Point(291, 2);
 			this.pictureBox1.Name = "pictureBox1";
 			this.pictureBox1.Size = new System.Drawing.Size(49, 22);
 			this.pictureBox1.TabIndex = 22;
@@ -312,15 +312,15 @@
 			this.panel1.Controls.Add(this.lblResult);
 			this.panel1.Controls.Add(this.pictureBox1);
 			this.panel1.Controls.Add(this.label1);
-			this.panel1.Controls.Add(this.cmbCurHole);
+			this.panel1.Controls.Add(this.cmbCurLoop);
 			this.panel1.Controls.Add(this.groupBox1);
 			this.panel1.Controls.Add(this.cmbCurPolygon);
 			this.panel1.Controls.Add(this.cmbPolygonIndex);
 			this.panel1.Controls.Add(this.btnClear);
 			this.panel1.Controls.Add(this.btnDelPol);
-			this.panel1.Controls.Add(this.btnAddHole);
+			this.panel1.Controls.Add(this.btnAddLoop);
 			this.panel1.Controls.Add(this.btnAddPol);
-			this.panel1.Controls.Add(this.btnDelHole);
+			this.panel1.Controls.Add(this.btnDelLoop);
 			this.panel1.Controls.Add(this.cmbHole);
 			this.panel1.Controls.Add(this.lblPos);
 			this.panel1.Controls.Add(this.cmbPol);
@@ -329,6 +329,35 @@
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(885, 166);
 			this.panel1.TabIndex = 24;
+			this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
+			// 
+			// btnSearchEdge
+			// 
+			this.btnSearchEdge.Location = new System.Drawing.Point(602, 31);
+			this.btnSearchEdge.Name = "btnSearchEdge";
+			this.btnSearchEdge.Size = new System.Drawing.Size(75, 23);
+			this.btnSearchEdge.TabIndex = 29;
+			this.btnSearchEdge.Text = "エッジ検索";
+			this.btnSearchEdge.UseVisualStyleBackColor = true;
+			this.btnSearchEdge.Click += new System.EventHandler(this.btnSearchEdge_Click);
+			// 
+			// btnSearchNode
+			// 
+			this.btnSearchNode.Location = new System.Drawing.Point(521, 31);
+			this.btnSearchNode.Name = "btnSearchNode";
+			this.btnSearchNode.Size = new System.Drawing.Size(75, 23);
+			this.btnSearchNode.TabIndex = 28;
+			this.btnSearchNode.Text = "ノード検索";
+			this.btnSearchNode.UseVisualStyleBackColor = true;
+			this.btnSearchNode.Click += new System.EventHandler(this.btnSearchNode_Click);
+			// 
+			// tbSearch
+			// 
+			this.tbSearch.Location = new System.Drawing.Point(466, 33);
+			this.tbSearch.Name = "tbSearch";
+			this.tbSearch.Size = new System.Drawing.Size(49, 19);
+			this.tbSearch.TabIndex = 27;
+			this.tbSearch.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
 			// 
 			// cmbSrcHole
 			// 
@@ -360,34 +389,6 @@
 			this.btnDebug.UseVisualStyleBackColor = true;
 			this.btnDebug.Click += new System.EventHandler(this.btnDebug_Click);
 			// 
-			// tbSearch
-			// 
-			this.tbSearch.Location = new System.Drawing.Point(466, 33);
-			this.tbSearch.Name = "tbSearch";
-			this.tbSearch.Size = new System.Drawing.Size(49, 19);
-			this.tbSearch.TabIndex = 27;
-			this.tbSearch.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-			// 
-			// btnSearchNode
-			// 
-			this.btnSearchNode.Location = new System.Drawing.Point(521, 31);
-			this.btnSearchNode.Name = "btnSearchNode";
-			this.btnSearchNode.Size = new System.Drawing.Size(75, 23);
-			this.btnSearchNode.TabIndex = 28;
-			this.btnSearchNode.Text = "ノード検索";
-			this.btnSearchNode.UseVisualStyleBackColor = true;
-			this.btnSearchNode.Click += new System.EventHandler(this.btnSearchNode_Click);
-			// 
-			// btnSearchEdge
-			// 
-			this.btnSearchEdge.Location = new System.Drawing.Point(602, 31);
-			this.btnSearchEdge.Name = "btnSearchEdge";
-			this.btnSearchEdge.Size = new System.Drawing.Size(75, 23);
-			this.btnSearchEdge.TabIndex = 29;
-			this.btnSearchEdge.Text = "エッジ検索";
-			this.btnSearchEdge.UseVisualStyleBackColor = true;
-			this.btnSearchEdge.Click += new System.EventHandler(this.btnSearchEdge_Click);
-			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -416,8 +417,8 @@
 		private System.Windows.Forms.ComboBox cmbPolygonIndex;
 		private System.Windows.Forms.RadioButton radExtract;
 		private System.Windows.Forms.Button btnClear;
-		private System.Windows.Forms.Button btnAddHole;
-		private System.Windows.Forms.Button btnDelHole;
+		private System.Windows.Forms.Button btnAddLoop;
+		private System.Windows.Forms.Button btnDelLoop;
 		private System.Windows.Forms.Label lblPos;
 		private System.Windows.Forms.ComboBox cmbPol;
 		private System.Windows.Forms.ComboBox cmbHole;
@@ -425,7 +426,7 @@
 		private System.Windows.Forms.Button btnAddPol;
 		private System.Windows.Forms.ComboBox cmbCurGroup;
 		private System.Windows.Forms.ComboBox cmbCurPolygon;
-		private System.Windows.Forms.ComboBox cmbCurHole;
+		private System.Windows.Forms.ComboBox cmbCurLoop;
 		private System.Windows.Forms.PictureBox pictureBox1;
 		private System.Windows.Forms.RadioButton radFilter;
 		private System.Windows.Forms.Button btnOpen;
