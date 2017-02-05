@@ -64,7 +64,7 @@ namespace Jk {
 		/// <summary>
 		/// 頂点によるループデータ
 		/// </summary>
-		public class VertexLoop {
+		public class VLoop {
 			/// <summary>
 			/// 頂点配列
 			/// </summary>
@@ -93,7 +93,7 @@ namespace Jk {
 			/// <summary>
 			/// コンストラクタ
 			/// </summary>
-			public VertexLoop() : this(new List<Vertex>(), null) {
+			public VLoop() : this(new List<Vertex>(), null) {
 			}
 
 			/// <summary>
@@ -101,7 +101,7 @@ namespace Jk {
 			/// </summary>
 			/// <param name="vertices"></param>
 			/// <param name="edgesUserData"></param>
-			public VertexLoop(List<Vertex> vertices, List<object> edgesUserData) {
+			public VLoop(List<Vertex> vertices, List<object> edgesUserData) {
 				this.Vertices = vertices;
 				this.EdgesUserData = edgesUserData;
 			}
@@ -123,8 +123,8 @@ namespace Jk {
 			/// 複製を作成
 			/// </summary>
 			/// <returns>複製</returns>
-			public VertexLoop Clone() {
-				var c = this.MemberwiseClone() as VertexLoop;
+			public VLoop Clone() {
+				var c = this.MemberwiseClone() as VLoop;
 				if (c.Vertices != null)
 					c.Vertices = new List<Vertex>(c.Vertices);
 				if (c.EdgesUserData != null)
@@ -140,7 +140,7 @@ namespace Jk {
 			/// <summary>
 			/// ループ配列、添字[0:外枠、1...:穴]
 			/// </summary>
-			public List<VertexLoop> Loops;
+			public List<VLoop> Loops;
 
 			/// <summary>
 			/// このポリゴンに紐づくユーザーデータ
@@ -154,14 +154,14 @@ namespace Jk {
 			/// <summary>
 			/// コンストラクタ
 			/// </summary>
-			public Polygon() : this(new List<VertexLoop>()) {
+			public Polygon() : this(new List<VLoop>()) {
 			}
 
 			/// <summary>
 			/// コンストラクタ、頂点ループ配列を渡して初期化する
 			/// </summary>
 			/// <param name="loops">ループ配列、添字[0:外枠、1...:穴]</param>
-			public Polygon(List<VertexLoop> loops) {
+			public Polygon(List<VLoop> loops) {
 				this.Loops = loops;
 			}
 
@@ -270,7 +270,7 @@ namespace Jk {
 			public Polygon Clone() {
 				var c = this.MemberwiseClone() as Polygon;
 				if (c.Loops != null)
-					c.Loops = new List<VertexLoop>(c.Loops);
+					c.Loops = new List<VLoop>(c.Loops);
 				return c;
 			}
 
@@ -585,6 +585,11 @@ namespace Jk {
 			/// 進行方向From→Toの左側のユーザーデータ、[グループインデックス]
 			/// </summary>
 			public object[] LeftUserData;
+
+			/// <summary>
+			/// ユーザーが自由に設定＆使用できる値
+			/// </summary>
+			public ulong UserValue;
 
 			/// <summary>
 			/// 進行方向From→Toの右側のグループインデックス最大値
@@ -1009,22 +1014,30 @@ namespace Jk {
 		/// <summary>
 		/// ノードとエッジで構成されるポリゴン
 		/// </summary>
-		public class TopologicalPolygon {
-			/// <summary>
-			/// ユニークなエッジインデックス、 PolBoolF 内で同じ値があってはならない
-			/// </summary>
-			public uint UniqueIndex;
-			
+		public class EPolygon {
 			/// <summary>
 			/// ループ配列、添字[0:外枠、1...:穴]
 			/// </summary>
-			public List<EdgeLoop> Loops;
+			public List<ELoop> Loops;
 
-			public TopologicalPolygon() {
-				this.Loops = new List<EdgeLoop>();
+			/// <summary>
+			/// このポリゴンに紐づくユーザーデータ
+			/// </summary>
+			public object UserData;
+
+			/// <summary>
+			/// ユーザーが自由に設定＆使用できる値
+			/// </summary>
+			public ulong UserValue;
+
+			public int GroupIndex;
+			public int PolygonIndex;
+
+			public EPolygon() {
+				this.Loops = new List<ELoop>();
 			}
 
-			public TopologicalPolygon(List<EdgeLoop> loops) {
+			public EPolygon(List<ELoop> loops) {
 				this.Loops = loops;
 			}
 
@@ -1059,7 +1072,7 @@ namespace Jk {
 			/// <param name="thisPolygonIndex">自分のポリゴンインデックス</param>
 			/// <param name="polygon">包含チェック対象ポリゴン</param>
 			/// <returns>立場を逆にしたパターンを調べる必要が無いなら true</returns>
-			public void LinkPolygonIfContainsEdge(int thisGroupIndex, int thisPolygonIndex, TopologicalPolygon polygon) {
+			public void LinkPolygonIfContainsEdge(int thisGroupIndex, int thisPolygonIndex, EPolygon polygon) {
 				var volume = this.Loops[0].Volume;
 				var loops = polygon.Loops;
 
@@ -1348,7 +1361,7 @@ namespace Jk {
 		/// <summary>
 		/// エッジと方向
 		/// </summary>
-		public struct EdgeDir {
+		public struct EDir {
 			/// <summary>
 			/// エッジ
 			/// </summary>
@@ -1359,7 +1372,7 @@ namespace Jk {
 			/// </summary>
 			public bool TraceRight;
 
-			public EdgeDir(Edge edge, bool right) {
+			public EDir(Edge edge, bool right) {
 				this.Edge = edge;
 				this.TraceRight = right;
 			}
@@ -1436,11 +1449,11 @@ namespace Jk {
 		/// <summary>
 		/// エッジによるループデータ
 		/// </summary>
-		public class EdgeLoop {
+		public class ELoop {
 			/// <summary>
 			/// ループを構成するエッジ配列
 			/// </summary>
-			public List<EdgeDir> Edges;
+			public List<EDir> Edges;
 
 			/// <summary>
 			/// 面積
@@ -1457,10 +1470,15 @@ namespace Jk {
 			/// </summary>
 			public volume Volume;
 
-			public EdgeLoop(List<EdgeDir> edges) : this(Area(edges), edges) {
+			/// <summary>
+			/// このポリゴンに紐づくユーザーデータ
+			/// </summary>
+			public object UserData;
+
+			public ELoop(List<EDir> edges) : this(Area(edges), edges) {
 			}
 
-			public EdgeLoop(element area, List<EdgeDir> edges) {
+			public ELoop(element area, List<EDir> edges) {
 				this.Area = Math.Abs(area);
 				this.CW = area <= 0;
 				this.Edges = edges;
@@ -1493,7 +1511,7 @@ namespace Jk {
 		NodeManager _NodeMgr;
 		EdgeManager _EdgeMgr;
 		List<List<Polygon>> _Groups = new List<List<Polygon>>();
-		List<List<TopologicalPolygon>> _TopoGroups = new List<List<TopologicalPolygon>>();
+		List<List<EPolygon>> _TopoGroups = new List<List<EPolygon>>();
 		element _Epsilon;
 		IntersectionNodeProc _IntersectionNodeGenerator;
 		Func<object, object> _UserDataCloner;
@@ -1682,7 +1700,7 @@ namespace Jk {
 		/// </summary>
 		/// <param name="edges">エッジと方向の一覧</param>
 		/// <returns>ノード一覧</returns>
-		public static List<Node> NodesFromEdges(IEnumerable<EdgeDir> edges) {
+		public static List<Node> NodesFromEdges(IEnumerable<EDir> edges) {
 			return new List<Node>(from r in edges select r.From);
 		}
 
@@ -1692,7 +1710,7 @@ namespace Jk {
 		/// <param name="edges">方向付きのエッジリスト</param>
 		/// <param name="matcher">マッチ判定デリゲート</param>
 		/// <returns>弧線リスト</returns>
-		public static List<IndexRange> MatchSegments(List<EdgeDir> edges, Func<Edge, bool, bool> matcher) {
+		public static List<IndexRange> MatchSegments(List<EDir> edges, Func<Edge, bool, bool> matcher) {
 			var list = new List<IndexRange>();
 			var n = edges.Count;
 
@@ -1740,9 +1758,9 @@ namespace Jk {
 		/// <param name="edgeFilter">フィルタ、エッジと右方向かどうかを受け取り無視するなら true を返す</param>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<EdgeLoop>> Filtering(Func<Edge, bool, bool> edgeFilter) {
-			var edges = new List<EdgeDir>();
-			var polygons = new List<List<EdgeDir>>();
+		public List<EPolygon> Filtering(Func<Edge, bool, bool> edgeFilter) {
+			var edges = new List<EDir>();
+			var polygons = new List<List<EDir>>();
 			GetPolygons(edges, edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, polygons);
 			return Distinguish(polygons);
 		}
@@ -1752,7 +1770,7 @@ namespace Jk {
 		/// </summary>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<EdgeLoop>> Or() {
+		public List<EPolygon> Or() {
 #if POLYGONBOOLEAN_DEBUG
 			_Logging = true;
 			System.Diagnostics.POLYGONBOOLEAN_DEBUG.WriteLine("======== Or ========");
@@ -1779,7 +1797,7 @@ namespace Jk {
 		/// </summary>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<EdgeLoop>> Xor() {
+		public List<EPolygon> Xor() {
 #if POLYGONBOOLEAN_DEBUG
 			_Logging = true;
 			System.Diagnostics.POLYGONBOOLEAN_DEBUG.WriteLine("======== Xor ========");
@@ -1811,7 +1829,7 @@ namespace Jk {
 		/// </summary>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<EdgeLoop>> And() {
+		public List<EPolygon> And() {
 			// エッジの指定方向に登録ポリゴンの内一つでも存在しないなら無視するフィルタ
 			var edgeFilter = new Func<Edge, bool, bool>(
 				(Edge e, bool right) => {
@@ -1833,7 +1851,7 @@ namespace Jk {
 		/// <param name="groupIndex">減算するグループのインデックス</param>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<EdgeLoop>> Sub(int groupIndex) {
+		public List<EPolygon> Sub(int groupIndex) {
 			// エッジの指定方向に減算ポリゴンが存在するなら無視するフィルタ
 			var edgeFilter = new Func<Edge, bool, bool>(
 				(Edge e, bool right) => {
@@ -1849,15 +1867,8 @@ namespace Jk {
 		/// <param name="groupIndex">抽出するグループのインデックス</param>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<List<EdgeLoop>> Extract(int groupIndex) {
-			var group = new List<List<EdgeLoop>>();
-			var tpols = _TopoGroups[groupIndex];
-
-			for(int i = 0, m = tpols.Count; i < m; i++) {
-				group.Add(tpols[i].Loops);
-			}
-
-			return group;
+		public List<EPolygon> Extract(int groupIndex) {
+			return _TopoGroups[groupIndex];
 		}
 
 		/// <summary>
@@ -1865,16 +1876,16 @@ namespace Jk {
 		/// </summary>
 		/// <param name="result">ブーリアン演算結果</param>
 		/// <returns>Polygon の配列</returns>
-		public static List<Polygon> ToPolygons(List<List<EdgeLoop>> result) {
+		public static List<Polygon> ToPolygons(List<List<ELoop>> result) {
 			var polygons = new List<Polygon>(result.Count);
 			for (int i = 0, n = result.Count; i < n; i++) {
 				var eloops = result[i];
 				if (eloops.Count == 0)
 					continue;
 
-				var vloops = new List<VertexLoop>();
+				var vloops = new List<VLoop>();
 				foreach (var eloop in eloops) {
-					var vloop = new VertexLoop(new List<Vertex>(from e in eloop.Edges select new Vertex(e.From)), null);
+					var vloop = new VLoop(new List<Vertex>(from e in eloop.Edges select new Vertex(e.From)), null);
 					vloop.Area = eloop.Area;
 					vloop.CW = eloop.CW;
 					vloop.Volume = eloop.Volume;
@@ -1901,7 +1912,7 @@ namespace Jk {
 		/// <param name="rightFlag">エッジの右側に付与する辿ったことを示すフラグ</param>
 		/// <param name="leftFlag">エッジの左側に付与する辿ったことを示すフラグ</param>
 		/// <param name="polygons">ポリゴン一覧が返る</param>
-		private void GetPolygons(List<EdgeDir> edges, Func<Edge, bool, bool> edgeFilter, EdgeFlags rightFlag, EdgeFlags leftFlag, List<List<EdgeDir>> polygons) {
+		private void GetPolygons(List<EDir> edges, Func<Edge, bool, bool> edgeFilter, EdgeFlags rightFlag, EdgeFlags leftFlag, List<List<EDir>> polygons) {
 			polygons.Clear();
 
 			// 予め無視することがわかっているエッジを処理
@@ -1920,7 +1931,7 @@ namespace Jk {
 					// ポリゴンを構成するエッジと方向一覧を取得
 					// 結果のポリゴン一覧に追加
 					if (TracePolygon(edge, true, false, rightFlag, leftFlag, edges))
-						polygons.Add(new List<EdgeDir>(edges));
+						polygons.Add(new List<EDir>(edges));
 				}
 			}
 
@@ -1930,7 +1941,7 @@ namespace Jk {
 					// ポリゴンを構成するエッジと方向一覧を取得
 					// 結果のポリゴン一覧に追加
 					if (TracePolygon(edge, false, false, rightFlag, leftFlag, edges))
-						polygons.Add(new List<EdgeDir>(edges));
+						polygons.Add(new List<EDir>(edges));
 				}
 			}
 		}
@@ -1941,19 +1952,19 @@ namespace Jk {
 		/// <returns>全てのポリゴンを構成するエッジと方向の一覧</returns>
 		private void PolygonizeAll() {
 			// 作成できるループを全て取得する
-			var edges = new List<EdgeDir>();
-			var loops = new List<EdgeLoop>();
+			var edges = new List<EDir>();
+			var loops = new List<ELoop>();
 			foreach (var edge in this.Edges) {
 				if ((edge.Flags & EdgeFlags.RightPolygonized) == 0) {
 					if (TracePolygon(edge, true, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, edges)) {
-						loops.Add(new EdgeLoop(new List<EdgeDir>(edges)));
+						loops.Add(new ELoop(new List<EDir>(edges)));
 					}
 				}
 			}
 			foreach (var edge in this.Edges) {
 				if ((edge.Flags & EdgeFlags.LeftPolygonized) == 0) {
 					if (TracePolygon(edge, false, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, edges)) {
-						loops.Add(new EdgeLoop(new List<EdgeDir>(edges)));
+						loops.Add(new ELoop(new List<EDir>(edges)));
 					}
 				}
 			}
@@ -1997,7 +2008,7 @@ namespace Jk {
 		/// <param name="leftFlag">エッジの左側に付与する辿ったことを示すフラグ</param>
 		/// <param name="list">結果のエッジ一覧が返る</param>
 		/// <returns>指定された側にポリゴン形成できたなら true が返る</returns>
-		private static bool TracePolygon(Edge edge, bool traceRight, bool traceCCW, EdgeFlags rightFlag, EdgeFlags leftFlag, List<EdgeDir> list) {
+		private static bool TracePolygon(Edge edge, bool traceRight, bool traceCCW, EdgeFlags rightFlag, EdgeFlags leftFlag, List<EDir> list) {
 			var startEdge = edge;
 			var startNode = traceRight ? edge.From : edge.To; // ポリゴンの開始ノード
 			var nextNode = traceRight ? edge.To : edge.From;
@@ -2015,7 +2026,7 @@ namespace Jk {
 
 			while (true) {
 				// ポリゴンを構成するエッジとして方向と共に登録
-				list.Add(new EdgeDir(edge, curIsRight));
+				list.Add(new EDir(edge, curIsRight));
 				edge.Flags |= curIsRight ? rightFlag : leftFlag;
 
 #if POLYGONBOOLEAN_DEBUG
@@ -2112,10 +2123,10 @@ namespace Jk {
 			var em = _EdgeMgr;
 			for (int groupIndex = 0, ngroups = _Groups.Count; groupIndex < ngroups; groupIndex++) {
 				var group = _Groups[groupIndex];
-				var tpols = new List<TopologicalPolygon>();
+				var tpols = new List<EPolygon>();
 				for (int polygonIndex = 0, npolygons = group.Count; polygonIndex < npolygons; polygonIndex++) {
 					var pol = group[polygonIndex];
-					var tpol = new TopologicalPolygon();
+					var tpol = new EPolygon();
 
 					foreach (var loop in pol.Loops) {
 						// 頂点をノードに変換する、半径 _Epsilon を使いノードの接触を調べ、接触しているなら既存のノードを使用する
@@ -2130,7 +2141,7 @@ namespace Jk {
 						}
 
 						// ラインをエッジに変換する、既存エッジに同じノード組み合わせのものが存在したらそちらを使用する
-						var edges = new List<EdgeDir>(nnodes);
+						var edges = new List<EDir>(nnodes);
 						var node1 = nodes[0];
 						for (int i = 1; i <= nnodes; i++) {
 							var node2 = nodes[i % nnodes];
@@ -2139,10 +2150,10 @@ namespace Jk {
 							edge.LinkPolygon(right, groupIndex, polygonIndex);
 							if (loop.EdgesUserData != null)
 								edge.SetUserData(right, groupIndex, loop.EdgesUserData[i - 1]);
-							edges.Add(new EdgeDir(edge, right));
+							edges.Add(new EDir(edge, right));
 							node1 = node2;
 						}
-						tpol.Loops.Add(new EdgeLoop(edges));
+						tpol.Loops.Add(new ELoop(edges));
 					}
 
 					tpols.Add(tpol);
@@ -2350,15 +2361,14 @@ namespace Jk {
 			var inGroups = _Groups;
 			var topoGroups = _TopoGroups;
 			var ntopoGroups = topoGroups.Count;
-			uint uniqueIndex = 0;
-			var edges = new List<EdgeDir>();
-			var polygons = new List<List<EdgeDir>>();
+			var edges = new List<EDir>();
+			var polygons = new List<List<EDir>>();
 
 			for (int igroup = 0; igroup < ntopoGroups; igroup++) {
 				var inGroup = inGroups[igroup];
-				var tpols = topoGroups[igroup];
+				var epols = topoGroups[igroup];
 				var groupIndex = igroup;
-				tpols.Clear();
+				epols.Clear();
 
 				for (int ipolygon = 0, npolygon = inGroup.Count; ipolygon < npolygon; ipolygon++) {
 					var polygonIndex = ipolygon;
@@ -2372,12 +2382,7 @@ namespace Jk {
 
 					// トポロジー構造から目的のポリゴンだけ抽出する
 					GetPolygons(edges, edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, polygons);
-					var loopGroup = Distinguish(polygons);
-					foreach (var loops in loopGroup) {
-						var tpol = new TopologicalPolygon(loops);
-						tpol.UniqueIndex = uniqueIndex++;
-						tpols.Add(tpol);
-					}
+					epols.AddRange(Distinguish(polygons));
 				}
 			}
 
@@ -2411,14 +2416,14 @@ namespace Jk {
 		/// 指定されたエッジによるポリゴン配列を外枠ポリゴンと穴に区別する
 		/// </summary>
 		/// <param name="edges">エッジによるポリゴン配列</param>
-		/// <returns>外枠ポリゴン、穴、穴・・・の順に直した配列</returns>
+		/// <returns>エッジによるポリゴン配列</returns>
 		/// <remarks>外枠ポリゴンは時計回り、穴は反時計回りとなる</remarks>
-		private static List<List<EdgeLoop>> Distinguish(List<List<EdgeDir>> edges) {
+		private static List<EPolygon> Distinguish(List<List<EDir>> edges) {
 			// まず面積を求め、面積降順に並び替える
-			var loops = new EdgeLoop[edges.Count];
+			var loops = new ELoop[edges.Count];
 			for (int i = loops.Length - 1; i != -1; i--) {
 				var e = edges[i];
-				loops[i] = new EdgeLoop(Area(e), e);
+				loops[i] = new ELoop(Area(e), e);
 			}
 			Array.Sort(loops, (a, b) => {
 				if (b.Area == a.Area) {
@@ -2537,13 +2542,13 @@ namespace Jk {
 			}
 
 			// 親子関係を組んだリストを作成
-			var result = new List<List<EdgeLoop>>();
+			var result = new List<EPolygon>();
 			var used = new bool[loops.Length];
 			for (int i = 0, n = loops.Length; i < n; i++) {
 				if (used[i])
 					continue;
 
-				var list = new List<EdgeLoop>();
+				var list = new List<ELoop>();
 
 				// 親を取得
 				var parent = loops[i];
@@ -2580,7 +2585,7 @@ namespace Jk {
 					used[j] = true;
 				}
 
-				result.Add(list);
+				result.Add(new EPolygon(list));
 			}
 
 			return result;
@@ -2689,7 +2694,9 @@ namespace Jk {
 		/// </summary>
 		/// <param name="edges">[in] 多角形の頂点列</param>
 		/// <returns>多角形の面積が返る、ポリゴンが反時計回りなら正数、時計回りなら負数となる</returns>
-		private static element Area(List<EdgeDir> edges) {
+		private static element Area(List<EDir> edges) {
+			if (edges.Count == 0)
+				return 0;
 			var nvts = edges.Count;
 			int i, n = nvts + 1;
 			var p1 = edges[0].From.Position;
@@ -2734,7 +2741,7 @@ namespace Jk {
 		/// <param name="edges">[in] 多角形のエッジ配列</param>
 		/// <param name="close">[in] 多角形の始点と終点を閉じて判定をする場合はtrueを指定する</param>
 		/// <returns>点が多角形内にあるならtrueが返る</returns>
-		private static bool PointInPolygon2(vector c, List<EdgeDir> edges, bool close = false) {
+		private static bool PointInPolygon2(vector c, List<EDir> edges, bool close = false) {
 			var nvts = edges.Count;
 			int i, count = 0;
 			int n = close ? nvts + 1 : nvts;
@@ -2759,7 +2766,7 @@ namespace Jk {
 		/// <param name="edges">[in] 多角形のエッジ配列</param>
 		/// <param name="close">[in] 多角形の始点と終点を閉じて判定をする場合は０以外を指定する</param>
 		/// <returns>点が多角形内にあるなら2、辺または頂点上にあるなら1、それ以外なら0が返る</returns>
-		private static int PointTouchPolygon2(vector c, List<EdgeDir> edges, bool close = false) {
+		private static int PointTouchPolygon2(vector c, List<EDir> edges, bool close = false) {
 			var nvts = edges.Count;
 			int i, count = 0;
 			int n = close ? nvts + 1 : nvts;

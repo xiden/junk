@@ -5,8 +5,10 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using System.IO;
 using Jk;
 
 namespace PolygonBoolean {
@@ -41,7 +43,7 @@ namespace PolygonBoolean {
 			}
 		}
 
-		PolBoolF.VertexLoop CurLoop {
+		PolBoolF.VLoop CurLoop {
 			get {
 				var index = this.cmbCurLoop.SelectedIndex;
 				return 0 <= index ? this.CurPolygon.Loops[index] : null;
@@ -153,13 +155,14 @@ namespace PolygonBoolean {
 			for (int i = 1; i <= 20; i++)
 				this.cmbHole.Items.Add(i.ToString());
 
-			var polygonFileName = "PolygonOverwrite";
+			//var polygonFileName = "PolygonOverwrite";
 			//var polygonFileName = "PolygonOr";
 			//var polygonFileName = "PolygonSub";
 			//var polygonFileName = "TopologyFailed";
-			for (int i = 0; i < 2; i++) {
-				ReadPolygon(i, "g:/dvl/logs/" + polygonFileName + (i + 1) + ".csv");
-			}
+			//var polygonFileName = "Zero2_Input";
+			//for (int i = 0; i < 2; i++) {
+			//	ReadPolygon(i, "g:/dvl/logs/" + polygonFileName + (i + 1) + ".csv");
+			//}
 
 			//var p = new PolBoolF.Polygon(null, null, null);
 			//p.Vertices = new List<PolBoolF.Vertex>();
@@ -216,7 +219,7 @@ namespace PolygonBoolean {
 
 				var pol = this.CurPolygon;
 				if (pol.Loops.Count == 0)
-					pol.Loops.Add(new PolBoolF.VertexLoop());
+					pol.Loops.Add(new PolBoolF.VLoop());
 
 				pol.Loops[0].Vertices.Add(new PolBoolF.Vertex(pt));
 				this.Invalidate();
@@ -460,7 +463,7 @@ namespace PolygonBoolean {
 					}
 
 					// ポリゴン同士の演算を行う
-					List<List<PolBoolF.EdgeLoop>> result = null;
+					List<PolBoolF.EPolygon> result = null;
 					if (radOr.Checked)
 						result = pb.Or();
 					else if (radXor.Checked)
@@ -517,15 +520,15 @@ namespace PolygonBoolean {
 						result = pb.Filtering(edgeFilter);
 					}
 					sb.AppendLine("演算結果ポリゴン数: " + result.Count);
-					foreach (var r in result) {
-						sb.AppendLine((r.Count - 1).ToString());
+					foreach (var epolygon in result) {
+						sb.AppendLine((epolygon.Loops.Count - 1).ToString());
 					}
 
 					// 結果のポリゴンを描画
 					tf = new Tf { X = new TransformLinearf(1, 0), Y = new TransformLinearf(1, 0) };
 					volume = new AABB2f(Vector2f.MaxValue, Vector2f.MinValue);
-					foreach (var loops in result) {
-						volume = volume.Merge(loops[0].Volume);
+					foreach (var epolygon in result) {
+						volume = volume.Merge(epolygon.Loops[0].Volume);
 					}
 					if (volume.IsValid && volume.Size != Vector2f.Zero) {
 						var ra = this.ResultArea;
@@ -536,12 +539,12 @@ namespace PolygonBoolean {
 					for (int j = 0; j < result.Count; j++) {
 						if (1 <= cmbPol.SelectedIndex && cmbPol.SelectedIndex != (j + 1))
 							continue;
-						var loops = result[j];
-						for (int i = 0, n = loops.Count; i < n; i++) {
+						var eloops = result[j].Loops;
+						for (int i = 0, n = eloops.Count; i < n; i++) {
 							if (1 <= cmbHole.SelectedIndex && cmbHole.SelectedIndex != (i + 1))
 								continue;
 
-							var loop = loops[i];
+							var loop = eloops[i];
 							Brush brs = i == 0 ? brsPolygon : brsHole;
 
 							if (i == 0) {
@@ -575,11 +578,11 @@ namespace PolygonBoolean {
 					for (int j = 0; j < result.Count; j++) {
 						if (1 <= cmbPol.SelectedIndex && cmbPol.SelectedIndex != (j + 1))
 							continue;
-						var loops = result[j];
-						for (int i = 0, n = loops.Count; i < n; i++) {
+						var eloops = result[j].Loops;
+						for (int i = 0, n = eloops.Count; i < n; i++) {
 							if (1 <= cmbHole.SelectedIndex && cmbHole.SelectedIndex != (i + 1))
 								continue;
-							var loop = loops[i];
+							var loop = eloops[i];
 							g.DrawPolygon(penPolygon, (from edge in loop.Edges select ToPt(tf.Fw(edge.From.Position))).ToArray());
 						}
 					}
@@ -674,7 +677,7 @@ namespace PolygonBoolean {
 				group.Add(new PolBoolF.Polygon());
 
 			var polygon = group[group.Count - 1];
-			polygon.Loops.Add(new PolBoolF.VertexLoop());
+			polygon.Loops.Add(new PolBoolF.VLoop());
 
 			UpdateLoopCmb(true);
 
@@ -757,7 +760,7 @@ namespace PolygonBoolean {
 		public static List<PolBoolF.Polygon> ReadPolygonFromCsv(string fileName) {
 			var polygons = new List<PolBoolF.Polygon>();
 			PolBoolF.Polygon p = null;
-			PolBoolF.VertexLoop l = null;
+			PolBoolF.VLoop l = null;
 
 			using (var cr = new CsvReader(new System.IO.StreamReader(fileName))) {
 				for (;;) {
@@ -770,11 +773,11 @@ namespace PolygonBoolean {
 					switch (fields[0]) {
 					case "polygon":
 						p = new PolBoolF.Polygon();
-						p.Loops.Add(l = new PolBoolF.VertexLoop());
+						p.Loops.Add(l = new PolBoolF.VLoop());
 						polygons.Add(p);
 						break;
 					case "hole":
-						p.Loops.Add(l = new PolBoolF.VertexLoop());
+						p.Loops.Add(l = new PolBoolF.VLoop());
 						break;
 					default: {
 							var v = new Vector2f(float.Parse(fields[0]), float.Parse(fields[1]));
@@ -793,7 +796,7 @@ namespace PolygonBoolean {
 			g.Clear();
 
 			PolBoolF.Polygon p = null;
-			PolBoolF.VertexLoop l = null;
+			PolBoolF.VLoop l = null;
 			var colors = new Color[] {
 				Color.Red,
 				Color.Orange,
@@ -815,13 +818,13 @@ namespace PolygonBoolean {
 					switch (fields[0]) {
 					case "polygon":
 						p = new PolBoolF.Polygon();
-						p.Loops.Add(l = new PolBoolF.VertexLoop());
+						p.Loops.Add(l = new PolBoolF.VLoop());
 						p.UserData = colors[colorIndex % colors.Length];
 						colorIndex++;
 						g.Add(p);
 						break;
 					case "hole":
-						p.Loops.Add(l = new PolBoolF.VertexLoop());
+						p.Loops.Add(l = new PolBoolF.VLoop());
 						break;
 					default: {
 							var v = new Vector2f(float.Parse(fields[0]), float.Parse(fields[1]));
@@ -864,58 +867,42 @@ namespace PolygonBoolean {
 			}
 		}
 
-		private void btnDebug_Click(object sender, EventArgs e) {
-			var groups = new List<List<PolBoolF.Polygon>>();
-			for (int i = 1; i <= 1000; i++) {
-				var fileName = "g:/dvl/logs/Brush" + i + ".csv";
-				if (!System.IO.File.Exists(fileName))
-					break;
-				groups.Add(ReadPolygonFromCsv(fileName));
-			}
+		private void btnErrOpen_Click(object sender, EventArgs e) {
+			using (var od = new OpenFileDialog()) {
+				od.Filter = "CSVファイル(*.csv)|*.csv|すべてのファイル(*.*)|*.*";
+				od.CheckPathExists = true;
+				if (od.ShowDialog() != DialogResult.OK)
+					return;
 
-			int lastItem = groups.Count - 1;
+				var dir = Path.GetDirectoryName(od.FileName);
+				var fname = Path.GetFileName(od.FileName);
 
-			while (lastItem != 0) {
-				int l = 0;
-				for (int i = 0; i <= lastItem; i += 2) {
-					List<PolBoolF.Polygon> result;
+				var regex = new Regex("(?<name>[a-zA-Z]+)(?<index>[0-9]+)_(?<pfix>.*)", RegexOptions.Compiled);
+				var m = regex.Match(fname);
+				if (!m.Success)
+					return;
 
-					if (i < lastItem) {
-						var pb = new PolBoolF(Epsilon);
-						pb.AddPolygon(groups[i]);
-						pb.AddPolygon(groups[i + 1]);
+				var name = m.Groups["name"].Value;
+				var pfix = m.Groups["pfix"].Value;
+
+				for (int i = 1; i <= 1000; i++) {
+					var f = Path.Combine(dir, name + i + "_" + pfix);
+					if (!File.Exists(f))
+						break;
+
+					var pb = new PolBoolF(Epsilon);
+					pb.AddPolygon(ReadPolygonFromCsv(f));
+					try {
 						pb.CreateTopology(true);
-						result = PolBoolF.ToPolygons(pb.Or());
-					} else {
-						result = groups[i];
+					} catch (Exception ex) {
+						MessageBox.Show(f + ": " + ex.Message);
+						break;
 					}
-
-					if (result.Count == 0) {
-						_Groups[0] = groups[i];
-						_Groups[1] = groups[i + 1];
-						foreach (var p in _Groups[0]) {
-							p.UserData = Color.Red;
-						}
-						foreach (var p in _Groups[1]) {
-							p.UserData = Color.Blue;
-						}
-						UpdatePolygonCmb(true);
-						this.Invalidate();
-						return;
-					}
-
-					l = i / 2;
-					groups[l] = result;
 				}
-				lastItem = l;
 			}
+		}
 
-			_Groups[this.cmbCurGroup.SelectedIndex] = groups[0];
-			foreach (var p in groups[0]) {
-				p.UserData = Color.Red;
-			}
-			UpdatePolygonCmb(true);
-			this.Invalidate();
+		private void btnDebug_Click(object sender, EventArgs e) {
 		}
 
 		private void cmbSrcPol_SelectedIndexChanged(object sender, EventArgs e) {
@@ -947,9 +934,9 @@ namespace PolygonBoolean {
 				for (int igroup = 0, ngroups = pb.Groups.Count; igroup < ngroups; igroup++) {
 					var result = pb.Extract(igroup);
 					for (int ipolygon = 0, npolygons = result.Count; ipolygon < npolygons; ipolygon++) {
-						var loops = result[ipolygon];
-						for (int iloop = 0, nloops = loops.Count; iloop < nloops; iloop++) {
-							var loop = loops[iloop];
+						var eloops = result[ipolygon].Loops;
+						for (int iloop = 0, nloops = eloops.Count; iloop < nloops; iloop++) {
+							var loop = eloops[iloop];
 							if (iloop == 0) {
 								fs.WriteLine("topopol" + igroup + "_" + ipolygon);
 							} else {

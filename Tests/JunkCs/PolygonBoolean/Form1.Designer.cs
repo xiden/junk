@@ -47,6 +47,7 @@
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.btnOpen = new System.Windows.Forms.Button();
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.btnErrOpen = new System.Windows.Forms.Button();
 			this.btnSearchEdge = new System.Windows.Forms.Button();
 			this.btnSearchNode = new System.Windows.Forms.Button();
 			this.tbSearch = new System.Windows.Forms.TextBox();
@@ -301,6 +302,7 @@
 			// 
 			// panel1
 			// 
+			this.panel1.Controls.Add(this.btnErrOpen);
 			this.panel1.Controls.Add(this.btnSearchEdge);
 			this.panel1.Controls.Add(this.btnSearchNode);
 			this.panel1.Controls.Add(this.tbSearch);
@@ -330,6 +332,16 @@
 			this.panel1.Size = new System.Drawing.Size(885, 166);
 			this.panel1.TabIndex = 24;
 			this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
+			// 
+			// btnErrOpen
+			// 
+			this.btnErrOpen.Location = new System.Drawing.Point(329, 34);
+			this.btnErrOpen.Name = "btnErrOpen";
+			this.btnErrOpen.Size = new System.Drawing.Size(116, 23);
+			this.btnErrOpen.TabIndex = 30;
+			this.btnErrOpen.Text = "ファイルエラーチェック";
+			this.btnErrOpen.UseVisualStyleBackColor = true;
+			this.btnErrOpen.Click += new System.EventHandler(this.btnErrOpen_Click);
 			// 
 			// btnSearchEdge
 			// 
@@ -437,6 +449,7 @@
 		private System.Windows.Forms.Button btnSearchEdge;
 		private System.Windows.Forms.Button btnSearchNode;
 		private System.Windows.Forms.TextBox tbSearch;
+		private System.Windows.Forms.Button btnErrOpen;
 	}
 }
 
