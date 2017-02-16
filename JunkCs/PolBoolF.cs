@@ -15,6 +15,15 @@ namespace Jk {
 	public class PolBoolF {
 		#region クラス
 		/// <summary>
+		/// エッジフィルタ
+		/// </summary>
+		/// <param name="pb">ポリゴンブーリアン演算オブジェクト</param>
+		/// <param name="edge">エッジ</param>
+		/// <param name="right">右側をチェックするかどうか</param>
+		/// <returns>無視するなら true、残すなら false</returns>
+		public delegate bool EdgeFilter(PolBoolF pb, Edge edge, bool right);
+
+		/// <summary>
 		/// ポリゴンの頂点
 		/// </summary>
 		public struct Vertex {
@@ -345,6 +354,16 @@ namespace Jk {
 			/// 左側が摘出済み
 			/// </summary>
 			LeftRemoved = 1 << 3,
+
+			/// <summary>
+			/// 右側が有効なポリゴンとして取得されたどうか
+			/// </summary>
+			RightEnabled = 1 << 4,
+
+			/// <summary>
+			/// 左側が有効なポリゴンとして取得されたどうか
+			/// </summary>
+			LeftEnabled = 1 << 5,
 		}
 
 		/// <summary>
@@ -585,6 +604,11 @@ namespace Jk {
 			/// 進行方向From→Toの左側のユーザーデータ、[グループインデックス]
 			/// </summary>
 			public object[] LeftUserData;
+
+			/// <summary>
+			/// ユーザーが自由に設定＆使用できるユーザーデータ
+			/// </summary>
+			public object UserData;
 
 			/// <summary>
 			/// ユーザーが自由に設定＆使用できる値
@@ -1518,6 +1542,15 @@ namespace Jk {
 #if POLYGONBOOLEAN_DEBUG
 		static bool _Logging;
 #endif
+		/// <summary>
+		/// オブジェクトに紐づくユーザーデータ
+		/// </summary>
+		public object UserData;
+
+		/// <summary>
+		/// ユーザーが自由に設定＆使用できる値
+		/// </summary>
+		public ulong UserValue;
 		#endregion
 
 		#region プロパティ
@@ -1710,7 +1743,7 @@ namespace Jk {
 		/// <param name="edges">方向付きのエッジリスト</param>
 		/// <param name="matcher">マッチ判定デリゲート</param>
 		/// <returns>弧線リスト</returns>
-		public static List<IndexRange> MatchSegments(List<EDir> edges, Func<Edge, bool, bool> matcher) {
+		public List<IndexRange> MatchSegments(List<EDir> edges, EdgeFilter matcher) {
 			var list = new List<IndexRange>();
 			var n = edges.Count;
 
@@ -1718,7 +1751,7 @@ namespace Jk {
 			int start = -1;
 			for (int i = 0; i < n; i++) {
 				var e = edges[i];
-				if (!matcher(e.Edge, e.TraceRight)) {
+				if (!matcher(this, e.Edge, e.TraceRight)) {
 					start = i;
 					break;
 				}
@@ -1732,7 +1765,7 @@ namespace Jk {
 			for (int i = 1; i <= n; i++) {
 				var index = (start + i) % n;
 				var e = edges[index];
-				var match = matcher(e.Edge, e.TraceRight);
+				var match = matcher(this, e.Edge, e.TraceRight);
 				if (match) {
 					if (!lastMatched) {
 						indexRange.Start = index;
@@ -1756,12 +1789,14 @@ namespace Jk {
 		/// 指定されたエッジフィルタをパスしたエッジからポリゴンを作成する
 		/// </summary>
 		/// <param name="edgeFilter">フィルタ、エッジと右方向かどうかを受け取り無視するなら true を返す</param>
+		/// <param name="rightEnabledFlag">有効なポリゴンとして取得されるエッジに付与するフラグ</param>
+		/// <param name="leftEnabledFlag">有効なポリゴンとして取得されるエッジに付与するフラグ</param>
 		/// <returns>結果のポリゴンを構成するエッジと方向の一覧</returns>
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
-		public List<EPolygon> Filtering(Func<Edge, bool, bool> edgeFilter) {
+		public List<EPolygon> Filtering(EdgeFilter edgeFilter, EdgeFlags rightEnabledFlag, EdgeFlags leftEnabledFlag) {
 			var edges = new List<EDir>();
 			var polygons = new List<List<EDir>>();
-			GetPolygons(edges, edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, polygons);
+			GetPolygons(edges, edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, rightEnabledFlag, leftEnabledFlag, polygons);
 			return Distinguish(polygons);
 		}
 
@@ -1776,15 +1811,15 @@ namespace Jk {
 			System.Diagnostics.POLYGONBOOLEAN_DEBUG.WriteLine("======== Or ========");
 #endif
 			// エッジの両側にポリゴンが存在するなら無視するフィルタ
-			var edgeFilter = new Func<Edge, bool, bool>(
-				(Edge e, bool right) => {
+			var edgeFilter = new EdgeFilter(
+				(pb, e, right) => {
 					return 0 <= e.RightGroupMax && 0 <= e.LeftGroupMax;
 				}
 			);
 #if POLYGONBOOLEAN_DEBUG
 			try {
 #endif
-				return Filtering(edgeFilter);
+				return Filtering(edgeFilter, 0, 0);
 #if POLYGONBOOLEAN_DEBUG
 			} finally {
 				_Logging = false;
@@ -1803,8 +1838,8 @@ namespace Jk {
 			System.Diagnostics.POLYGONBOOLEAN_DEBUG.WriteLine("======== Xor ========");
 #endif
 			// エッジの両側のポリゴン数が同じか、指定方向に偶数ポリゴンが存在するなら無視するフィルタ
-			var edgeFilter = new Func<Edge, bool, bool>(
-				(Edge e, bool right) => {
+			var edgeFilter = new EdgeFilter(
+				(pb, e, right) => {
 					var rc = e.RightGroupCount;
 					var lc = e.LeftGroupCount;
 					if (rc == lc)
@@ -1816,7 +1851,7 @@ namespace Jk {
 #if POLYGONBOOLEAN_DEBUG
 			try {
 #endif
-				return Filtering(edgeFilter);
+				return Filtering(edgeFilter, 0, 0);
 #if POLYGONBOOLEAN_DEBUG
 			} finally {
 				_Logging = false;
@@ -1831,8 +1866,8 @@ namespace Jk {
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
 		public List<EPolygon> And() {
 			// エッジの指定方向に登録ポリゴンの内一つでも存在しないなら無視するフィルタ
-			var edgeFilter = new Func<Edge, bool, bool>(
-				(Edge e, bool right) => {
+			var edgeFilter = new EdgeFilter(
+				(pb, e, right) => {
 					var p = right ? e.RightPolygons: e.LeftPolygons;
 					for (int i = p.Length - 1; i != -1; i--) {
 						if (p[i] < 0)
@@ -1842,7 +1877,7 @@ namespace Jk {
 				}
 			);
 
-			return Filtering(edgeFilter);
+			return Filtering(edgeFilter, 0, 0);
 		}
 
 		/// <summary>
@@ -1853,12 +1888,12 @@ namespace Jk {
 		/// <remarks>事前に CreateTopology() を呼び出しておく必要がある。</remarks>
 		public List<EPolygon> Sub(int groupIndex) {
 			// エッジの指定方向に減算ポリゴンが存在するなら無視するフィルタ
-			var edgeFilter = new Func<Edge, bool, bool>(
-				(Edge e, bool right) => {
+			var edgeFilter = new EdgeFilter(
+				(pb, e, right) => {
 					return 0 <= (right ? e.RightPolygons : e.LeftPolygons)[groupIndex];
 				}
 			);
-			return Filtering(edgeFilter);
+			return Filtering(edgeFilter, 0, 0);
 		}
 
 		/// <summary>
@@ -1911,17 +1946,19 @@ namespace Jk {
 		/// <param name="edgeFilter">フィルタ</param>
 		/// <param name="rightFlag">エッジの右側に付与する辿ったことを示すフラグ</param>
 		/// <param name="leftFlag">エッジの左側に付与する辿ったことを示すフラグ</param>
+		/// <param name="rightEnabledFlag">有効なポリゴンとして取得されるエッジに付与するフラグ</param>
+		/// <param name="leftEnabledFlag">有効なポリゴンとして取得されるエッジに付与するフラグ</param>
 		/// <param name="polygons">ポリゴン一覧が返る</param>
-		private void GetPolygons(List<EDir> edges, Func<Edge, bool, bool> edgeFilter, EdgeFlags rightFlag, EdgeFlags leftFlag, List<List<EDir>> polygons) {
+		private void GetPolygons(List<EDir> edges, EdgeFilter edgeFilter, EdgeFlags rightFlag, EdgeFlags leftFlag, EdgeFlags rightEnabledFlag, EdgeFlags leftEnabledFlag, List<List<EDir>> polygons) {
 			polygons.Clear();
 
 			// 予め無視することがわかっているエッジを処理
-			var flagsnot = ~(rightFlag | leftFlag);
+			var flagsnot = ~(rightFlag | leftFlag | rightEnabledFlag | leftEnabledFlag);
 			foreach (var edge in this.Edges) {
 				edge.Flags &= flagsnot;
-				if (edgeFilter(edge, true))
+				if (edgeFilter(this, edge, true))
 					edge.Flags |= rightFlag;
-				if (edgeFilter(edge, false))
+				if (edgeFilter(this, edge, false))
 					edge.Flags |= leftFlag;
 			}
 
@@ -1930,7 +1967,7 @@ namespace Jk {
 				if ((edge.Flags & rightFlag) == 0) {
 					// ポリゴンを構成するエッジと方向一覧を取得
 					// 結果のポリゴン一覧に追加
-					if (TracePolygon(edge, true, false, rightFlag, leftFlag, edges))
+					if (TracePolygon(edge, true, false, rightFlag, leftFlag, rightEnabledFlag, leftEnabledFlag, edges))
 						polygons.Add(new List<EDir>(edges));
 				}
 			}
@@ -1940,7 +1977,7 @@ namespace Jk {
 				if ((edge.Flags & leftFlag) == 0) {
 					// ポリゴンを構成するエッジと方向一覧を取得
 					// 結果のポリゴン一覧に追加
-					if (TracePolygon(edge, false, false, rightFlag, leftFlag, edges))
+					if (TracePolygon(edge, false, false, rightFlag, leftFlag, rightEnabledFlag, leftEnabledFlag, edges))
 						polygons.Add(new List<EDir>(edges));
 				}
 			}
@@ -1956,14 +1993,14 @@ namespace Jk {
 			var loops = new List<ELoop>();
 			foreach (var edge in this.Edges) {
 				if ((edge.Flags & EdgeFlags.RightPolygonized) == 0) {
-					if (TracePolygon(edge, true, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, edges)) {
+					if (TracePolygon(edge, true, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, 0, 0, edges)) {
 						loops.Add(new ELoop(new List<EDir>(edges)));
 					}
 				}
 			}
 			foreach (var edge in this.Edges) {
 				if ((edge.Flags & EdgeFlags.LeftPolygonized) == 0) {
-					if (TracePolygon(edge, false, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, edges)) {
+					if (TracePolygon(edge, false, false, EdgeFlags.RightPolygonized, EdgeFlags.LeftPolygonized, 0, 0, edges)) {
 						loops.Add(new ELoop(new List<EDir>(edges)));
 					}
 				}
@@ -2006,15 +2043,25 @@ namespace Jk {
 		/// <param name="traceCCW">true なら最も反時計回り側のエッジを辿る、false なら最も時計回り側のエッジを辿る</param>
 		/// <param name="rightFlag">エッジの右側に付与する辿ったことを示すフラグ</param>
 		/// <param name="leftFlag">エッジの左側に付与する辿ったことを示すフラグ</param>
+		/// <param name="rightEnabledFlag">有効なポリゴンとして取得されるエッジに付与するフラグ</param>
+		/// <param name="leftEnabledFlag">有効なポリゴンとして取得されるエッジに付与するフラグ</param>
 		/// <param name="list">結果のエッジ一覧が返る</param>
 		/// <returns>指定された側にポリゴン形成できたなら true が返る</returns>
-		private static bool TracePolygon(Edge edge, bool traceRight, bool traceCCW, EdgeFlags rightFlag, EdgeFlags leftFlag, List<EDir> list) {
+		private static bool TracePolygon(Edge edge, bool traceRight, bool traceCCW, EdgeFlags rightFlag, EdgeFlags leftFlag, EdgeFlags rightEnabledFlag, EdgeFlags leftEnabledFlag, List<EDir> list) {
 			var startEdge = edge;
 			var startNode = traceRight ? edge.From : edge.To; // ポリゴンの開始ノード
 			var nextNode = traceRight ? edge.To : edge.From;
 			var curNode = startNode;
 			var curIsRight = traceRight; // エッジの右側を辿るなら true、左側なら false
 			var isNull = true;
+			var rightFlagAndGotFlag = rightFlag;
+			var leftFlagAndGotFlag = leftFlag;
+			var enabledFlags = rightEnabledFlag | leftEnabledFlag;
+
+			if (enabledFlags != 0) {
+				rightFlagAndGotFlag |= rightEnabledFlag;
+				leftFlagAndGotFlag |= leftEnabledFlag;
+			}
 
 			list.Clear();
 
@@ -2027,7 +2074,7 @@ namespace Jk {
 			while (true) {
 				// ポリゴンを構成するエッジとして方向と共に登録
 				list.Add(new EDir(edge, curIsRight));
-				edge.Flags |= curIsRight ? rightFlag : leftFlag;
+				edge.Flags |= curIsRight ? rightFlagAndGotFlag : leftFlagAndGotFlag;
 
 #if POLYGONBOOLEAN_DEBUG
 				if (_Logging) {
@@ -2112,6 +2159,15 @@ namespace Jk {
 					System.Diagnostics.POLYGONBOOLEAN_DEBUG.WriteLine("Is null");
 			}
 #endif
+			if (isNull && enabledFlags != 0) {
+				rightEnabledFlag = ~rightEnabledFlag;
+				leftEnabledFlag = ~leftEnabledFlag;
+				for (int i = list.Count - 1; i != -1; i--) {
+					var ed = list[i];
+					ed.Edge.Flags &= ed.TraceRight ? rightEnabledFlag : leftEnabledFlag;
+				}
+			}
+
 			return !isNull;
 		}
 
@@ -2374,14 +2430,14 @@ namespace Jk {
 					var polygonIndex = ipolygon;
 
 					// エッジの指定方向に指定ポリゴンが存在しないなら無視するフィルタ
-					var edgeFilter = new Func<Edge, bool, bool>(
-						(Edge e, bool right) => {
+					var edgeFilter = new EdgeFilter(
+						(pb, e, right) => {
 							return (right ? e.RightPolygons : e.LeftPolygons)[groupIndex] != polygonIndex;
 						}
 					);
 
 					// トポロジー構造から目的のポリゴンだけ抽出する
-					GetPolygons(edges, edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, polygons);
+					GetPolygons(edges, edgeFilter, EdgeFlags.RightRemoved, EdgeFlags.LeftRemoved, 0, 0, polygons);
 					epols.AddRange(Distinguish(polygons));
 				}
 			}
@@ -2450,10 +2506,11 @@ namespace Jk {
 				for (int j = i - 1; j != -1; j--) {
 					var parent = loops[j];
 
-					// 面積が同じなら穴なので親にはできない、
-					// ポリゴン同士は重複あり得ないので親は存在しないことになる
-					if (child.Area == parent.Area)
-						continue;
+					// TODO: 同じ座標でも時計回りが子になるようにしてあるのでこのチェックいらないはず、どういう理由でこの処理入れたのか忘れた・・・
+					//// 面積が同じなら穴なので親にはできない、
+					//// ポリゴン同士は重複あり得ないので親は存在しないことになる
+					//if (child.Area == parent.Area)
+					//	continue;
 
 					// 親境界ボリュームが子境界ボリュームを包含していないならポリゴン包含はあり得ない
 					if (!parent.Volume.Contains(childVolume))
@@ -2565,7 +2622,8 @@ namespace Jk {
 				list.Add(parent);
 				used[i] = true;
 
-				// 子を取得
+				// 子（穴）を取得
+				// 穴になるのは直接の子のみ
 				for (int j = i + 1; j < n; j++) {
 					if (used[j] || parentIndices[j] != i)
 						continue;

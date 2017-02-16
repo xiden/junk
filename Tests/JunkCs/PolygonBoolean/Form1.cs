@@ -13,7 +13,7 @@ using Jk;
 
 namespace PolygonBoolean {
 	public partial class Form1 : Form {
-		public const float Epsilon = 0.01f;
+		public const float Epsilon = 0.001f;
 
 		Tf _SrcLastTf;
 		Tf _SrcZoomTf = new Tf { X = new TransformLinearf(1, 0), Y = new TransformLinearf(1, 0) };
@@ -139,20 +139,24 @@ namespace PolygonBoolean {
 
 			UpdatePolygonCmb(true);
 
+			this.cmbSrcGroup.Items.Add("All groups");
+			this.cmbSrcGroup.Items.Add("1");
+			this.cmbSrcGroup.Items.Add("2");
+
 			this.cmbSrcPol.Items.Add("All pols");
-			for (int i = 1; i <= 20; i++)
+			for (int i = 1; i <= 100; i++)
 				this.cmbSrcPol.Items.Add(i.ToString());
 
-			this.cmbSrcHole.Items.Add("All holes");
-			for (int i = 1; i <= 20; i++)
-				this.cmbSrcHole.Items.Add(i.ToString());
+			this.cmbSrcLoop.Items.Add("All holes");
+			for (int i = 1; i <= 100; i++)
+				this.cmbSrcLoop.Items.Add(i.ToString());
 
 			this.cmbPol.Items.Add("All pols");
-			for (int i = 1; i <= 20; i++)
+			for (int i = 1; i <= 100; i++)
 				this.cmbPol.Items.Add(i.ToString());
 
 			this.cmbHole.Items.Add("All holes");
-			for (int i = 1; i <= 20; i++)
+			for (int i = 1; i <= 100; i++)
 				this.cmbHole.Items.Add(i.ToString());
 
 			//var polygonFileName = "PolygonOverwrite";
@@ -342,13 +346,19 @@ namespace PolygonBoolean {
 					if (group.Count != 0)
 						pb.AddPolygon(group);
 
+					if (1 <= cmbSrcGroup.SelectedIndex && cmbSrcGroup.SelectedIndex != (igroup + 1))
+						continue;
+
 					for (int ipolygon = 0; ipolygon < group.Count; ipolygon++) {
-						if (cmbCurGroup.SelectedIndex == igroup && 1 <= cmbSrcPol.SelectedIndex && cmbSrcPol.SelectedIndex != (ipolygon + 1))
+						if (1 <= cmbSrcPol.SelectedIndex && cmbSrcPol.SelectedIndex != (ipolygon + 1))
 							continue;
 
 						var polygon = group[ipolygon];
 						var loops = polygon.Loops;
 						for (int iloop = 0; iloop < loops.Count; iloop++) {
+							if (1 <= cmbSrcLoop.SelectedIndex && cmbSrcLoop.SelectedIndex != (iloop + 1))
+								continue;
+
 							var loop = loops[iloop];
 							var vertices = loop.Vertices;
 
@@ -475,8 +485,8 @@ namespace PolygonBoolean {
 					else if (radExtract.Checked)
 						result = pb.Extract(this.cmbPolygonIndex.SelectedIndex);
 					else if (radFilter.Checked) {
-						var edgeFilter = new Func<PolBoolF.Edge, bool, bool>(
-							(PolBoolF.Edge edge, bool right) => {
+						var edgeFilter = new PolBoolF.EdgeFilter(
+							(PolBoolF pbFilter, PolBoolF.Edge edge, bool right) => {
 								int rightGroupMax, leftGroupMax;
 								int[] rightPolygons, leftPolygons;
 
@@ -517,7 +527,7 @@ namespace PolygonBoolean {
 								return true;
 							}
 						);
-						result = pb.Filtering(edgeFilter);
+						result = pb.Filtering(edgeFilter, 0, 0);
 					}
 					sb.AppendLine("演算結果ポリゴン数: " + result.Count);
 					foreach (var epolygon in result) {
@@ -903,6 +913,10 @@ namespace PolygonBoolean {
 		}
 
 		private void btnDebug_Click(object sender, EventArgs e) {
+		}
+
+		private void cmbSrcGroup_SelectedIndexChanged(object sender, EventArgs e) {
+			this.Invalidate();
 		}
 
 		private void cmbSrcPol_SelectedIndexChanged(object sender, EventArgs e) {

@@ -51,9 +51,10 @@
 			this.btnSearchEdge = new System.Windows.Forms.Button();
 			this.btnSearchNode = new System.Windows.Forms.Button();
 			this.tbSearch = new System.Windows.Forms.TextBox();
-			this.cmbSrcHole = new System.Windows.Forms.ComboBox();
+			this.cmbSrcLoop = new System.Windows.Forms.ComboBox();
 			this.cmbSrcPol = new System.Windows.Forms.ComboBox();
 			this.btnDebug = new System.Windows.Forms.Button();
+			this.cmbSrcGroup = new System.Windows.Forms.ComboBox();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			this.panel1.SuspendLayout();
@@ -302,11 +303,12 @@
 			// 
 			// panel1
 			// 
+			this.panel1.Controls.Add(this.cmbSrcGroup);
 			this.panel1.Controls.Add(this.btnErrOpen);
 			this.panel1.Controls.Add(this.btnSearchEdge);
 			this.panel1.Controls.Add(this.btnSearchNode);
 			this.panel1.Controls.Add(this.tbSearch);
-			this.panel1.Controls.Add(this.cmbSrcHole);
+			this.panel1.Controls.Add(this.cmbSrcLoop);
 			this.panel1.Controls.Add(this.cmbSrcPol);
 			this.panel1.Controls.Add(this.btnDebug);
 			this.panel1.Controls.Add(this.cmbCurGroup);
@@ -335,7 +337,7 @@
 			// 
 			// btnErrOpen
 			// 
-			this.btnErrOpen.Location = new System.Drawing.Point(329, 34);
+			this.btnErrOpen.Location = new System.Drawing.Point(445, 31);
 			this.btnErrOpen.Name = "btnErrOpen";
 			this.btnErrOpen.Size = new System.Drawing.Size(116, 23);
 			this.btnErrOpen.TabIndex = 30;
@@ -345,7 +347,7 @@
 			// 
 			// btnSearchEdge
 			// 
-			this.btnSearchEdge.Location = new System.Drawing.Point(602, 31);
+			this.btnSearchEdge.Location = new System.Drawing.Point(718, 31);
 			this.btnSearchEdge.Name = "btnSearchEdge";
 			this.btnSearchEdge.Size = new System.Drawing.Size(75, 23);
 			this.btnSearchEdge.TabIndex = 29;
@@ -355,7 +357,7 @@
 			// 
 			// btnSearchNode
 			// 
-			this.btnSearchNode.Location = new System.Drawing.Point(521, 31);
+			this.btnSearchNode.Location = new System.Drawing.Point(637, 31);
 			this.btnSearchNode.Name = "btnSearchNode";
 			this.btnSearchNode.Size = new System.Drawing.Size(75, 23);
 			this.btnSearchNode.TabIndex = 28;
@@ -365,27 +367,27 @@
 			// 
 			// tbSearch
 			// 
-			this.tbSearch.Location = new System.Drawing.Point(466, 33);
+			this.tbSearch.Location = new System.Drawing.Point(582, 33);
 			this.tbSearch.Name = "tbSearch";
 			this.tbSearch.Size = new System.Drawing.Size(49, 19);
 			this.tbSearch.TabIndex = 27;
 			this.tbSearch.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
 			// 
-			// cmbSrcHole
+			// cmbSrcLoop
 			// 
-			this.cmbSrcHole.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.cmbSrcHole.FormattingEnabled = true;
-			this.cmbSrcHole.Location = new System.Drawing.Point(243, 34);
-			this.cmbSrcHole.Name = "cmbSrcHole";
-			this.cmbSrcHole.Size = new System.Drawing.Size(59, 20);
-			this.cmbSrcHole.TabIndex = 26;
-			this.cmbSrcHole.SelectedIndexChanged += new System.EventHandler(this.cmbSrcHole_SelectedIndexChanged);
+			this.cmbSrcLoop.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cmbSrcLoop.FormattingEnabled = true;
+			this.cmbSrcLoop.Location = new System.Drawing.Point(348, 32);
+			this.cmbSrcLoop.Name = "cmbSrcLoop";
+			this.cmbSrcLoop.Size = new System.Drawing.Size(59, 20);
+			this.cmbSrcLoop.TabIndex = 26;
+			this.cmbSrcLoop.SelectedIndexChanged += new System.EventHandler(this.cmbSrcHole_SelectedIndexChanged);
 			// 
 			// cmbSrcPol
 			// 
 			this.cmbSrcPol.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbSrcPol.FormattingEnabled = true;
-			this.cmbSrcPol.Location = new System.Drawing.Point(178, 34);
+			this.cmbSrcPol.Location = new System.Drawing.Point(283, 32);
 			this.cmbSrcPol.Name = "cmbSrcPol";
 			this.cmbSrcPol.Size = new System.Drawing.Size(59, 20);
 			this.cmbSrcPol.TabIndex = 25;
@@ -400,6 +402,16 @@
 			this.btnDebug.Text = "デバッグ";
 			this.btnDebug.UseVisualStyleBackColor = true;
 			this.btnDebug.Click += new System.EventHandler(this.btnDebug_Click);
+			// 
+			// cmbSrcGroup
+			// 
+			this.cmbSrcGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cmbSrcGroup.FormattingEnabled = true;
+			this.cmbSrcGroup.Location = new System.Drawing.Point(218, 32);
+			this.cmbSrcGroup.Name = "cmbSrcGroup";
+			this.cmbSrcGroup.Size = new System.Drawing.Size(59, 20);
+			this.cmbSrcGroup.TabIndex = 31;
+			this.cmbSrcGroup.SelectedIndexChanged += new System.EventHandler(this.cmbSrcGroup_SelectedIndexChanged);
 			// 
 			// Form1
 			// 
@@ -444,12 +456,13 @@
 		private System.Windows.Forms.Button btnOpen;
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.Button btnDebug;
-		private System.Windows.Forms.ComboBox cmbSrcHole;
+		private System.Windows.Forms.ComboBox cmbSrcLoop;
 		private System.Windows.Forms.ComboBox cmbSrcPol;
 		private System.Windows.Forms.Button btnSearchEdge;
 		private System.Windows.Forms.Button btnSearchNode;
 		private System.Windows.Forms.TextBox tbSearch;
 		private System.Windows.Forms.Button btnErrOpen;
+		private System.Windows.Forms.ComboBox cmbSrcGroup;
 	}
 }
 
