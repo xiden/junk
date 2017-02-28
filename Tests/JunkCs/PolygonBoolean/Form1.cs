@@ -15,6 +15,93 @@ namespace PolygonBoolean {
 	public partial class Form1 : Form {
 		public const float Epsilon = 0.001f;
 
+		/// <summary>
+		/// 上描きを表現するフィルタ
+		/// </summary>
+		public static readonly PolBoolF.EdgeFilter PaintEdgeFilter = new PolBoolF.EdgeFilter(
+			(pb, edge, right) => {
+				int rightGroupMax, leftGroupMax;
+				int[] rightPolygons, leftPolygons;
+
+				if (right) {
+					rightGroupMax = edge.RightGroupMax;
+					leftGroupMax = edge.LeftGroupMax;
+					rightPolygons = edge.RightPolygons;
+					leftPolygons = edge.LeftPolygons;
+				} else {
+					leftGroupMax = edge.RightGroupMax;
+					rightGroupMax = edge.LeftGroupMax;
+					leftPolygons = edge.RightPolygons;
+					rightPolygons = edge.LeftPolygons;
+				}
+
+				// 進行方向右側にポリゴンが無ければ無視
+				if (rightGroupMax < 0)
+					return true;
+
+				// ポリゴン外との境界だったら無視はできない
+				if (leftGroupMax < 0)
+					return false;
+
+				// 左右のポリゴンが同じなら無視する
+				var rightPolygonIndex = rightPolygons[rightGroupMax];
+				var leftPolygonIndex = leftPolygons[leftGroupMax];
+				if (rightGroupMax == leftGroupMax && rightPolygonIndex == leftPolygonIndex)
+					return true;
+
+				// 左右のマテリアルが違うなら無視できない
+				var groups = pb.Groups;
+				var rightMaterial = (Color)groups[rightGroupMax][rightPolygonIndex].UserData;
+				var leftMaterial = (Color)groups[leftGroupMax][leftPolygonIndex].UserData;
+				if (rightMaterial != leftMaterial)
+					return false;
+
+				return true;
+			}
+		);
+
+
+		/// <summary>
+		/// 先頭グループ内のエッジのみ残すエッジフィルタ
+		/// </summary>
+		public static readonly PolBoolF.EdgeFilter ClipEdgeFilter = new PolBoolF.EdgeFilter(
+			(pb, edge, right) => {
+				int rightGroupMax, leftGroupMax;
+				int[] rightPolygons, leftPolygons;
+
+				if (right) {
+					rightGroupMax = edge.RightGroupMax;
+					leftGroupMax = edge.LeftGroupMax;
+					rightPolygons = edge.RightPolygons;
+					leftPolygons = edge.LeftPolygons;
+				} else {
+					leftGroupMax = edge.RightGroupMax;
+					rightGroupMax = edge.LeftGroupMax;
+					leftPolygons = edge.RightPolygons;
+					rightPolygons = edge.LeftPolygons;
+				}
+
+				// 進行方向右側に０グループ目が存在しなかったら無視する
+				if (rightPolygons[0] < 0)
+					return true;
+
+				// 進行方向左側に０グループ目が存在しなかったら輪郭なので無視できない
+				if (leftPolygons[0] < 0)
+					return false;
+
+				// 左右のマテリアルが違うなら無視できない
+				var groups = pb.Groups;
+				var rightPolygonIndex = rightPolygons[rightGroupMax];
+				var leftPolygonIndex = leftPolygons[leftGroupMax];
+				var rightMaterial = (Color)groups[rightGroupMax][rightPolygonIndex].UserData;
+				var leftMaterial = (Color)groups[leftGroupMax][leftPolygonIndex].UserData;
+				if (rightMaterial != leftMaterial)
+					return false;
+
+				return true;
+			}
+		);
+
 		Tf _SrcLastTf;
 		Tf _SrcZoomTf = new Tf { X = new TransformLinearf(1, 0), Y = new TransformLinearf(1, 0) };
 		Tf _TopoLastTf;
@@ -287,6 +374,7 @@ namespace PolygonBoolean {
 				}
 			}
 		}
+
 		static object UserDataClone(object obj) {
 			System.Diagnostics.Debug.WriteLine(obj);
 			return obj;
@@ -473,71 +561,69 @@ namespace PolygonBoolean {
 					}
 
 					// ポリゴン同士の演算を行う
-					List<PolBoolF.EPolygon> result = null;
+					List<PolBoolF.EPolygon> epolygons = null;
 					if (radOr.Checked)
-						result = pb.Or();
+						epolygons = pb.Or();
 					else if (radXor.Checked)
-						result = pb.Xor();
+						epolygons = pb.Xor();
 					else if (radAnd.Checked)
-						result = pb.And();
+						epolygons = pb.And();
 					else if (radSub.Checked)
-						result = pb.Sub(this.cmbPolygonIndex.SelectedIndex);
+						epolygons = pb.Sub(this.cmbPolygonIndex.SelectedIndex);
 					else if (radExtract.Checked)
-						result = pb.Extract(this.cmbPolygonIndex.SelectedIndex);
-					else if (radFilter.Checked) {
-						var edgeFilter = new PolBoolF.EdgeFilter(
-							(PolBoolF pbFilter, PolBoolF.Edge edge, bool right) => {
-								int rightGroupMax, leftGroupMax;
-								int[] rightPolygons, leftPolygons;
+						epolygons = pb.Extract(this.cmbPolygonIndex.SelectedIndex);
+					else if (radPaint.Checked)
+						epolygons = pb.Filtering(PaintEdgeFilter, 0, 0);
+					else if (radClip.Checked)
+						epolygons = pb.Filtering(ClipEdgeFilter, 0, 0);
 
-								if (right) {
-									rightGroupMax = edge.RightGroupMax;
-									leftGroupMax = edge.LeftGroupMax;
-									rightPolygons = edge.RightPolygons;
-									leftPolygons = edge.LeftPolygons;
+					sb.AppendLine("演算結果ポリゴン数: " + epolygons.Count);
+					foreach (var epolygon in epolygons) {
+						sb.AppendLine((epolygon.Loops.Count - 1).ToString());
+					}
+
+					// ポリゴンを構成するエッジから対応する入力値のグループ、ポリゴンのインデックスを探して設定する
+					foreach (var epolygon in epolygons) {
+						// エッジループ配列から代表となるグループインデックスとポリゴンインデックスを探す
+						int srcGroupIndex = -1;
+						int srcPolygonIndex = -1;
+						foreach (var eloop in epolygon.Loops) {
+							var edges = eloop.Edges;
+							for (int i = edges.Count - 1; i != -1; i--) {
+								var edge = edges[i];
+								int rgm;
+								int[] rp;
+
+								// 指定方向で取得
+								if (edge.TraceRight) {
+									rgm = edge.Edge.RightGroupMax;
+									rp = edge.Edge.RightPolygons;
 								} else {
-									leftGroupMax = edge.RightGroupMax;
-									rightGroupMax = edge.LeftGroupMax;
-									leftPolygons = edge.RightPolygons;
-									rightPolygons = edge.LeftPolygons;
+									rgm = edge.Edge.LeftGroupMax;
+									rp = edge.Edge.LeftPolygons;
 								}
 
-								// 進行方向右側にポリゴンが無ければ無視
-								if (rightGroupMax < 0)
-									return true;
-
-								// ポリゴン外との境界だったら無視はできない
-								if (leftGroupMax < 0)
-									return false;
-
-								// 左右のポリゴンの表面マテリアルを取得、グループインデックスが大きい方を優先
-								var rightPolygonIndex = rightPolygons[rightGroupMax];
-								var leftPolygonIndex = leftPolygons[leftGroupMax];
-								var rightColor = (Color)_Groups[rightGroupMax][rightPolygonIndex].UserData;
-								var leftColor = (Color)_Groups[leftGroupMax][leftPolygonIndex].UserData;
-
-								// 左右のポリゴンが同じなら無視する
-								if (rightGroupMax == leftGroupMax && rightPolygonIndex == leftPolygonIndex)
-									return true;
-
-								// 左右のマテリアルが違うなら無視できない
-								if (rightColor != leftColor)
-									return false;
-
-								return true;
+								// グループインデックスが大きい方を優先する
+								if (srcGroupIndex < rgm) {
+									srcGroupIndex = rgm;
+									srcPolygonIndex = rp[rgm];
+									if (srcGroupIndex == rp.Length - 1)
+										break;
+								}
 							}
-						);
-						result = pb.Filtering(edgeFilter, 0, 0);
-					}
-					sb.AppendLine("演算結果ポリゴン数: " + result.Count);
-					foreach (var epolygon in result) {
-						sb.AppendLine((epolygon.Loops.Count - 1).ToString());
+						}
+
+						if (srcGroupIndex != -1) {
+							// 値をセット
+							epolygon.GroupIndex = srcGroupIndex;
+							epolygon.PolygonIndex = srcPolygonIndex;
+						}
 					}
 
 					// 結果のポリゴンを描画
 					tf = new Tf { X = new TransformLinearf(1, 0), Y = new TransformLinearf(1, 0) };
 					volume = new AABB2f(Vector2f.MaxValue, Vector2f.MinValue);
-					foreach (var epolygon in result) {
+					foreach (var epolygon in epolygons) {
 						volume = volume.Merge(epolygon.Loops[0].Volume);
 					}
 					if (volume.IsValid && volume.Size != Vector2f.Zero) {
@@ -546,49 +632,26 @@ namespace PolygonBoolean {
 						tf.Y = new TransformLinearf(new Rangef(volume.Min.Y, volume.Max.Y), new Rangef(ra.Max.Y, ra.Min.Y));
 					}
 
-					for (int j = 0; j < result.Count; j++) {
+					for (int j = 0; j < epolygons.Count; j++) {
 						if (1 <= cmbPol.SelectedIndex && cmbPol.SelectedIndex != (j + 1))
 							continue;
-						var eloops = result[j].Loops;
+						var epolygon = epolygons[j];
+						var eloops = epolygon.Loops;
 						for (int i = 0, n = eloops.Count; i < n; i++) {
 							if (1 <= cmbHole.SelectedIndex && cmbHole.SelectedIndex != (i + 1))
 								continue;
 
 							var loop = eloops[i];
-							Brush brs = i == 0 ? brsPolygon : brsHole;
-
-							if (i == 0) {
-								int group = -1, polygon = -1;
-
-								foreach (var edge in loop.Edges) {
-									var rp = edge.TraceRight ? edge.Edge.RightPolygons : edge.Edge.LeftPolygons;
-
-									for (int ig = rp.Length - 1; ig != -1; ig--) {
-										if (0 <= rp[ig]) {
-											if (group < ig) {
-												group = ig;
-												polygon = rp[ig];
-												break;
-											}
-										}
-									}
-								}
-
-								if (group < 0) {
-									brs = new SolidBrush(Color.Black);
-								} else {
-									brs = new SolidBrush((Color)_Groups[group][polygon].UserData);
-								}
-							}
+							Brush brs = i == 0 ? new SolidBrush((Color)_Groups[epolygon.GroupIndex][epolygon.PolygonIndex].UserData) : brsHole;
 
 							var pts = (from edge in loop.Edges select ToPt(tf.Fw(edge.From.Position))).ToArray();
 							g.FillPolygon(brs, pts);
 						}
 					}
-					for (int j = 0; j < result.Count; j++) {
+					for (int j = 0; j < epolygons.Count; j++) {
 						if (1 <= cmbPol.SelectedIndex && cmbPol.SelectedIndex != (j + 1))
 							continue;
-						var eloops = result[j].Loops;
+						var eloops = epolygons[j].Loops;
 						for (int i = 0, n = eloops.Count; i < n; i++) {
 							if (1 <= cmbHole.SelectedIndex && cmbHole.SelectedIndex != (i + 1))
 								continue;
@@ -597,58 +660,11 @@ namespace PolygonBoolean {
 						}
 					}
 
-					//// 他の多角形との共有エッジを描画
-					//var matcher = new Func<Jk.PolygonBooleanf.Edge, bool, bool>(
-					//	(Jk.PolygonBooleanf.Edge edge, bool right) => {
-					//		List<int> r, l;
-					//		if (right) {
-					//			r = edge.Right;
-					//			l = edge.Left;
-					//		} else {
-					//			l = edge.Right;
-					//			r = edge.Left;
-					//		}
-					//		if (!(r.Count != 1 || r[0] != this.cmbPolygonIndex.SelectedIndex || l.Count != 0))
-					//			return false;
-					//		return true;
-					//	}
-					//);
-
-					//foreach (var polList in result) {
-					//	foreach (var edges in polList) {
-					//		var n = edges.Count;
-					//		foreach (var indexRange in Jk.PolygonBooleanf.MatchSegments(edges, matcher)) {
-					//			for (int i = 0; i < indexRange.Count; i++) {
-					//				var edge = edges[(indexRange.Start + i) % n];
-					//				var n1 = edge.Edge.From;
-					//				var n2 = edge.Edge.To;
-					//				g.DrawLine(penArc, n1.Position.X, n1.Position.Y, n2.Position.X, n2.Position.Y);
-					//			}
-					//		}
-					//	}
-					//}
-
 					this.label1.Text = sb.ToString();
 				} catch (Exception ex) {
 					this.lblResult.Text = ex.Message;
 				}
 			}
-		}
-
-		private void radOr_CheckedChanged(object sender, EventArgs e) {
-			this.Invalidate();
-		}
-
-		private void radSub_CheckedChanged(object sender, EventArgs e) {
-			this.Invalidate();
-		}
-
-		private void radAnd_CheckedChanged(object sender, EventArgs e) {
-			this.Invalidate();
-		}
-
-		private void radXor_CheckedChanged(object sender, EventArgs e) {
-			this.Invalidate();
 		}
 
 		private void cmbPolygonIndex_SelectedIndexChanged(object sender, EventArgs e) {
@@ -887,27 +903,40 @@ namespace PolygonBoolean {
 				var dir = Path.GetDirectoryName(od.FileName);
 				var fname = Path.GetFileName(od.FileName);
 
-				var regex = new Regex("(?<name>[a-zA-Z]+)(?<index>[0-9]+)_(?<pfix>.*)", RegexOptions.Compiled);
-				var m = regex.Match(fname);
-				if (!m.Success)
-					return;
-
-				var name = m.Groups["name"].Value;
-				var pfix = m.Groups["pfix"].Value;
-
-				for (int i = 1; i <= 1000; i++) {
-					var f = Path.Combine(dir, name + i + "_" + pfix);
-					if (!File.Exists(f))
-						break;
-
-					var pb = new PolBoolF(Epsilon);
-					pb.AddPolygon(ReadPolygonFromCsv(f));
-					try {
-						pb.CreateTopology(true);
-					} catch (Exception ex) {
-						MessageBox.Show(f + ": " + ex.Message);
-						break;
+				var regex1 = new Regex(@"(?<name>[a-zA-Z]+)(?<index>[0-9]+)(?<pfix>\..*)");
+				var regex2 = new Regex(@"(?<name>[a-zA-Z]+)(?<index>[0-9]+)(?<pfix>_.*)");
+				int matchType = 0;
+				var m = regex1.Match(fname);
+				if (m.Success) {
+					matchType = 1;
+				} else {
+					m = regex2.Match(fname);
+					if (m.Success) {
+						matchType = 1;
 					}
+				}
+				if (matchType != 0) {
+					var index = int.Parse(m.Groups["index"].Value);
+					var name = m.Groups["name"].Value;
+					var pfix = m.Groups["pfix"].Value;
+					var sb = new StringBuilder();
+
+					for (int i = index; i <= index + 1000; i++) {
+						var f = Path.Combine(dir, string.Concat(name, i, pfix));
+						if (!File.Exists(f))
+							break;
+
+						var pb = new PolBoolF(Epsilon);
+						pb.AddPolygon(ReadPolygonFromCsv(f));
+						try {
+							pb.CreateTopology(true);
+						} catch (Exception ex) {
+							sb.AppendLine(f + ": " + ex.Message);
+						}
+					}
+
+					if (sb.Length != 0)
+						MessageBox.Show(sb.ToString());
 				}
 			}
 		}
@@ -977,6 +1006,10 @@ namespace PolygonBoolean {
 
 		private void panel1_Paint(object sender, PaintEventArgs e) {
 
+		}
+
+		private void OnFilterChanged(object sender, EventArgs e) {
+			this.Invalidate();
 		}
 	}
 }

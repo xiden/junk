@@ -28,7 +28,8 @@
 			this.radOr = new System.Windows.Forms.RadioButton();
 			this.radSub = new System.Windows.Forms.RadioButton();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.radFilter = new System.Windows.Forms.RadioButton();
+			this.radClip = new System.Windows.Forms.RadioButton();
+			this.radPaint = new System.Windows.Forms.RadioButton();
 			this.radExtract = new System.Windows.Forms.RadioButton();
 			this.radXor = new System.Windows.Forms.RadioButton();
 			this.radAnd = new System.Windows.Forms.RadioButton();
@@ -47,6 +48,7 @@
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.btnOpen = new System.Windows.Forms.Button();
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.cmbSrcGroup = new System.Windows.Forms.ComboBox();
 			this.btnErrOpen = new System.Windows.Forms.Button();
 			this.btnSearchEdge = new System.Windows.Forms.Button();
 			this.btnSearchNode = new System.Windows.Forms.Button();
@@ -54,7 +56,6 @@
 			this.cmbSrcLoop = new System.Windows.Forms.ComboBox();
 			this.cmbSrcPol = new System.Windows.Forms.ComboBox();
 			this.btnDebug = new System.Windows.Forms.Button();
-			this.cmbSrcGroup = new System.Windows.Forms.ComboBox();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			this.panel1.SuspendLayout();
@@ -91,7 +92,7 @@
 			this.radOr.TabStop = true;
 			this.radOr.Text = "Or";
 			this.radOr.UseVisualStyleBackColor = true;
-			this.radOr.CheckedChanged += new System.EventHandler(this.radOr_CheckedChanged);
+			this.radOr.CheckedChanged += new System.EventHandler(this.OnFilterChanged);
 			// 
 			// radSub
 			// 
@@ -102,11 +103,12 @@
 			this.radSub.TabIndex = 3;
 			this.radSub.Text = "Sub";
 			this.radSub.UseVisualStyleBackColor = true;
-			this.radSub.CheckedChanged += new System.EventHandler(this.radSub_CheckedChanged);
+			this.radSub.CheckedChanged += new System.EventHandler(this.OnFilterChanged);
 			// 
 			// groupBox1
 			// 
-			this.groupBox1.Controls.Add(this.radFilter);
+			this.groupBox1.Controls.Add(this.radClip);
+			this.groupBox1.Controls.Add(this.radPaint);
 			this.groupBox1.Controls.Add(this.radExtract);
 			this.groupBox1.Controls.Add(this.radXor);
 			this.groupBox1.Controls.Add(this.radAnd);
@@ -114,20 +116,32 @@
 			this.groupBox1.Controls.Add(this.radSub);
 			this.groupBox1.Location = new System.Drawing.Point(3, 60);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(338, 42);
+			this.groupBox1.Size = new System.Drawing.Size(428, 42);
 			this.groupBox1.TabIndex = 9;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "演算方法";
 			// 
-			// radFilter
+			// radClip
 			// 
-			this.radFilter.AutoSize = true;
-			this.radFilter.Location = new System.Drawing.Point(256, 18);
-			this.radFilter.Name = "radFilter";
-			this.radFilter.Size = new System.Drawing.Size(50, 16);
-			this.radFilter.TabIndex = 5;
-			this.radFilter.Text = "Filter";
-			this.radFilter.UseVisualStyleBackColor = true;
+			this.radClip.AutoSize = true;
+			this.radClip.Location = new System.Drawing.Point(311, 18);
+			this.radClip.Name = "radClip";
+			this.radClip.Size = new System.Drawing.Size(43, 16);
+			this.radClip.TabIndex = 6;
+			this.radClip.Text = "Clip";
+			this.radClip.UseVisualStyleBackColor = true;
+			this.radClip.CheckedChanged += new System.EventHandler(this.OnFilterChanged);
+			// 
+			// radPaint
+			// 
+			this.radPaint.AutoSize = true;
+			this.radPaint.Location = new System.Drawing.Point(256, 18);
+			this.radPaint.Name = "radPaint";
+			this.radPaint.Size = new System.Drawing.Size(49, 16);
+			this.radPaint.TabIndex = 5;
+			this.radPaint.Text = "Paint";
+			this.radPaint.UseVisualStyleBackColor = true;
+			this.radPaint.CheckedChanged += new System.EventHandler(this.OnFilterChanged);
 			// 
 			// radExtract
 			// 
@@ -138,7 +152,7 @@
 			this.radExtract.TabIndex = 4;
 			this.radExtract.Text = "Extract";
 			this.radExtract.UseVisualStyleBackColor = true;
-			this.radExtract.CheckedChanged += new System.EventHandler(this.radExtract_CheckedChanged);
+			this.radExtract.CheckedChanged += new System.EventHandler(this.OnFilterChanged);
 			// 
 			// radXor
 			// 
@@ -149,7 +163,7 @@
 			this.radXor.TabIndex = 1;
 			this.radXor.Text = "Xor";
 			this.radXor.UseVisualStyleBackColor = true;
-			this.radXor.CheckedChanged += new System.EventHandler(this.radXor_CheckedChanged);
+			this.radXor.CheckedChanged += new System.EventHandler(this.OnFilterChanged);
 			// 
 			// radAnd
 			// 
@@ -160,13 +174,13 @@
 			this.radAnd.TabIndex = 2;
 			this.radAnd.Text = "And";
 			this.radAnd.UseVisualStyleBackColor = true;
-			this.radAnd.CheckedChanged += new System.EventHandler(this.radAnd_CheckedChanged);
+			this.radAnd.CheckedChanged += new System.EventHandler(this.OnFilterChanged);
 			// 
 			// cmbPolygonIndex
 			// 
 			this.cmbPolygonIndex.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbPolygonIndex.FormattingEnabled = true;
-			this.cmbPolygonIndex.Location = new System.Drawing.Point(347, 74);
+			this.cmbPolygonIndex.Location = new System.Drawing.Point(457, 74);
 			this.cmbPolygonIndex.Name = "cmbPolygonIndex";
 			this.cmbPolygonIndex.Size = new System.Drawing.Size(121, 20);
 			this.cmbPolygonIndex.TabIndex = 10;
@@ -205,7 +219,7 @@
 			// lblPos
 			// 
 			this.lblPos.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.lblPos.Location = new System.Drawing.Point(474, 74);
+			this.lblPos.Location = new System.Drawing.Point(584, 74);
 			this.lblPos.Name = "lblPos";
 			this.lblPos.Size = new System.Drawing.Size(115, 20);
 			this.lblPos.TabIndex = 14;
@@ -216,7 +230,7 @@
 			// 
 			this.cmbPol.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbPol.FormattingEnabled = true;
-			this.cmbPol.Location = new System.Drawing.Point(595, 74);
+			this.cmbPol.Location = new System.Drawing.Point(705, 74);
 			this.cmbPol.Name = "cmbPol";
 			this.cmbPol.Size = new System.Drawing.Size(59, 20);
 			this.cmbPol.TabIndex = 15;
@@ -226,7 +240,7 @@
 			// 
 			this.cmbHole.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbHole.FormattingEnabled = true;
-			this.cmbHole.Location = new System.Drawing.Point(660, 74);
+			this.cmbHole.Location = new System.Drawing.Point(770, 74);
 			this.cmbHole.Name = "cmbHole";
 			this.cmbHole.Size = new System.Drawing.Size(59, 20);
 			this.cmbHole.TabIndex = 16;
@@ -335,6 +349,16 @@
 			this.panel1.TabIndex = 24;
 			this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
 			// 
+			// cmbSrcGroup
+			// 
+			this.cmbSrcGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cmbSrcGroup.FormattingEnabled = true;
+			this.cmbSrcGroup.Location = new System.Drawing.Point(218, 32);
+			this.cmbSrcGroup.Name = "cmbSrcGroup";
+			this.cmbSrcGroup.Size = new System.Drawing.Size(59, 20);
+			this.cmbSrcGroup.TabIndex = 31;
+			this.cmbSrcGroup.SelectedIndexChanged += new System.EventHandler(this.cmbSrcGroup_SelectedIndexChanged);
+			// 
 			// btnErrOpen
 			// 
 			this.btnErrOpen.Location = new System.Drawing.Point(445, 31);
@@ -403,16 +427,6 @@
 			this.btnDebug.UseVisualStyleBackColor = true;
 			this.btnDebug.Click += new System.EventHandler(this.btnDebug_Click);
 			// 
-			// cmbSrcGroup
-			// 
-			this.cmbSrcGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.cmbSrcGroup.FormattingEnabled = true;
-			this.cmbSrcGroup.Location = new System.Drawing.Point(218, 32);
-			this.cmbSrcGroup.Name = "cmbSrcGroup";
-			this.cmbSrcGroup.Size = new System.Drawing.Size(59, 20);
-			this.cmbSrcGroup.TabIndex = 31;
-			this.cmbSrcGroup.SelectedIndexChanged += new System.EventHandler(this.cmbSrcGroup_SelectedIndexChanged);
-			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -452,7 +466,7 @@
 		private System.Windows.Forms.ComboBox cmbCurPolygon;
 		private System.Windows.Forms.ComboBox cmbCurLoop;
 		private System.Windows.Forms.PictureBox pictureBox1;
-		private System.Windows.Forms.RadioButton radFilter;
+		private System.Windows.Forms.RadioButton radPaint;
 		private System.Windows.Forms.Button btnOpen;
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.Button btnDebug;
@@ -463,6 +477,7 @@
 		private System.Windows.Forms.TextBox tbSearch;
 		private System.Windows.Forms.Button btnErrOpen;
 		private System.Windows.Forms.ComboBox cmbSrcGroup;
+		private System.Windows.Forms.RadioButton radClip;
 	}
 }
 

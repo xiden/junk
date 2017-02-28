@@ -85,6 +85,16 @@ namespace Jk {
 			public List<object> EdgesUserData;
 
 			/// <summary>
+			/// このループに紐づくユーザーデータ
+			/// </summary>
+			public object UserData;
+
+			/// <summary>
+			/// ユーザーが自由に設定＆使用できる値
+			/// </summary>
+			public ulong UserValue;
+
+			/// <summary>
 			/// 面積
 			/// </summary>
 			public element Area;
@@ -106,13 +116,23 @@ namespace Jk {
 			}
 
 			/// <summary>
-			/// コンストラクタ、頂点配列エッジユーザーデータ配列を渡して初期化する
+			/// コンストラクタ、頂点リスト、エッジユーザーデータリストを渡して初期化する
 			/// </summary>
-			/// <param name="vertices"></param>
-			/// <param name="edgesUserData"></param>
+			/// <param name="vertices">頂点リスト</param>
+			/// <param name="edgesUserData">エッジユーザーデータリスト</param>
 			public VLoop(List<Vertex> vertices, List<object> edgesUserData) {
 				this.Vertices = vertices;
 				this.EdgesUserData = edgesUserData;
+			}
+
+			/// <summary>
+			/// コンストラクタ、頂点コレクション、エッジユーザーデータコレクションを渡して初期化する
+			/// </summary>
+			/// <param name="vertices">頂点コレクション</param>
+			/// <param name="edgesUserData">エッジユーザーデータコレクション</param>
+			public VLoop(IEnumerable<Vertex> vertices, IEnumerable<object> edgesUserData) {
+				this.Vertices = new List<Vertex>(vertices);
+				this.EdgesUserData = new List<object>(edgesUserData);
 			}
 
 			/// <summary>
@@ -156,6 +176,11 @@ namespace Jk {
 			/// </summary>
 			public object UserData;
 
+			/// <summary>
+			/// ユーザーが自由に設定＆使用できる値
+			/// </summary>
+			public ulong UserValue;
+
 			public thisclass Owner;
 			public int GroupIndex;
 			public int PolygonIndex;
@@ -167,11 +192,19 @@ namespace Jk {
 			}
 
 			/// <summary>
-			/// コンストラクタ、頂点ループ配列を渡して初期化する
+			/// コンストラクタ、頂点ループリストを渡して初期化する
 			/// </summary>
-			/// <param name="loops">ループ配列、添字[0:外枠、1...:穴]</param>
+			/// <param name="loops">ループリスト、添字[0:外枠、1...:穴]</param>
 			public Polygon(List<VLoop> loops) {
 				this.Loops = loops;
+			}
+
+			/// <summary>
+			/// コンストラクタ、頂点ループコレクションを渡して初期化する
+			/// </summary>
+			/// <param name="loops">頂点ループコレクション、添字[0:外枠、1...:穴]</param>
+			public Polygon(IEnumerable<VLoop> loops) {
+				this.Loops = new List<VLoop>(loops);
 			}
 
 			/// <summary>
@@ -1065,6 +1098,10 @@ namespace Jk {
 				this.Loops = loops;
 			}
 
+			public EPolygon(IEnumerable<ELoop> loops) {
+				this.Loops = new List<ELoop>(loops);
+			}
+
 			/// <summary>
 			/// 指定座標を包含しているか調べる
 			/// </summary>
@@ -1498,6 +1535,9 @@ namespace Jk {
 			/// このポリゴンに紐づくユーザーデータ
 			/// </summary>
 			public object UserData;
+
+			public ELoop(IEnumerable<EDir> edges) : this(new List<EDir>(edges)) {
+			}
 
 			public ELoop(List<EDir> edges) : this(Area(edges), edges) {
 			}
